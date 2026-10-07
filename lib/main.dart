@@ -549,53 +549,50 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
 
   // ============ DETAIL BOTTOM SHEET ============
   void _openDetail(String type) {
-    String title = '', value = '', desc = '', context = '';
-    IconData ic = Icons.info;
+    String title = '', value = '', desc = '', detailCtx = '';
 
     if (type == 'precip') {
-      title = '🌧️ ${T('precip')}'; value = '${_precip.round()} mm'; ic = Icons.water_drop;
+      title = '🌧️ ${T('precip')}'; value = '${_precip.round()} mm';
       desc = 'Precipitation includes rain, snow, and hail. 0mm means it is currently dry.';
-      context = _precip > 0 ? T('raining') : T('dry');
+      detailCtx = _precip > 0 ? T('raining') : T('dry');
     } else if (type == 'wind') {
-      title = '💨 ${T('wind')}'; value = _fmtW(_wind); ic = Icons.air;
+      title = '💨 ${T('wind')}'; value = _fmtW(_wind);
       desc = 'Wind direction indicates where the wind is coming from.';
-      context = _wind > 20 ? T('strong_winds') : T('light_breeze');
+      detailCtx = _wind > 20 ? T('strong_winds') : T('light_breeze');
     } else if (type == 'aqi') {
-      title = '🌍 ${T('aqi')}'; value = '$_aqi'; ic = Icons.eco;
+      title = '🌍 ${T('aqi')}'; value = '$_aqi';
       desc = 'Air quality affects your respiratory health.';
-      context = _aqiCategory();
+      detailCtx = _aqiCategory();
     } else if (type == 'uv') {
-      title = '☀️ ${T('uv')}'; value = '${_uv.round()}'; ic = Icons.wb_sunny;
+      title = '☀️ ${T('uv')}'; value = '${_uv.round()}';
       desc = 'UV radiation from the sun can damage your skin.';
-      context = _uvCategory();
+      detailCtx = _uvCategory();
     } else if (type == 'humidity') {
-      title = '💧 ${T('humidity')}'; value = '$_humidity%'; ic = Icons.water;
+      title = '💧 ${T('humidity')}'; value = '$_humidity%';
       desc = 'Humidity is the amount of water vapor in the air.';
-      context = _humidity > 60 ? T('muggy') : T('comfortable');
+      detailCtx = _humidity > 60 ? T('muggy') : T('comfortable');
     } else if (type == 'sun') {
-      title = '🌅 ${T('sun')}'; value = '${_fmtTime(_sunrise)} / ${_fmtTime(_sunset)}'; ic = Icons.wb_twilight;
+      title = '🌅 ${T('sun')}'; value = '${_fmtTime(_sunrise)} / ${_fmtTime(_sunset)}';
       desc = 'The sun provides essential Vitamin D.';
-      context = '${T('sunrise')}: ${_fmtTime(_sunrise)}, ${T('sunset')}: ${_fmtTime(_sunset)}';
+      detailCtx = '${T('sunrise')}: ${_fmtTime(_sunrise)}, ${T('sunset')}: ${_fmtTime(_sunset)}';
     } else if (type == 'outdoor') {
       final isBad = _wcode >= 51 || _temp > 38 || _temp < 5;
-      title = '🏃 ${T('outdoor')}'; value = isBad ? 'Not recommended' : 'Great day'; ic = Icons.directions_run;
+      title = '🏃 ${T('outdoor')}'; value = isBad ? 'Not recommended' : 'Great day';
       desc = 'Consider the weather before planning outdoor activities.';
-      context = isBad ? T('bad_out') : T('great_out');
+      detailCtx = isBad ? T('bad_out') : T('great_out');
     } else if (type == 'clothing') {
       title = '👕 ${T('clothing')}'; value = _temp > 30 ? 'Light' : _temp > 20 ? 'Comfortable' : 'Warm';
-      ic = Icons.checkroom;
       desc = 'Dress appropriately for the current temperature.';
-      context = _temp > 30 ? T('light_cloth') : _temp > 20 ? T('ok_cloth') : T('warm_cloth');
+      detailCtx = _temp > 30 ? T('light_cloth') : _temp > 20 ? T('ok_cloth') : T('warm_cloth');
     } else if (type == 'cold') {
       title = '💊 ${T('cold')}'; value = (_feels < 15 || _humidity > 80) ? 'Higher risk' : 'Low risk';
-      ic = Icons.medical_services;
       desc = 'Weather conditions can affect your risk of catching a cold.';
-      context = (_feels < 15 || _humidity > 80) ? T('high_cold') : T('low_cold');
+      detailCtx = (_feels < 15 || _humidity > 80) ? T('high_cold') : T('low_cold');
     } else if (type == 'drive') {
       final isBad = (_wcode >= 45 && _wcode <= 48) || _wcode >= 61;
-      title = '🚗 ${T('drive')}'; value = isBad ? 'Caution' : 'Excellent'; ic = Icons.directions_car;
+      title = '🚗 ${T('drive')}'; value = isBad ? 'Caution' : 'Excellent';
       desc = 'Weather can significantly impact driving safety.';
-      context = isBad ? T('bad_drive') : T('ok_drive');
+      detailCtx = isBad ? T('bad_drive') : T('ok_drive');
     }
 
     showModalBottomSheet(
@@ -637,7 +634,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
             Text(T('context'), style: TextStyle(color: _txt().withOpacity(0.7),
               fontSize: 14, fontWeight: FontWeight.w600)),
             const SizedBox(height: 8),
-            Text(context, style: TextStyle(color: _txt(), fontSize: 14, height: 1.6)),
+            Text(detailCtx, style: TextStyle(color: _txt(), fontSize: 14, height: 1.6)),
             const SizedBox(height: 24),
           ],
         )),
