@@ -23,6 +23,15 @@ jobs:
           flutter-version: '3.19.0'
           channel: 'stable'
 
+      - name: Save our custom main.dart
+        run: cp lib/main.dart /tmp/custom_main.dart
+
+      - name: Generate Android platform files
+        run: flutter create --project-name weather_flutter --platforms=android .
+
+      - name: Restore our custom main.dart
+        run: cp /tmp/custom_main.dart lib/main.dart
+
       - name: Get dependencies
         run: flutter pub get
 
