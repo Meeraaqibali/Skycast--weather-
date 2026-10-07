@@ -687,7 +687,6 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
             _smoothRoute(builder: (_) => _buildDetailPage(key)),
           );
         },
-    ),
   );
   }
 
