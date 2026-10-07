@@ -23,6 +23,12 @@ jobs:
           flutter-version: '3.19.0'
           channel: 'stable'
 
+      - name: Install Pillow for icon generation
+        run: pip install pillow --quiet
+
+      - name: Generate app icon
+        run: python3 scripts/generate_icon.py
+
       - name: Save our custom main.dart
         run: cp lib/main.dart /tmp/custom_main.dart
 
@@ -37,6 +43,9 @@ jobs:
 
       - name: Get dependencies
         run: flutter pub get
+
+      - name: Generate launcher icons
+        run: dart run flutter_launcher_icons
 
       - name: Build APK
         run: flutter build apk --release --split-per-abi
