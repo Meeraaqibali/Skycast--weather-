@@ -501,9 +501,8 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
     ),
   ]));
 
-  Widget _ex(String emoji, String l, String v, String sub, VoidCallback onTap) => InkWell(
+  Widget _ex(String emoji, String l, String v, String sub, VoidCallback onTap) => _TapCard(
     onTap: onTap,
-    borderRadius: BorderRadius.circular(16),
     child: Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(color: _isLight ? Colors.white : Colors.white.withOpacity(0.08),
@@ -541,9 +540,8 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
     ]));
   }
 
-  Widget _life(String emoji, String text, VoidCallback onTap) => InkWell(
+  Widget _life(String emoji, String text, VoidCallback onTap) => _TapCard(
     onTap: onTap,
-    borderRadius: BorderRadius.circular(16),
     child: Container(
       margin: const EdgeInsets.only(bottom: 8), padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(color: _isLight ? Colors.white : Colors.white.withOpacity(0.08),
@@ -563,27 +561,21 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
 
 
 
+
+
   PageRouteBuilder _smoothRoute({required WidgetBuilder builder}) {
     return PageRouteBuilder(
+      opaque: true,
       pageBuilder: (context, animation, secondaryAnimation) => builder(context),
-      transitionDuration: const Duration(milliseconds: 350),
-      reverseTransitionDuration: const Duration(milliseconds: 300),
+      transitionDuration: const Duration(milliseconds: 700),
+      reverseTransitionDuration: const Duration(milliseconds: 550),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         final curved = CurvedAnimation(
           parent: animation,
-          curve: Curves.easeOutCubic,
-          reverseCurve: Curves.easeInCubic,
+          curve: Curves.easeInOutCubic,
+          reverseCurve: Curves.easeInOutCubic,
         );
-        return FadeTransition(
-          opacity: curved,
-          child: SlideTransition(
-            position: Tween<Offset>(
-              begin: const Offset(0.03, 0),
-              end: Offset.zero,
-            ).animate(curved),
-            child: child,
-          ),
-        );
+        return FadeTransition(opacity: curved, child: child);
       },
     );
   }
@@ -909,3 +901,33 @@ class _DetailPage extends StatelessWidget {
     );
   }
 }
+
+class _TapCard extends StatefulWidget {
+  final Widget child;
+  final VoidCallback onTap;
+  const _TapCard({required this.child, required this.onTap});
+  @override
+  State<_TapCard> createState() => _TapCardState();
+}
+
+class _TapCardState extends State<_TapCard> {
+  bool _pressed = false;
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _pressed = true),
+      onTapUp: (_) {
+        setState(() => _pressed = false);
+        widget.onTap();
+      },
+      onTapCancel: () => setState(() => _pressed = false),
+      child: AnimatedScale(
+        scale: _pressed ? 0.96 : 1.0,
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeOutCubic,
+        child: widget.child,
+      ),
+    );
+  }
+}
+
