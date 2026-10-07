@@ -633,7 +633,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
     ];
 
     Navigator.push(context, MaterialPageRoute(
-      builder: (ctx) => _DetailPage(
+      builder: (_) => _DetailPage(
         bg1: _bg1(), bg2: _bg2(), txt: _txt(),
         title: title, value: value, label: label, desc: desc, ctx: ctx,
         metrics: metrics.where((m) => m['key'] != type).toList(),
@@ -644,7 +644,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
         metricsLabel: T('weather_metrics'),
         lifestyleLabel: T('lifestyle'),
         onTapItem: (key) {
-          Navigator.pop(ctx);
+          Navigator.pop(context);
           Future.delayed(const Duration(milliseconds: 200), () => _openDetail(key));
         },
       ),
