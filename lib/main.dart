@@ -567,8 +567,8 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
     return PageRouteBuilder(
       opaque: true,
       pageBuilder: (context, animation, secondaryAnimation) => builder(context),
-      transitionDuration: const Duration(milliseconds: 700),
-      reverseTransitionDuration: const Duration(milliseconds: 550),
+      transitionDuration: const Duration(milliseconds: 500),
+      reverseTransitionDuration: const Duration(milliseconds: 500),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         final curved = CurvedAnimation(
           parent: animation,
@@ -582,6 +582,12 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
 
   // ============ FULL-SCREEN DETAIL PAGE ============
   void _openDetail(String type) {
+    Navigator.push(context, _smoothRoute(
+      builder: (_) => _buildDetailPage(type),
+    ));
+  }
+
+  Widget _buildDetailPage(String type) {
     String title = '', value = '', label = '', desc = '', ctx = '';
 
     if (type == 'precip') {
@@ -665,8 +671,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
       {'key': 'drive', 'name': '🚗 ${T('drive')}'},
     ];
 
-    Navigator.push(context, _smoothRoute(
-      builder: (_) => _DetailPage(
+    return _DetailPage(
         bg1: _bg1(), bg2: _bg2(), txt: _txt(),
         title: title, value: value, label: label, desc: desc, ctx: ctx,
         metrics: metrics.where((m) => m['key'] != type).toList(),
@@ -677,11 +682,13 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
         metricsLabel: T('weather_metrics'),
         lifestyleLabel: T('lifestyle'),
         onTapItem: (key) {
-          Navigator.pop(context);
-          Future.delayed(const Duration(milliseconds: 200), () => _openDetail(key));
+          Navigator.pushReplacement(
+            context,
+            _smoothRoute(builder: (_) => _buildDetailPage(key)),
+          );
         },
-      ),
-    ));
+    ),
+  );
   }
 
   void _openSettings() {
@@ -923,7 +930,7 @@ class _TapCardState extends State<_TapCard> {
       onTapCancel: () => setState(() => _pressed = false),
       child: AnimatedScale(
         scale: _pressed ? 0.96 : 1.0,
-        duration: const Duration(milliseconds: 250),
+        duration: const Duration(milliseconds: 500),
         curve: Curves.easeOutCubic,
         child: widget.child,
       ),
