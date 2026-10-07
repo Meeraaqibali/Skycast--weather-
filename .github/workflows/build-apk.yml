@@ -32,6 +32,35 @@ jobs:
       - name: Restore our custom main.dart
         run: cp /tmp/custom_main.dart lib/main.dart
 
+      - name: Add INTERNET permission & set app name
+        run: |
+          MANIFEST=android/app/src/main/AndroidManifest.xml
+          python3 << 'PYEOF'
+import re
+path = "android/app/src/main/AndroidManifest.xml"
+with open(path, "r") as f:
+    c = f.read()
+
+# Add INTERNET + ACCESS_NETWORK_STATE permissions
+if "android.permission.INTERNET" not in c:
+    c = c.replace(
+        "<application",
+        '<uses-permission android:name="android.permission.INTERNET" />\n    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />\n    <application',
+        1
+    )
+
+# Set app label + enable cleartext (in case)
+c = c.replace('android:label="weather_flutter"', 'android:label="SkyCast Weather"')
+if 'android:usesCleartextTraffic' not in c:
+    c = c.replace('<application', '<application\n        android:usesCleartextTraffic="true"', 1)
+
+with open(path, "w") as f:
+    f.write(c)
+print("Manifest updated")
+print("INTERNET permission:", "android.permission.INTERNET" in c)
+print("App label:", "SkyCast Weather" in c)
+PYEOF
+
       - name: Get dependencies
         run: flutter pub get
 
@@ -41,5 +70,5 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: weather-flutter-apk
+          name: skycast-weather-apk
           path: build/app/outputs/flutter-apk/*.apk
