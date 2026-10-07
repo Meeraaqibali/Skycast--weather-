@@ -558,32 +558,11 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
   );
 
   // ============ SMOOTH PAGE ROUTE ============
-  PageRouteBuilder _smoothRoute({required WidgetBuilder builder}) {
-    return PageRouteBuilder(
-      pageBuilder: (context, animation, secondaryAnimation) => builder(context),
-      transitionDuration: const Duration(milliseconds: 350),
-      reverseTransitionDuration: const Duration(milliseconds: 300),
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        final curved = CurvedAnimation(
-          parent: animation,
-          curve: Curves.easeOutCubic,
-          reverseCurve: Curves.easeInCubic,
-        );
-        return FadeTransition(
-          opacity: curved,
-          child: SlideTransition(
-            position: Tween<Offset>(
-              begin: const Offset(0.03, 0),
-              end: Offset.zero,
-            ).animate(curved),
-            child: child,
-          ),
-        );
-      },
-    );
-  }
+
 
   PageRouteBuilder _smoothRoute({required WidgetBuilder builder}) { return PageRouteBuilder(pageBuilder: (context, animation, secondaryAnimation) => builder(context), transitionDuration: const Duration(milliseconds: 350), reverseTransitionDuration: const Duration(milliseconds: 300), transitionsBuilder: (context, animation, secondaryAnimation, child) { final curved = CurvedAnimation(parent: animation, curve: Curves.easeOutCubic, reverseCurve: Curves.easeInCubic); return FadeTransition(opacity: curved, child: SlideTransition(position: Tween<Offset>(begin: const Offset(0.03, 0), end: Offset.zero).animate(curved), child: child)); }); }
+
+
 
   PageRouteBuilder _smoothRoute({required WidgetBuilder builder}) {
     return PageRouteBuilder(
@@ -804,7 +783,7 @@ class _DetailPage extends StatelessWidget {
     required this.onTapItem,
   });
 
-  bool get _isLight => bg1.r > 0.8 && bg1.g > 0.8;
+  bool get _isLight => bg1 == const Color(0xFFDCE8F5);
   Color _cardBorder() => _isLight ? const Color(0xFFD0D8E0) : Colors.white.withOpacity(0.2);
 
   @override
