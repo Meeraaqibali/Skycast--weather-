@@ -283,10 +283,20 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
   List<String> _days() => _lang == 'ur' ? DAYS_UR : _lang == 'sd' ? DAYS_SD : _lang == 'es' ? DAYS_ES : DAYS_EN;
   String _day(String iso) => _days()[DateTime.parse(iso).weekday % 7];
 
+  bool get _isLight {
+    if (_theme == "light") return true;
+    if (_theme == "dark") return false;
+    final h = DateTime.now().hour;
+    return h >= 6 && h < 18;
+  }
   Color _bg1() => _theme == 'light' ? const Color(0xFFE0EAFC) : const Color(0xFF1E3C4F);
   Color _bg2() => _theme == 'light' ? const Color(0xFFCFDEF3) : const Color(0xFF3A6B8A);
   Color _txt() => _theme == 'light' ? const Color(0xFF1A1A1A) : Colors.white;
   Color _cardBg() => _theme == 'light' ? Colors.white.withOpacity(0.65) : Colors.white.withOpacity(0.13);
+  Color _cardBorder() => _isLight ? Colors.black.withOpacity(0.1) : Colors.white.withOpacity(0.2);
+  Color _muted() => _isLight ? Colors.black.withOpacity(0.6) : Colors.white.withOpacity(0.7);
+  Color _faint() => _isLight ? Colors.black.withOpacity(0.4) : Colors.white.withOpacity(0.5);
+  Color _divider() => _isLight ? Colors.black.withOpacity(0.1) : Colors.white.withOpacity(0.15);
 
   String _aqiCategory() {
     if (_aqi <= 20) return T('good');
