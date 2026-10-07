@@ -547,99 +547,108 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
     ),
   );
 
-  // ============ DETAIL BOTTOM SHEET ============
+  // ============ FULL-SCREEN DETAIL PAGE ============
   void _openDetail(String type) {
-    String title = '', value = '', desc = '', detailCtx = '';
+    String title = '', value = '', label = '', desc = '', ctx = '';
 
     if (type == 'precip') {
-      title = '🌧️ ${T('precip')}'; value = '${_precip.round()} mm';
+      title = '🌧️ ${T('precip')}';
+      value = '${_precip.round()} mm';
+      label = '$_precipChance% ${T('chance')}';
       desc = 'Precipitation includes rain, snow, and hail. 0mm means it is currently dry.';
-      detailCtx = _precip > 0 ? T('raining') : T('dry');
+      ctx = _precip > 0 ? T('raining') : T('dry');
     } else if (type == 'wind') {
-      title = '💨 ${T('wind')}'; value = _fmtW(_wind);
+      title = '💨 ${T('wind')}';
+      value = _fmtW(_wind);
+      label = '${T('direction')}: ' + ['N','NE','E','SE','S','SW','W','NW'][((_wind / 45).round()) % 8];
       desc = 'Wind direction indicates where the wind is coming from.';
-      detailCtx = _wind > 20 ? T('strong_winds') : T('light_breeze');
+      ctx = _wind > 20 ? T('strong_winds') : T('light_breeze');
     } else if (type == 'aqi') {
-      title = '🌍 ${T('aqi')}'; value = '$_aqi';
+      title = '🌍 ${T('aqi')}';
+      value = '$_aqi';
+      label = '${T('category')}: ${_aqiCategory()}';
       desc = 'Air quality affects your respiratory health.';
-      detailCtx = _aqiCategory();
+      ctx = '${T('context')}: ${_aqiCategory()}';
     } else if (type == 'uv') {
-      title = '☀️ ${T('uv')}'; value = '${_uv.round()}';
+      title = '☀️ ${T('uv')}';
+      value = '${_uv.round()}';
+      label = '${T('category')}: ${_uvCategory()}';
       desc = 'UV radiation from the sun can damage your skin.';
-      detailCtx = _uvCategory();
+      ctx = '${T('uv')}: ${_uvCategory()}';
     } else if (type == 'humidity') {
-      title = '💧 ${T('humidity')}'; value = '$_humidity%';
+      title = '💧 ${T('humidity')}';
+      value = '$_humidity%';
+      label = _humidity > 60 ? T('muggy') : T('comfortable');
       desc = 'Humidity is the amount of water vapor in the air.';
-      detailCtx = _humidity > 60 ? T('muggy') : T('comfortable');
+      ctx = '$_humidity%';
     } else if (type == 'sun') {
-      title = '🌅 ${T('sun')}'; value = '${_fmtTime(_sunrise)} / ${_fmtTime(_sunset)}';
+      title = '🌅 ${T('sun')}';
+      value = '${_fmtTime(_sunrise)} / ${_fmtTime(_sunset)}';
+      label = '${T('sunrise')} / ${T('sunset')}';
       desc = 'The sun provides essential Vitamin D.';
-      detailCtx = '${T('sunrise')}: ${_fmtTime(_sunrise)}, ${T('sunset')}: ${_fmtTime(_sunset)}';
+      ctx = '${T('sunrise')}: ${_fmtTime(_sunrise)} · ${T('sunset')}: ${_fmtTime(_sunset)}';
     } else if (type == 'outdoor') {
       final isBad = _wcode >= 51 || _temp > 38 || _temp < 5;
-      title = '🏃 ${T('outdoor')}'; value = isBad ? 'Not recommended' : 'Great day';
+      title = '🏃 ${T('outdoor')}';
+      value = isBad ? T('bad_out').split('.').first : T('great_out').split('.').first;
+      label = T('about');
       desc = 'Consider the weather before planning outdoor activities.';
-      detailCtx = isBad ? T('bad_out') : T('great_out');
+      ctx = isBad ? T('bad_out') : T('great_out');
     } else if (type == 'clothing') {
-      title = '👕 ${T('clothing')}'; value = _temp > 30 ? 'Light' : _temp > 20 ? 'Comfortable' : 'Warm';
+      title = '👕 ${T('clothing')}';
+      value = _temp > 30 ? 'Light' : _temp > 20 ? 'Comfortable' : 'Warm';
+      label = T('about');
       desc = 'Dress appropriately for the current temperature.';
-      detailCtx = _temp > 30 ? T('light_cloth') : _temp > 20 ? T('ok_cloth') : T('warm_cloth');
+      ctx = _temp > 30 ? T('light_cloth') : _temp > 20 ? T('ok_cloth') : T('warm_cloth');
     } else if (type == 'cold') {
-      title = '💊 ${T('cold')}'; value = (_feels < 15 || _humidity > 80) ? 'Higher risk' : 'Low risk';
+      final isHigh = _feels < 15 || _humidity > 80;
+      title = '💊 ${T('cold')}';
+      value = isHigh ? 'Higher Risk' : 'Low Risk';
+      label = T('about');
       desc = 'Weather conditions can affect your risk of catching a cold.';
-      detailCtx = (_feels < 15 || _humidity > 80) ? T('high_cold') : T('low_cold');
+      ctx = isHigh ? T('high_cold') : T('low_cold');
     } else if (type == 'drive') {
       final isBad = (_wcode >= 45 && _wcode <= 48) || _wcode >= 61;
-      title = '🚗 ${T('drive')}'; value = isBad ? 'Caution' : 'Excellent';
+      title = '🚗 ${T('drive')}';
+      value = isBad ? 'Caution' : 'Excellent';
+      label = T('about');
       desc = 'Weather can significantly impact driving safety.';
-      detailCtx = isBad ? T('bad_drive') : T('ok_drive');
+      ctx = isBad ? T('bad_drive') : T('ok_drive');
     }
 
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: _bg1(),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
-      builder: (ctx) => SafeArea(child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: SingleChildScrollView(child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(children: [
-              IconButton(
-                onPressed: () => Navigator.pop(ctx),
-                icon: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(50),
-                    border: Border.all(color: Colors.white.withOpacity(0.25))),
-                  child: Icon(Icons.arrow_back, color: _txt(), size: 22),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(child: Text(title, style: TextStyle(
-                color: _txt(), fontSize: 22, fontWeight: FontWeight.w600))),
-            ]),
-            const SizedBox(height: 20),
-            Text(value, style: TextStyle(color: _txt(), fontSize: 56, fontWeight: FontWeight.w200)),
-            const SizedBox(height: 24),
-            Text(T('about'), style: TextStyle(color: _txt().withOpacity(0.7),
-              fontSize: 14, fontWeight: FontWeight.w600)),
-            const SizedBox(height: 8),
-            Text(desc, style: TextStyle(color: _txt(), fontSize: 14, height: 1.6)),
-            const SizedBox(height: 20),
-            Text(T('context'), style: TextStyle(color: _txt().withOpacity(0.7),
-              fontSize: 14, fontWeight: FontWeight.w600)),
-            const SizedBox(height: 8),
-            Text(detailCtx, style: TextStyle(color: _txt(), fontSize: 14, height: 1.6)),
-            const SizedBox(height: 24),
-          ],
-        )),
-      )),
-    );
+    // Build weather metrics list
+    final metrics = [
+      {'key': 'precip', 'name': '🌧️ ${T('precip')}', 'val': '${_precip.round()} mm'},
+      {'key': 'wind', 'name': '💨 ${T('wind')}', 'val': _fmtW(_wind)},
+      {'key': 'aqi', 'name': '🌍 ${T('aqi')}', 'val': '$_aqi'},
+      {'key': 'uv', 'name': '☀️ ${T('uv')}', 'val': '${_uv.round()}'},
+      {'key': 'humidity', 'name': '💧 ${T('humidity')}', 'val': '$_humidity%'},
+      {'key': 'sun', 'name': '🌅 ${T('sun')}', 'val': _fmtTime(_sunrise)},
+    ];
+    final lifestyle = [
+      {'key': 'outdoor', 'name': '🏃 ${T('outdoor')}'},
+      {'key': 'clothing', 'name': '👕 ${T('clothing')}'},
+      {'key': 'cold', 'name': '💊 ${T('cold')}'},
+      {'key': 'drive', 'name': '🚗 ${T('drive')}'},
+    ];
+
+    Navigator.push(context, MaterialPageRoute(
+      builder: (ctx) => _DetailPage(
+        bg1: _bg1(), bg2: _bg2(), txt: _txt(),
+        title: title, value: value, label: label, desc: desc, ctx: ctx,
+        metrics: metrics.where((m) => m['key'] != type).toList(),
+        lifestyle: lifestyle.where((m) => m['key'] != type).toList(),
+        aboutLabel: T('about'),
+        contextLabel: T('context'),
+        exploreLabel: T('explore'),
+        metricsLabel: T('weather_metrics'),
+        lifestyleLabel: T('lifestyle'),
+        onTapItem: (key) {
+          Navigator.pop(ctx);
+          Future.delayed(const Duration(milliseconds: 200), () => _openDetail(key));
+        },
+      ),
+    ));
   }
 
   void _openSettings() {
@@ -711,4 +720,148 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
       ),
     ]),
   );
+}
+
+
+// ============ FULL-SCREEN DETAIL PAGE WIDGET ============
+class _DetailPage extends StatelessWidget {
+  final Color bg1, bg2, txt;
+  final String title, value, label, desc, ctx;
+  final List<Map<String, String>> metrics, lifestyle;
+  final String aboutLabel, contextLabel, exploreLabel, metricsLabel, lifestyleLabel;
+  final Function(String) onTapItem;
+
+  const _DetailPage({
+    required this.bg1, required this.bg2, required this.txt,
+    required this.title, required this.value, required this.label,
+    required this.desc, required this.ctx,
+    required this.metrics, required this.lifestyle,
+    required this.aboutLabel, required this.contextLabel, required this.exploreLabel,
+    required this.metricsLabel, required this.lifestyleLabel,
+    required this.onTapItem,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: bg1,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft, end: Alignment.bottomRight,
+            colors: [bg1, const Color(0xFF2C5364), bg2],
+          ),
+        ),
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Back button + title row
+                Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Container(
+                        width: 46, height: 46,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.15),
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white.withOpacity(0.25)),
+                        ),
+                        child: Icon(Icons.arrow_back, color: txt, size: 22),
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(child: Text(title,
+                      style: TextStyle(color: txt, fontSize: 21, fontWeight: FontWeight.w600))),
+                  ],
+                ),
+                const SizedBox(height: 28),
+
+                // Value
+                Text(value, style: TextStyle(color: txt, fontSize: 60,
+                  fontWeight: FontWeight.w200, height: 1)),
+                const SizedBox(height: 6),
+                Text(label, style: TextStyle(color: txt.withOpacity(0.7), fontSize: 14)),
+                const SizedBox(height: 32),
+
+                // About section
+                Text(aboutLabel, style: TextStyle(color: txt.withOpacity(0.9),
+                  fontSize: 16, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 10),
+                Text(desc, style: TextStyle(color: txt.withOpacity(0.8),
+                  fontSize: 14, height: 1.6)),
+                const SizedBox(height: 28),
+
+                // Context section
+                Text(contextLabel, style: TextStyle(color: txt.withOpacity(0.9),
+                  fontSize: 16, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 10),
+                Text(ctx, style: TextStyle(color: txt.withOpacity(0.8),
+                  fontSize: 14, height: 1.6)),
+                const SizedBox(height: 32),
+
+                // Explore
+                Divider(color: txt.withOpacity(0.15)),
+                const SizedBox(height: 20),
+                Text(exploreLabel, style: TextStyle(color: txt.withOpacity(0.9),
+                  fontSize: 16, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 16),
+
+                // Weather Metrics
+                if (metrics.isNotEmpty) ...[
+                  Text(metricsLabel.toUpperCase(), style: TextStyle(
+                    color: txt.withOpacity(0.6), fontSize: 13,
+                    fontWeight: FontWeight.w600, letterSpacing: 1.2)),
+                  const SizedBox(height: 12),
+                  ...metrics.map((m) => _listItem(m['name']!, m['val'] ?? '', txt,
+                    () => onTapItem(m['key']!))),
+                  const SizedBox(height: 20),
+                ],
+
+                // Lifestyle Index
+                if (lifestyle.isNotEmpty) ...[
+                  Text(lifestyleLabel.toUpperCase(), style: TextStyle(
+                    color: txt.withOpacity(0.6), fontSize: 13,
+                    fontWeight: FontWeight.w600, letterSpacing: 1.2)),
+                  const SizedBox(height: 12),
+                  ...lifestyle.map((m) => _listItem(m['name']!, '', txt,
+                    () => onTapItem(m['key']!))),
+                ],
+                const SizedBox(height: 40),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _listItem(String name, String val, Color txt, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.08),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.white.withOpacity(0.15)),
+        ),
+        child: Row(
+          children: [
+            Expanded(child: Text(name, style: TextStyle(color: txt,
+              fontSize: 14, fontWeight: FontWeight.w500))),
+            if (val.isNotEmpty) ...[
+              Text(val, style: TextStyle(color: txt.withOpacity(0.7), fontSize: 14)),
+              const SizedBox(width: 8),
+            ],
+            Text('›', style: TextStyle(color: txt.withOpacity(0.5), fontSize: 22)),
+          ],
+        ),
+      ),
+    );
+  }
 }
