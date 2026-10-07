@@ -751,6 +751,9 @@ class _DetailPage extends StatelessWidget {
     required this.onTapItem,
   });
 
+  bool get _isLight => bg1 == const Color(0xFFE0EAFC);
+  Color _cardBorder() => _isLight ? Colors.black.withOpacity(0.1) : Colors.white.withOpacity(0.2);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
