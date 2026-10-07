@@ -293,10 +293,10 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
   Color _bg2() => _theme == 'light' ? const Color(0xFFCFDEF3) : const Color(0xFF3A6B8A);
   Color _txt() => _theme == 'light' ? const Color(0xFF1A1A1A) : Colors.white;
   Color _cardBg() => _theme == 'light' ? Colors.white.withOpacity(0.65) : Colors.white.withOpacity(0.13);
-  Color _cardBorder() => _isLight ? Colors.black.withOpacity(0.1) : Colors.white.withOpacity(0.2);
-  Color _muted() => _isLight ? Colors.black.withOpacity(0.6) : Colors.white.withOpacity(0.7);
-  Color _faint() => _isLight ? Colors.black.withOpacity(0.4) : Colors.white.withOpacity(0.5);
-  Color _divider() => _isLight ? Colors.black.withOpacity(0.1) : Colors.white.withOpacity(0.15);
+  Color _cardBorder() => _isLight ? const Color(0xFFD0D8E0) : Colors.white.withOpacity(0.2);
+  Color _muted() => _isLight ? const Color(0xFF333333) : Colors.white.withOpacity(0.75);
+  Color _faint() => _isLight ? const Color(0xFF555555) : Colors.white.withOpacity(0.55);
+  Color _divider() => _isLight ? const Color(0xFFD0D8E0) : Colors.white.withOpacity(0.15);
 
   String _aqiCategory() {
     if (_aqi <= 20) return T('good');
@@ -345,9 +345,9 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: _cardBg(),
+        backgroundColor: _isLight ? const Color(0xFF1E3C4F) : _cardBg(),
         onPressed: _openSettings,
-        child: Icon(Icons.settings, color: _txt()),
+        child: Icon(Icons.settings, color: _isLight ? Colors.white : _txt()),
       ),
     );
   }
@@ -364,7 +364,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
 
   Widget _searchBar() => Row(children: [
     Expanded(child: TextField(
-      controller: _ctrl, style: TextStyle(color: _txt()),
+      controller: _ctrl, style: TextStyle(color: _isLight ? const Color(0xFF1A1A1A) : _txt()),
       decoration: InputDecoration(
         hintText: T('search'), hintStyle: TextStyle(color: _faint()),
         filled: true, fillColor: Colors.white.withOpacity(0.13),
@@ -427,7 +427,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
           final h = up[i];
           return Container(
             width: 72, margin: const EdgeInsets.only(right: 12), padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(color: _isLight ? Colors.black.withOpacity(0.04) : Colors.white.withOpacity(0.08),
+            decoration: BoxDecoration(color: _isLight ? Colors.white : Colors.white.withOpacity(0.08),
               borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.white.withOpacity(0.15))),
             child: Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
               Text(i == 0 ? T('now') : _fmtHour(h['time']),
@@ -450,7 +450,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
       const SizedBox(height: 12),
       ...days.asMap().entries.map((e) => Container(
         margin: const EdgeInsets.only(bottom: 8), padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(color: _isLight ? Colors.black.withOpacity(0.04) : Colors.white.withOpacity(0.08),
+        decoration: BoxDecoration(color: _isLight ? Colors.white : Colors.white.withOpacity(0.08),
           borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.white.withOpacity(0.15))),
         child: Row(children: [
           SizedBox(width: 60, child: Text(e.key == 0 ? T('today') : _day(e.value['date']),
@@ -506,7 +506,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
     borderRadius: BorderRadius.circular(16),
     child: Container(
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(color: _isLight ? Colors.black.withOpacity(0.04) : Colors.white.withOpacity(0.08),
+      decoration: BoxDecoration(color: _isLight ? Colors.white : Colors.white.withOpacity(0.08),
         borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.white.withOpacity(0.15))),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
@@ -546,7 +546,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
     borderRadius: BorderRadius.circular(16),
     child: Container(
       margin: const EdgeInsets.only(bottom: 8), padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(color: _isLight ? Colors.black.withOpacity(0.04) : Colors.white.withOpacity(0.08),
+      decoration: BoxDecoration(color: _isLight ? Colors.white : Colors.white.withOpacity(0.08),
         borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.white.withOpacity(0.15))),
       child: Row(children: [
         Text(emoji, style: const TextStyle(fontSize: 20)),
@@ -556,6 +556,34 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
       ]),
     ),
   );
+
+  // ============ SMOOTH PAGE ROUTE ============
+  PageRouteBuilder _smoothRoute({required WidgetBuilder builder}) {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => builder(context),
+      transitionDuration: const Duration(milliseconds: 350),
+      reverseTransitionDuration: const Duration(milliseconds: 300),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        final curved = CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeOutCubic,
+          reverseCurve: Curves.easeInCubic,
+        );
+        return FadeTransition(
+          opacity: curved,
+          child: SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0.03, 0),
+              end: Offset.zero,
+            ).animate(curved),
+            child: child,
+          ),
+        );
+      },
+    );
+  }
+
+  PageRouteBuilder _smoothRoute({required WidgetBuilder builder}) { return PageRouteBuilder(pageBuilder: (context, animation, secondaryAnimation) => builder(context), transitionDuration: const Duration(milliseconds: 350), reverseTransitionDuration: const Duration(milliseconds: 300), transitionsBuilder: (context, animation, secondaryAnimation, child) { final curved = CurvedAnimation(parent: animation, curve: Curves.easeOutCubic, reverseCurve: Curves.easeInCubic); return FadeTransition(opacity: curved, child: SlideTransition(position: Tween<Offset>(begin: const Offset(0.03, 0), end: Offset.zero).animate(curved), child: child)); }); }
 
   // ============ FULL-SCREEN DETAIL PAGE ============
   void _openDetail(String type) {
@@ -642,7 +670,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
       {'key': 'drive', 'name': '🚗 ${T('drive')}'},
     ];
 
-    Navigator.push(context, MaterialPageRoute(
+    Navigator.push(context, _smoothRoute(
       builder: (_) => _DetailPage(
         bg1: _bg1(), bg2: _bg2(), txt: _txt(),
         title: title, value: value, label: label, desc: desc, ctx: ctx,
@@ -751,8 +779,8 @@ class _DetailPage extends StatelessWidget {
     required this.onTapItem,
   });
 
-  bool get _isLight => bg1 == const Color(0xFFE0EAFC);
-  Color _cardBorder() => _isLight ? Colors.black.withOpacity(0.1) : Colors.white.withOpacity(0.2);
+  bool get _isLight => bg1.r > 0.8 && bg1.g > 0.8;
+  Color _cardBorder() => _isLight ? const Color(0xFFD0D8E0) : Colors.white.withOpacity(0.2);
 
   @override
   Widget build(BuildContext context) {
@@ -779,11 +807,11 @@ class _DetailPage extends StatelessWidget {
                       child: Container(
                         width: 46, height: 46,
                         decoration: BoxDecoration(
-                          color: _isLight ? Colors.white : Colors.white.withOpacity(0.15),
+                          color: _isLight ? const Color(0xFF1E3C4F) : Colors.white.withOpacity(0.15),
                           shape: BoxShape.circle,
-                          border: Border.all(color: _isLight ? Colors.black.withOpacity(0.15) : Colors.white.withOpacity(0.25)),
+                          border: Border.all(color: _isLight ? Colors.transparent : Colors.white.withOpacity(0.25)),
                         ),
-                        child: Icon(Icons.arrow_back, color: txt, size: 22),
+                        child: Icon(Icons.arrow_back, color: _isLight ? Colors.white : txt, size: 22),
                       ),
                     ),
                     const SizedBox(width: 14),
@@ -859,7 +887,7 @@ class _DetailPage extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         decoration: BoxDecoration(
-          color: _isLight ? Colors.black.withOpacity(0.04) : Colors.white.withOpacity(0.08),
+          color: _isLight ? Colors.white : Colors.white.withOpacity(0.08),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: _cardBorder()),
         ),
