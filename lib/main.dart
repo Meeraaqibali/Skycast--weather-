@@ -347,7 +347,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
     decoration: BoxDecoration(
       color: _cardBg(),
       borderRadius: BorderRadius.circular(28),
-      border: Border.all(color: Colors.white.withOpacity(0.2)),
+      border: Border.all(color: _cardBorder()),
     ),
     child: child,
   );
@@ -356,9 +356,9 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
     Expanded(child: TextField(
       controller: _ctrl, style: TextStyle(color: _txt()),
       decoration: InputDecoration(
-        hintText: T('search'), hintStyle: TextStyle(color: _txt().withOpacity(0.5)),
+        hintText: T('search'), hintStyle: TextStyle(color: _faint()),
         filled: true, fillColor: Colors.white.withOpacity(0.13),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide(color: _cardBorder())),
         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
       ),
       onSubmitted: (v) { if (v.trim().isNotEmpty) _fetch(v.trim()); },
@@ -380,7 +380,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
         child: CircularProgressIndicator(color: Colors.white)))
     : Column(children: [
         Text('$_city, $_country'.toUpperCase(),
-          style: TextStyle(color: _txt().withOpacity(0.7), fontSize: 13,
+          style: TextStyle(color: _muted(), fontSize: 13,
             letterSpacing: 1.5, fontWeight: FontWeight.w500)),
         const SizedBox(height: 16),
         _animatedIcon(_wcode, 80),
@@ -389,7 +389,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
           fontWeight: FontWeight.w200, height: 1)),
         Text(_desc(_wcode), style: TextStyle(color: _txt(), fontSize: 18)),
         const SizedBox(height: 20),
-        Divider(color: _txt().withOpacity(0.15)),
+        Divider(color: _divider()),
         const SizedBox(height: 12),
         Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
           _det(T('wind'), _fmtW(_wind)),
@@ -399,7 +399,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
       ]));
 
   Widget _det(String l, String v) => Column(children: [
-    Text(l.toUpperCase(), style: TextStyle(color: _txt().withOpacity(0.6), fontSize: 10, letterSpacing: 1.2)),
+    Text(l.toUpperCase(), style: TextStyle(color: _faint(), fontSize: 10, letterSpacing: 1.2)),
     const SizedBox(height: 4),
     Text(v, style: TextStyle(color: _txt(), fontSize: 15, fontWeight: FontWeight.w500)),
   ]);
@@ -408,7 +408,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
     final now = DateTime.now();
     final up = _hourly.where((h) => DateTime.parse(h['time']).isAfter(now)).take(24).toList();
     return _card(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text(T('hourly').toUpperCase(), style: TextStyle(color: _txt().withOpacity(0.7),
+      Text(T('hourly').toUpperCase(), style: TextStyle(color: _muted(),
         fontSize: 13, letterSpacing: 1.2, fontWeight: FontWeight.w500)),
       const SizedBox(height: 12),
       SizedBox(height: 100, child: ListView.builder(
@@ -417,11 +417,11 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
           final h = up[i];
           return Container(
             width: 72, margin: const EdgeInsets.only(right: 12), padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(color: Colors.white.withOpacity(0.08),
+            decoration: BoxDecoration(color: _isLight ? Colors.black.withOpacity(0.04) : Colors.white.withOpacity(0.08),
               borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.white.withOpacity(0.15))),
             child: Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
               Text(i == 0 ? T('now') : _fmtHour(h['time']),
-                style: TextStyle(color: _txt().withOpacity(0.7), fontSize: 12)),
+                style: TextStyle(color: _muted(), fontSize: 12)),
               Text(_icon(h['code']), style: const TextStyle(fontSize: 24)),
               Text(_fmtT((h['temp'] as num).toDouble()),
                 style: TextStyle(color: _txt(), fontSize: 14, fontWeight: FontWeight.w500)),
@@ -435,12 +435,12 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
   Widget _dailyCard() {
     final days = _allDays ? _daily : _daily.take(3).toList();
     return _card(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text(T('daily').toUpperCase(), style: TextStyle(color: _txt().withOpacity(0.7),
+      Text(T('daily').toUpperCase(), style: TextStyle(color: _muted(),
         fontSize: 13, letterSpacing: 1.2, fontWeight: FontWeight.w500)),
       const SizedBox(height: 12),
       ...days.asMap().entries.map((e) => Container(
         margin: const EdgeInsets.only(bottom: 8), padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(color: Colors.white.withOpacity(0.08),
+        decoration: BoxDecoration(color: _isLight ? Colors.black.withOpacity(0.04) : Colors.white.withOpacity(0.08),
           borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.white.withOpacity(0.15))),
         child: Row(children: [
           SizedBox(width: 60, child: Text(e.key == 0 ? T('today') : _day(e.value['date']),
@@ -471,7 +471,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
   }
 
   Widget _extrasCard() => _card(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-    Text(T('details').toUpperCase(), style: TextStyle(color: _txt().withOpacity(0.7),
+    Text(T('details').toUpperCase(), style: TextStyle(color: _muted(),
       fontSize: 13, letterSpacing: 1.2, fontWeight: FontWeight.w500)),
     const SizedBox(height: 12),
     GridView.count(
@@ -496,20 +496,20 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
     borderRadius: BorderRadius.circular(16),
     child: Container(
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(color: Colors.white.withOpacity(0.08),
+      decoration: BoxDecoration(color: _isLight ? Colors.black.withOpacity(0.04) : Colors.white.withOpacity(0.08),
         borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.white.withOpacity(0.15))),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
           Expanded(child: Text('$emoji ${l.toUpperCase()}',
-            style: TextStyle(color: _txt().withOpacity(0.6), fontSize: 10,
+            style: TextStyle(color: _faint(), fontSize: 10,
               letterSpacing: 1, fontWeight: FontWeight.w500),
             overflow: TextOverflow.ellipsis)),
-          Icon(Icons.chevron_right, size: 14, color: _txt().withOpacity(0.4)),
+          Icon(Icons.chevron_right, size: 14, color: _faint()),
         ]),
         const SizedBox(height: 6),
         Text(v, style: TextStyle(color: _txt(), fontSize: 18, fontWeight: FontWeight.w500)),
         const SizedBox(height: 2),
-        Text(sub, style: TextStyle(color: _txt().withOpacity(0.7), fontSize: 11),
+        Text(sub, style: TextStyle(color: _muted(), fontSize: 11),
           overflow: TextOverflow.ellipsis),
       ]),
     ),
@@ -520,7 +520,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
     final isBadDrv = (_wcode >= 45 && _wcode <= 48) || _wcode >= 61;
     final isHighCold = _feels < 15 || _humidity > 80;
     return _card(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text('🌿 ${T('life').toUpperCase()}', style: TextStyle(color: _txt().withOpacity(0.7),
+      Text('🌿 ${T('life').toUpperCase()}', style: TextStyle(color: _muted(),
         fontSize: 13, letterSpacing: 1.2, fontWeight: FontWeight.w500)),
       const SizedBox(height: 12),
       _life('🏃', isBadOut ? T('bad_out') : T('great_out'), () => _openDetail('outdoor')),
@@ -536,13 +536,13 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
     borderRadius: BorderRadius.circular(16),
     child: Container(
       margin: const EdgeInsets.only(bottom: 8), padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(color: Colors.white.withOpacity(0.08),
+      decoration: BoxDecoration(color: _isLight ? Colors.black.withOpacity(0.04) : Colors.white.withOpacity(0.08),
         borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.white.withOpacity(0.15))),
       child: Row(children: [
         Text(emoji, style: const TextStyle(fontSize: 20)),
         const SizedBox(width: 12),
         Expanded(child: Text(text, style: TextStyle(color: _txt(), fontSize: 13))),
-        Icon(Icons.chevron_right, size: 18, color: _txt().withOpacity(0.4)),
+        Icon(Icons.chevron_right, size: 18, color: _faint()),
       ]),
     ),
   );
@@ -766,9 +766,9 @@ class _DetailPage extends StatelessWidget {
                       child: Container(
                         width: 46, height: 46,
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.15),
+                          color: _isLight ? Colors.white : Colors.white.withOpacity(0.15),
                           shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white.withOpacity(0.25)),
+                          border: Border.all(color: _isLight ? Colors.black.withOpacity(0.15) : Colors.white.withOpacity(0.25)),
                         ),
                         child: Icon(Icons.arrow_back, color: txt, size: 22),
                       ),
@@ -846,9 +846,9 @@ class _DetailPage extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.08),
+          color: _isLight ? Colors.black.withOpacity(0.04) : Colors.white.withOpacity(0.08),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.white.withOpacity(0.15)),
+          border: Border.all(color: _cardBorder()),
         ),
         child: Row(
           children: [
