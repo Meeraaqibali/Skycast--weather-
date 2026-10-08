@@ -15,7 +15,7 @@ class WeatherApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(useMaterial3: true, colorScheme: ColorScheme.fromSeed(
         seedColor: const Color(0xFF4A90E2), brightness: Brightness.dark)),
-      home: const WeatherHome(),
+      home: const SplashScreen(),
     );
   }
 }
@@ -25,7 +25,8 @@ const Map<String, Map<String, String>> TR = {
     'search':'Search city...','go':'Go','wind':'Wind','humidity':'Humidity','feels':'Feels Like',
     'hourly':'Hourly Forecast','daily':'7-Day Forecast','details':'More Details','life':'Life Index',
     'settings':'App Settings','theme':'Theme','temp_unit':'Temperature','wind_unit':'Wind Speed',
-    'time_format':'Time Format','language':'Language','done':'Done',
+    'time_format':'Time Format','language':'Language','text_size':'Text Size','done':'Done',
+    'text_small':'Small','text_medium':'Medium','text_large':'Large','text_xlarge':'Extra Large',
     'auto':'Auto','dark':'Dark','light':'Light','now':'Now','today':'Today',
     'precip':'Precipitation','aqi':'Air Quality','uv':'UV Index','sun':'Sun',
     'sunrise':'Sunrise','sunset':'Sunset','chance':'chance',
@@ -54,7 +55,8 @@ const Map<String, Map<String, String>> TR = {
     'search':'شہر تلاش کریں...','go':'جائیں','wind':'ہوا','humidity':'نمی','feels':'محسوس',
     'hourly':'گھنٹہ وار پیش گوئی','daily':'7 دن کی پیش گوئی','details':'مزید تفصیلات','life':'لائف انڈیکس',
     'settings':'ترتیبات','theme':'تھیم','temp_unit':'درجہ حرارت','wind_unit':'ہوا کی رفتار',
-    'time_format':'وقت کی ترتیب','language':'زبان','done':'مکمل',
+    'time_format':'وقت کی ترتیب','language':'زبان','text_size':'متن کا سائز','done':'مکمل',
+    'text_small':'چھوٹا','text_medium':'درمیانہ','text_large':'بڑا','text_xlarge':'بہت بڑا',
     'auto':'خودکار','dark':'ڈارک','light':'لائٹ','now':'ابھی','today':'آج',
     'precip':'بارش','aqi':'فضائی معیار','uv':'یووی انڈیکس','sun':'سورج',
     'sunrise':'طلوع','sunset':'غروب','chance':'امکان',
@@ -83,7 +85,8 @@ const Map<String, Map<String, String>> TR = {
     'search':'شهر ڳوليو...','go':'وڃو','wind':'هوا','humidity':'نمي','feels':'محسوس',
     'hourly':'ڪلاڪوار اڳڪٿي','daily':'7 ڏينهن جي اڳڪٿي','details':'وڌيڪ تفصيل','life':'لائف انڊيڪس',
     'settings':'سيٽنگون','theme':'ٿيم','temp_unit':'درجه حرارت','wind_unit':'هوا جي رفتار',
-    'time_format':'وقت جي ترتيب','language':'ٻولي','done':'مڪمل',
+    'time_format':'وقت جي ترتيب','language':'ٻولي','text_size':'متن جي ماپ','done':'مڪمل',
+    'text_small':'ننڍو','text_medium':'وچولو','text_large':'وڏو','text_xlarge':'تمام وڏو',
     'auto':'خودڪار','dark':'ڊارڪ','light':'لائيٽ','now':'هاڻي','today':'اڄ',
     'precip':'برسات','aqi':'فضائي معيار','uv':'يووي انڊيڪس','sun':'سج',
     'sunrise':'سج اڀرڻ','sunset':'سج لهڻ','chance':'امڪان',
@@ -112,7 +115,8 @@ const Map<String, Map<String, String>> TR = {
     'search':'Buscar ciudad...','go':'Ir','wind':'Viento','humidity':'Humedad','feels':'Sensación',
     'hourly':'Por Hora','daily':'7 Días','details':'Más Detalles','life':'Índice de Vida',
     'settings':'Ajustes','theme':'Tema','temp_unit':'Temperatura','wind_unit':'Viento',
-    'time_format':'Hora','language':'Idioma','done':'Listo',
+    'time_format':'Hora','language':'Idioma','text_size':'Tamaño de Texto','done':'Listo',
+    'text_small':'Pequeño','text_medium':'Mediano','text_large':'Grande','text_xlarge':'Muy Grande',
     'auto':'Auto','dark':'Oscuro','light':'Claro','now':'Ahora','today':'Hoy',
     'precip':'Precipitación','aqi':'Calidad Aire','uv':'Índice UV','sun':'Sol',
     'sunrise':'Amanecer','sunset':'Atardecer','chance':'probabilidad',
@@ -144,6 +148,165 @@ const List<String> DAYS_UR = ['اتوار','پیر','منگل','بدھ','جمع�
 const List<String> DAYS_SD = ['آچر','سومر','اڱارو','اربع','خميس','جمع','ڇنڇر'];
 const List<String> DAYS_ES = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
 
+class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
+  @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMixin {
+  late AnimationController _fadeCtrl;
+  late AnimationController _spinCtrl;
+  late AnimationController _scaleCtrl;
+  late AnimationController _textFadeCtrl;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _fadeCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 700),
+    );
+    _spinCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 4),
+    )..repeat();
+    _scaleCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    );
+    _textFadeCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
+
+    // Sequence:
+    // 1. Sun fades in and scales up (0-700ms)
+    // 2. Text fades in (500-1100ms)
+    // 3. Wait until 2200ms then navigate
+    _fadeCtrl.forward();
+    _scaleCtrl.forward();
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (mounted) _textFadeCtrl.forward();
+    });
+
+    Future.delayed(const Duration(milliseconds: 2200), () {
+      if (!mounted) return;
+      Navigator.pushReplacement(
+        context,
+        PageRouteBuilder(
+          opaque: true,
+          pageBuilder: (_, __, ___) => const WeatherHome(),
+          transitionDuration: const Duration(milliseconds: 700),
+          transitionsBuilder: (_, animation, __, child) {
+            final curved = CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeInOutCubic,
+            );
+            return FadeTransition(opacity: curved, child: child);
+          },
+        ),
+      );
+    });
+  }
+
+  @override
+  void dispose() {
+    _fadeCtrl.dispose();
+    _spinCtrl.dispose();
+    _scaleCtrl.dispose();
+    _textFadeCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFFFFFFF),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Animated sun icon
+            FadeTransition(
+              opacity: _fadeCtrl,
+              child: ScaleTransition(
+                scale: Tween<double>(begin: 0.5, end: 1.0).animate(
+                  CurvedAnimation(parent: _scaleCtrl, curve: Curves.easeOutBack),
+                ),
+                child: AnimatedBuilder(
+                  animation: _spinCtrl,
+                  builder: (c, ch) => Transform.rotate(
+                    angle: _spinCtrl.value * 2 * 3.14159,
+                    child: ch,
+                  ),
+                  child: const Text('☀️', style: TextStyle(fontSize: 100)),
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            // App name
+            FadeTransition(
+              opacity: _textFadeCtrl,
+              child: Column(
+                children: [
+                  const Text(
+                    'SkyCast',
+                    style: TextStyle(
+                      fontSize: 34,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF000000),
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Weather',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                      color: const Color(0xFF000000).withOpacity(0.5),
+                      letterSpacing: 4,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 60),
+            // Loading dots
+            FadeTransition(
+              opacity: _textFadeCtrl,
+              child: SizedBox(
+                width: 40,
+                height: 8,
+                child: AnimatedBuilder(
+                  animation: _spinCtrl,
+                  builder: (c, ch) => Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(3, (i) {
+                      final t = (_spinCtrl.value * 3 + i * 0.3) % 1.0;
+                      final opacity = (t < 0.5 ? t * 2 : (1 - t) * 2).clamp(0.2, 1.0);
+                      return Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 3),
+                        width: 6, height: 6,
+                        decoration: BoxDecoration(
+                          color: Color.fromRGBO(0, 0, 0, opacity),
+                          shape: BoxShape.circle,
+                        ),
+                      );
+                    }),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class WeatherHome extends StatefulWidget {
   const WeatherHome({super.key});
   @override
@@ -152,7 +315,7 @@ class WeatherHome extends StatefulWidget {
 
 class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin {
   final _ctrl = TextEditingController();
-  String _lang = 'en', _theme = 'auto', _unit = 'C', _windUnit = 'kmh', _timeFmt = '12h';
+  String _lang = 'en', _theme = 'auto', _unit = 'C', _windUnit = 'kmh', _timeFmt = '12h', _textSize = 'medium';
   String _city = 'Karachi', _country = 'Pakistan';
   double _temp = 0, _feels = 0, _wind = 0, _precip = 0, _uv = 0;
   int _humidity = 0, _wcode = 0, _precipChance = 0, _aqi = 0;
@@ -165,6 +328,15 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
   late Animation<double> _anim;
 
   String T(String k) => TR[_lang]?[k] ?? TR['en']?[k] ?? k;
+
+  double get _textScaleValue {
+    switch (_textSize) {
+      case 'small': return 0.9;
+      case 'large': return 1.15;
+      case 'xlarge': return 1.3;
+      default: return 1.0;
+    }
+  }
 
   @override
   void initState() {
@@ -189,6 +361,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
       _unit = p.getString('unit') ?? 'C';
       _windUnit = p.getString('windUnit') ?? 'kmh';
       _timeFmt = p.getString('timeFmt') ?? '12h';
+      _textSize = p.getString('textSize') ?? 'medium';
     });
   }
 
@@ -200,41 +373,122 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
     await p.setString('unit', _unit);
     await p.setString('windUnit', _windUnit);
     await p.setString('timeFmt', _timeFmt);
+    await p.setString('textSize', _textSize);
   }
 
-  Future<void> _fetch(String city) async {
+  Future<void> _fetch(String input) async {
     setState(() => _loading = true);
-    _refreshing = false;
     try {
-      final geo = await http.get(Uri.parse(
-        'https://geocoding-api.open-meteo.com/v1/search?name=${Uri.encodeComponent(city)}&count=10&language=en&format=json')).timeout(const Duration(seconds: 10));
-      final gd = json.decode(geo.body);
-      if (gd['results'] == null) {
+      // Normalize input
+      final city = input.trim();
+      
+      // Build variations to try
+      final variations = <String>[
+        city,
+        city.replaceAll(' ', ''),
+        city.replaceAll('hass', 'has'),
+        city.replaceAll('hass', ' khas'),
+        city.replaceAll('pur', 'pur '),
+        city.split(' ').first,
+      ];
+      
+      // Remove duplicates and short entries
+      final unique = <String>{};
+      for (final v in variations) {
+        if (v.trim().length >= 3) unique.add(v.trim());
+      }
+      
+      // Try each variation
+      List<dynamic> allResults = [];
+      for (final v in unique) {
+        try {
+          final res = await http.get(Uri.parse(
+            'https://geocoding-api.open-meteo.com/v1/search?name=${Uri.encodeComponent(v)}&count=10&language=en&format=json'
+          )).timeout(const Duration(seconds: 8));
+          final data = json.decode(res.body);
+          if (data['results'] != null) {
+            allResults.addAll(data['results'] as List);
+          }
+        } catch (_) {}
+      }
+      
+      if (allResults.isEmpty) {
         setState(() { _city = 'Not found'; _loading = false; });
         return;
       }
-      final pk = (gd['results'] as List).firstWhere(
-        (r) => r['country_code'] == 'PK', orElse: () => gd['results'][0]);
-      final lat = pk['latitude'], lon = pk['longitude'];
+      
+      // Remove duplicates by id
+      final seen = <int>{};
+      allResults = allResults.where((r) {
+        final id = r['id'] as int;
+        if (seen.contains(id)) return false;
+        seen.add(id);
+        return true;
+      }).toList();
+      
+      // Only Pakistan results
+      var pk = allResults.where((r) => r['country_code'] == 'PK').toList();
+      if (pk.isEmpty) pk = allResults;
+      
+      // Score by name similarity to input
+      final target = city.toLowerCase().replaceAll(' ', '');
+      pk.sort((a, b) {
+        final aName = (a['name'] as String).toLowerCase().replaceAll(' ', '');
+        final bName = (b['name'] as String).toLowerCase().replaceAll(' ', '');
+        
+        // Exact match gets highest score
+        int aScore = 0, bScore = 0;
+        if (aName == target) aScore = 100;
+        else if (aName.startsWith(target) || target.startsWith(aName)) aScore = 80;
+        else if (aName.contains(target) || target.contains(aName)) aScore = 60;
+        else {
+          // Check how many characters match at the start
+          int match = 0;
+          for (int i = 0; i < aName.length && i < target.length; i++) {
+            if (aName[i] == target[i]) match++;
+            else break;
+          }
+          aScore = match * 5;
+        }
+        
+        if (bName == target) bScore = 100;
+        else if (bName.startsWith(target) || target.startsWith(bName)) bScore = 80;
+        else if (bName.contains(target) || target.contains(bName)) bScore = 60;
+        else {
+          int match = 0;
+          for (int i = 0; i < bName.length && i < target.length; i++) {
+            if (bName[i] == target[i]) match++;
+            else break;
+          }
+          bScore = match * 5;
+        }
+        
+        if (aScore != bScore) return bScore - aScore;
+        // Tiebreaker: population
+        return ((b['population'] ?? 0) as int).compareTo((a['population'] ?? 0) as int);
+      });
+      
+      final pk2 = pk.first;
+      final lat = pk2['latitude'], lon = pk2['longitude'];
 
       final wr = await http.get(Uri.parse(
         'https://api.open-meteo.com/v1/forecast?latitude=$lat&longitude=$lon&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,precipitation&hourly=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_probability_max&timezone=auto')).timeout(const Duration(seconds: 10));
       final wd = json.decode(wr.body);
-      final c = wd['current'];
+      final cc = wd['current'];
 
       final ar = await http.get(Uri.parse(
         'https://air-quality-api.open-meteo.com/v1/air-quality?latitude=$lat&longitude=$lon&current=european_aqi&timezone=auto')).timeout(const Duration(seconds: 10));
       final ad = json.decode(ar.body);
 
       setState(() {
-        _city = pk['name'] ?? city;
-        _country = pk['country'] ?? '';
-        _temp = (c['temperature_2m'] as num).toDouble();
-        _feels = (c['apparent_temperature'] as num).toDouble();
-        _humidity = (c['relative_humidity_2m'] as num).toInt();
-        _wind = (c['wind_speed_10m'] as num).toDouble();
-        _precip = (c['precipitation'] as num).toDouble();
-        _wcode = (c['weather_code'] as num).toInt();
+        _city = pk2['name'] ?? city;
+        _country = pk2['country'] ?? '';
+        _temp = (cc['temperature_2m'] as num).toDouble();
+        _feels = (cc['apparent_temperature'] as num).toDouble();
+        _humidity = (cc['relative_humidity_2m'] as num).toInt();
+        _wind = (cc['wind_speed_10m'] as num).toDouble();
+        _precip = (cc['precipitation'] as num).toDouble();
+        _wcode = (cc['weather_code'] as num).toInt();
         _aqi = ((ad['current']?['european_aqi'] ?? 0) as num).toInt();
         _uv = (wd['daily']['uv_index_max'][0] as num).toDouble();
         _precipChance = (wd['daily']['precipitation_probability_max'][0] as num).toInt();
@@ -254,13 +508,10 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
         _loading = false;
       });
     } catch (e) {
-      setState(() {
-        _city = e.toString().contains('TimeoutException') ? 'Request timed out' : 'Connection error';
-        _country = '';
-        _loading = false;
-      });
+      setState(() { _city = 'Connection error'; _country = ''; _loading = false; });
     }
   }
+
 
   String _icon(int c) {
     if (c <= 1) return '☀️';
@@ -367,7 +618,10 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    final mq = MediaQuery.of(context);
+    return MediaQuery(
+      data: mq.copyWith(textScaler: TextScaler.linear(_textScaleValue)),
+      child: Scaffold(
       backgroundColor: _bg1(),
       body: Container(
         decoration: BoxDecoration(gradient: LinearGradient(
@@ -410,6 +664,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
         onPressed: _openSettings,
         child: Icon(Icons.settings, color: Colors.white),
       ),
+      ),
     );
   }
 
@@ -435,15 +690,17 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
       onSubmitted: (v) { if (v.trim().isNotEmpty) _fetch(v.trim()); },
     )),
     const SizedBox(width: 8),
-    ElevatedButton(
-      onPressed: () { final v = _ctrl.text.trim(); if (v.isNotEmpty) _fetch(v); },
-      style: ElevatedButton.styleFrom(
-        backgroundColor: _isLight ? const Color(0xFF000000) : const Color(0xFF333333),
-        foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        elevation: 0),
-      child: Text(T('go')),
+    _TapButton(
+      onTap: () { final v = _ctrl.text.trim(); if (v.isNotEmpty) _fetch(v); },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 16),
+        decoration: BoxDecoration(
+          color: _isLight ? const Color(0xFF000000) : const Color(0xFF333333),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Text(T('go'),
+          style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w600)),
+      ),
     ),
   ]);
 
@@ -797,6 +1054,16 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
               setSheet(() {});
               _saveSettings();
             }),
+              _settingDrop(T('text_size'), _textSize, ['small','medium','large','xlarge'],
+                [T('text_small'), T('text_medium'), T('text_large'), T('text_xlarge')],
+                (v) async {
+              if (v == _textSize) return;
+              setState(() => _mainOpacity = 0.0);
+              await Future.delayed(const Duration(milliseconds: 250));
+              setState(() { _textSize = v!; _mainOpacity = 1.0; });
+              setSheet(() {});
+              _saveSettings();
+            }),
               const SizedBox(height: 10),
               SizedBox(width: double.infinity, height: 50,
                 child: ElevatedButton(
@@ -1129,6 +1396,35 @@ class _TapCardState extends State<_TapCard> {
         scale: _pressed ? 0.97 : 1.0,
         duration: const Duration(milliseconds: 1000),
         curve: Curves.easeInOutCubic,
+        child: widget.child,
+      ),
+    );
+  }
+}
+
+class _TapButton extends StatefulWidget {
+  final Widget child;
+  final VoidCallback onTap;
+  const _TapButton({required this.child, required this.onTap});
+  @override
+  State<_TapButton> createState() => _TapButtonState();
+}
+
+class _TapButtonState extends State<_TapButton> {
+  bool _pressed = false;
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _pressed = true),
+      onTapUp: (_) {
+        setState(() => _pressed = false);
+        widget.onTap();
+      },
+      onTapCancel: () => setState(() => _pressed = false),
+      child: AnimatedScale(
+        scale: _pressed ? 0.92 : 1.0,
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOutCubic,
         child: widget.child,
       ),
     );
