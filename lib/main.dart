@@ -58,6 +58,16 @@ const Map<String, Map<String, String>> TR = {
     'light_breeze':'ہلکی ہوا','strong_winds':'تیز ہوا','muggy':'مرطوب','comfortable':'آرام دہ',
     'low':'کم','moderate':'معتدل','high':'زیادہ','very_high':'بہت زیادہ',
     'good':'اچھا','fair':'منصفانہ','poor':'خراب','dry':'فی الحال خشک','raining':'بارش ہو رہی ہے',
+      desc_precip:'بارش میں بارش، برف اور اولے شامل ہیں۔',
+      desc_wind:'ہوا کی سمت بتاتی ہے کہ ہوا کہاں سے آ رہی ہے۔',
+      desc_aqi:'فضائی معیار آپ کی سانس کی صحت کو متاثر کرتا ہے۔',
+      desc_uv:'سورج سے نکلنے والی UV شعاعیں جلد کو نقصان پہنچا سکتی ہیں۔',
+      desc_humidity:'نمی ہوا میں پانی کے بخارات کی مقدار ہے۔',
+      desc_sun:'سورج ضروری وٹامن ڈی فراہم کرتا ہے۔',
+      desc_outdoor:'بیرونی سرگرمیوں سے پہلے موسم پر غور کریں۔',
+      desc_clothing:'موجودہ درجہ حرارت کے مطابق مناسب لباس پہنیں۔',
+      desc_cold:'موسمی حالات زکام کے خطرے کو متاثر کر سکتے ہیں۔',
+      desc_drive:'موسم ڈرائیونگ کی حفاظت کو متاثر کر سکتا ہے۔',
   },
   'sd': {
     'search':'شهر ڳوليو...','go':'وڃو','wind':'هوا','humidity':'نمي','feels':'محسوس',
@@ -77,6 +87,16 @@ const Map<String, Map<String, String>> TR = {
     'light_breeze':'هلڪي هوا','strong_winds':'تيز هوا','muggy':'مرطوب','comfortable':'آرامده',
     'low':'گهٽ','moderate':'وچولو','high':'وڌيڪ','very_high':'تمام وڌيڪ',
     'good':'سٺو','fair':'منصفانه','poor':'خراب','dry':'في الحال خشڪ','raining':'مينهن پيو پوي',
+      desc_precip:'برسات ۾ مينهن، برف ۽ اولا شامل آهن.',
+      desc_wind:'هوا جي هدايت ظاهر ڪري ٿي ته هوا ڪٿان اچي رهي آهي.',
+      desc_aqi:'فضائي معيار توهان جي ساهه جي صحت کي متاثر ڪري ٿو.',
+      desc_uv:'سج مان نڪرندڙ UV شعاعون چمڙي کي نقصان پهچائي سگهن ٿيون.',
+      desc_humidity:'نمي هوا ۾ پاڻي جي بخارن جي مقدار آهي.',
+      desc_sun:'سج ضروري وٽامن ڊي فراهم ڪري ٿو.',
+      desc_outdoor:'ٻاهرين سرگرمين کان اڳ موسم تي غور ڪريو.',
+      desc_clothing:'موجوده درجه حرارت مطابق مناسب ڪپڙا پائو.',
+      desc_cold:'موسمي حالتون زڪام جي خطري کي متاثر ڪري سگهن ٿيون.',
+      desc_drive:'موسم ڊرائيونگ جي حفاظت کي متاثر ڪري سگهي ٿو.',
   },
   'es': {
     'search':'Buscar ciudad...','go':'Ir','wind':'Viento','humidity':'Humedad','feels':'Sensación',
@@ -96,6 +116,16 @@ const Map<String, Map<String, String>> TR = {
     'light_breeze':'Brisa ligera','strong_winds':'Vientos fuertes','muggy':'Húmedo','comfortable':'Cómodo',
     'low':'Bajo','moderate':'Moderado','high':'Alto','very_high':'Muy Alto',
     'good':'Buena','fair':'Aceptable','poor':'Mala','dry':'Seco actualmente','raining':'Está lloviendo',
+      desc_precip:'La precipitación incluye lluvia, nieve y granizo.',
+      desc_wind:'La dirección del viento indica de dónde viene.',
+      desc_aqi:'La calidad del aire afecta su salud respiratoria.',
+      desc_uv:'La radiación UV puede dañar su piel.',
+      desc_humidity:'La humedad es el vapor de agua en el aire.',
+      desc_sun:'El sol proporciona vitamina D esencial.',
+      desc_outdoor:'Considere el clima antes de planificar actividades.',
+      desc_clothing:'Vístase apropiadamente para la temperatura.',
+      desc_cold:'Las condiciones pueden afectar su riesgo de resfriarse.',
+      desc_drive:'El clima puede afectar la seguridad al conducir.',
   },
 };
 
@@ -490,7 +520,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
               borderRadius: BorderRadius.circular(16),
               side: BorderSide(color: Colors.white.withOpacity(0.2))),
           ),
-          child: Text(_allDays ? '▲  ${T('daily').split(' ').first}' : '▼  More',
+          child: Text(_allDays ? 'Less' : 'More',
             style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
         ),
       ),
@@ -701,48 +731,32 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
   }
 
   // ============ FULL-SCREEN DETAIL PAGE ============
-  void _openDetail(String type) {
-    Navigator.push(context, _smoothRoute(
-      builder: (_) => _buildDetailPage(type),
-    ));
-  }
-
-  Widget _buildDetailPage(String type) {
+  String _getDetailContent(String type) {
     String title = '', value = '', label = '', desc = '', ctx = '';
-
     if (type == 'precip') {
-      title = '🌧️ ${T('precip')}';
-      value = '${_precip.round()} mm';
+      title = '🌧️ ${T('precip')}'; value = '${_precip.round()} mm';
       label = '$_precipChance% ${T('chance')}';
       desc = T('desc_precip');
       ctx = _precip > 0 ? T('raining') : T('dry');
     } else if (type == 'wind') {
-      title = '💨 ${T('wind')}';
-      value = _fmtW(_wind);
+      title = '💨 ${T('wind')}'; value = _fmtW(_wind);
       label = '${T('direction')}: ' + ['N','NE','E','SE','S','SW','W','NW'][((_wind / 45).round()) % 8];
       desc = T('desc_wind');
       ctx = _wind > 20 ? T('strong_winds') : T('light_breeze');
     } else if (type == 'aqi') {
-      title = '🌍 ${T('aqi')}';
-      value = '$_aqi';
+      title = '🌍 ${T('aqi')}'; value = '$_aqi';
       label = '${T('category')}: ${_aqiCategory()}';
-      desc = T('desc_aqi');
-      ctx = '${T('context')}: ${_aqiCategory()}';
+      desc = T('desc_aqi'); ctx = '${T('context')}: ${_aqiCategory()}';
     } else if (type == 'uv') {
-      title = '☀️ ${T('uv')}';
-      value = '${_uv.round()}';
+      title = '☀️ ${T('uv')}'; value = '${_uv.round()}';
       label = '${T('category')}: ${_uvCategory()}';
-      desc = T('desc_uv');
-      ctx = '${T('uv')}: ${_uvCategory()}';
+      desc = T('desc_uv'); ctx = '${T('uv')}: ${_uvCategory()}';
     } else if (type == 'humidity') {
-      title = '💧 ${T('humidity')}';
-      value = '$_humidity%';
+      title = '💧 ${T('humidity')}'; value = '$_humidity%';
       label = _humidity > 60 ? T('muggy') : T('comfortable');
-      desc = T('desc_humidity');
-      ctx = '$_humidity%';
+      desc = T('desc_humidity'); ctx = '$_humidity%';
     } else if (type == 'sun') {
-      title = '🌅 ${T('sun')}';
-      value = '${_fmtTime(_sunrise)} / ${_fmtTime(_sunset)}';
+      title = '🌅 ${T('sun')}'; value = '${_fmtTime(_sunrise)} / ${_fmtTime(_sunset)}';
       label = '${T('sunrise')} / ${T('sunset')}';
       desc = T('desc_sun');
       ctx = '${T('sunrise')}: ${_fmtTime(_sunrise)} · ${T('sunset')}: ${_fmtTime(_sunset)}';
@@ -750,32 +764,30 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
       final isBad = _wcode >= 51 || _temp > 38 || _temp < 5;
       title = '🏃 ${T('outdoor')}';
       value = isBad ? T('bad_out').split('.').first : T('great_out').split('.').first;
-      label = T('about');
-      desc = T('desc_outdoor');
+      label = T('about'); desc = T('desc_outdoor');
       ctx = isBad ? T('bad_out') : T('great_out');
     } else if (type == 'clothing') {
       title = '👕 ${T('clothing')}';
       value = _temp > 30 ? 'Light' : _temp > 20 ? 'Comfortable' : 'Warm';
-      label = T('about');
-      desc = T('desc_clothing');
+      label = T('about'); desc = T('desc_clothing');
       ctx = _temp > 30 ? T('light_cloth') : _temp > 20 ? T('ok_cloth') : T('warm_cloth');
     } else if (type == 'cold') {
       final isHigh = _feels < 15 || _humidity > 80;
       title = '💊 ${T('cold')}';
       value = isHigh ? 'Higher Risk' : 'Low Risk';
-      label = T('about');
-      desc = T('desc_cold');
+      label = T('about'); desc = T('desc_cold');
       ctx = isHigh ? T('high_cold') : T('low_cold');
     } else if (type == 'drive') {
       final isBad = (_wcode >= 45 && _wcode <= 48) || _wcode >= 61;
       title = '🚗 ${T('drive')}';
       value = isBad ? 'Caution' : 'Excellent';
-      label = T('about');
-      desc = T('desc_drive');
+      label = T('about'); desc = T('desc_drive');
       ctx = isBad ? T('bad_drive') : T('ok_drive');
     }
+    return '$title|$value|$label|$desc|$ctx';
+  }
 
-    // Build weather metrics list
+  void _openDetail(String type) {
     final metrics = [
       {'key': 'precip', 'name': '🌧️ ${T('precip')}', 'val': '${_precip.round()} mm'},
       {'key': 'wind', 'name': '💨 ${T('wind')}', 'val': _fmtW(_wind)},
@@ -785,29 +797,25 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
       {'key': 'sun', 'name': '🌅 ${T('sun')}', 'val': _fmtTime(_sunrise)},
     ];
     final lifestyle = [
-      {'key': 'outdoor', 'name': '🏃 ${T('outdoor')}'},
-      {'key': 'clothing', 'name': '👕 ${T('clothing')}'},
-      {'key': 'cold', 'name': '💊 ${T('cold')}'},
-      {'key': 'drive', 'name': '🚗 ${T('drive')}'},
+      {'key': 'outdoor', 'name': '🏃 ${T('outdoor')}', 'val': ''},
+      {'key': 'clothing', 'name': '👕 ${T('clothing')}', 'val': ''},
+      {'key': 'cold', 'name': '💊 ${T('cold')}', 'val': ''},
+      {'key': 'drive', 'name': '🚗 ${T('drive')}', 'val': ''},
     ];
 
-    return _DetailPage(
-        bg1: _bg1(), bg2: _bg2(), txt: _txt(),
-        title: title, value: value, label: label, desc: desc, ctx: ctx,
-        metrics: metrics.where((m) => m['key'] != type).toList(),
-        lifestyle: lifestyle.where((m) => m['key'] != type).toList(),
-        aboutLabel: T('about'),
-        contextLabel: T('context'),
-        exploreLabel: T('explore'),
-        metricsLabel: T('weather_metrics'),
-        lifestyleLabel: T('lifestyle'),
-        onTapItem: (key) {
-          Navigator.pushReplacement(
-            context,
-            _smoothRoute(builder: (_) => _buildDetailPage(key)),
-          );
-        },
-  );
+    Navigator.push(context, _smoothRoute(builder: (_) => _DetailPage(
+      bg1: _bg1(), bg2: _bg2(), txt: _txt(),
+      initialType: type,
+      getContent: _getDetailContent,
+      getIconKey: (k) => k,
+      aboutLabel: T('about'),
+      contextLabel: T('context'),
+      exploreLabel: T('explore'),
+      metricsLabel: T('weather_metrics'),
+      lifestyleLabel: T('lifestyle'),
+      metricsList: metrics,
+      lifestyleList: lifestyle,
+    )));
   }
 
   void _openSettings() {
@@ -857,25 +865,54 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
 
   Widget _settingDrop(String label, String val, List<String> vals, List<String> disp,
       Function(String?) onChange) => Padding(
-    padding: const EdgeInsets.only(bottom: 16),
+    padding: const EdgeInsets.only(bottom: 18),
     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text(label, style: TextStyle(color: _txt().withOpacity(0.8),
-        fontSize: 13, fontWeight: FontWeight.w500)),
-      const SizedBox(height: 8),
+      Padding(
+        padding: const EdgeInsets.only(left: 4, bottom: 8),
+        child: Text(label,
+          style: TextStyle(
+            color: _isLight ? const Color(0xFF333333) : const Color(0xFFCCCCCC),
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.3,
+          )),
+      ),
       Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
         decoration: BoxDecoration(
-          color: _theme == 'light' ? Colors.black.withOpacity(0.05) : Colors.white.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(12),
+          color: _isLight ? const Color(0xFFF8F8F8) : const Color(0xFF252525),
+          borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: _theme == 'light' ? Colors.black.withOpacity(0.15) : Colors.white.withOpacity(0.2))),
-        child: DropdownButtonHideUnderline(child: DropdownButton<String>(
-          value: val, dropdownColor: _isLight ? const Color(0xFFFFFFFF) : const Color(0xFF1A1A1A),
-          isExpanded: true, style: TextStyle(color: _txt(), fontSize: 15),
-          items: vals.asMap().entries.map((e) => DropdownMenuItem(
-            value: e.value, child: Text(disp[e.key]))).toList(),
-          onChanged: onChange,
-        )),
+            color: _isLight ? const Color(0xFFBBBBBB) : const Color(0xFF444444),
+            width: 1.5,
+          ),
+          boxShadow: _isLight
+            ? [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2))]
+            : null,
+        ),
+        child: DropdownButtonHideUnderline(
+          child: DropdownButton<String>(
+            value: val,
+            dropdownColor: _isLight ? const Color(0xFFFFFFFF) : const Color(0xFF1A1A1A),
+            isExpanded: true,
+            icon: Icon(Icons.keyboard_arrow_down_rounded,
+              color: _isLight ? const Color(0xFF333333) : const Color(0xFFFFFFFF),
+              size: 22),
+            style: TextStyle(
+              color: _isLight ? const Color(0xFF000000) : const Color(0xFFFFFFFF),
+              fontSize: 15,
+              fontWeight: FontWeight.w500,
+            ),
+            items: vals.asMap().entries.map((e) => DropdownMenuItem(
+              value: e.value,
+              child: Text(disp[e.key],
+                style: TextStyle(
+                  color: _isLight ? const Color(0xFF000000) : const Color(0xFFFFFFFF),
+                )),
+            )).toList(),
+            onChanged: onChange,
+          ),
+        ),
       ),
     ]),
   );
@@ -883,44 +920,96 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
 
 
 // ============ FULL-SCREEN DETAIL PAGE WIDGET ============
-class _DetailPage extends StatelessWidget {
+class _DetailPage extends StatefulWidget {
   final Color bg1, bg2, txt;
-  final String title, value, label, desc, ctx;
-  final List<Map<String, String>> metrics, lifestyle;
+  final Function(String) getContent;  // returns content for a type
+  final Function(String) getIconKey;
+  final String initialType;
   final String aboutLabel, contextLabel, exploreLabel, metricsLabel, lifestyleLabel;
-  final Function(String) onTapItem;
+  final List<Map<String, String>> metricsList, lifestyleList;
 
   const _DetailPage({
     required this.bg1, required this.bg2, required this.txt,
-    required this.title, required this.value, required this.label,
-    required this.desc, required this.ctx,
-    required this.metrics, required this.lifestyle,
+    required this.getContent,
+    required this.getIconKey,
+    required this.initialType,
     required this.aboutLabel, required this.contextLabel, required this.exploreLabel,
     required this.metricsLabel, required this.lifestyleLabel,
-    required this.onTapItem,
+    required this.metricsList, required this.lifestyleList,
   });
 
-  bool get _isLight => bg1 == const Color(0xFFFFFFFF);
+  @override
+  State<_DetailPage> createState() => _DetailPageState();
+}
+
+class _DetailPageState extends State<_DetailPage> {
+  late String _currentType;
+  late Map<String, String> _content;
+  final ScrollController _scrollCtrl = ScrollController();
+
+  bool get _isLight => widget.bg1 == const Color(0xFFFFFFFF);
   Color _cardBorder() => _isLight ? const Color(0xFFDDDDDD) : const Color(0xFF333333);
+
+  @override
+  void initState() {
+    super.initState();
+    _currentType = widget.initialType;
+    _content = _parseContent(widget.getContent(_currentType));
+  }
+
+  @override
+  void dispose() {
+    _scrollCtrl.dispose();
+    super.dispose();
+  }
+
+  Map<String, String> _parseContent(String raw) {
+    // The content is a concatenated string like:
+    // "title|value|label|desc|ctx"
+    final parts = raw.split('|');
+    return {
+      'title': parts.isNotEmpty ? parts[0] : '',
+      'value': parts.length > 1 ? parts[1] : '',
+      'label': parts.length > 2 ? parts[2] : '',
+      'desc': parts.length > 3 ? parts[3] : '',
+      'ctx': parts.length > 4 ? parts[4] : '',
+    };
+  }
+
+  void _onExploreTap(String key) {
+    setState(() {
+      _currentType = key;
+      _content = _parseContent(widget.getContent(key));
+    });
+    // Smooth scroll to top
+    if (_scrollCtrl.hasClients) {
+      _scrollCtrl.animateTo(
+        0,
+        duration: const Duration(milliseconds: 700),
+        curve: Curves.easeOutCubic,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: bg1,
+      backgroundColor: widget.bg1,
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment.topLeft, end: Alignment.bottomRight,
-            colors: [bg1, bg2],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [widget.bg1, widget.bg2],
           ),
         ),
         child: SafeArea(
           child: SingleChildScrollView(
+            controller: _scrollCtrl,
             padding: const EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Back button + title row
                 Row(
                   children: [
                     GestureDetector(
@@ -928,69 +1017,76 @@ class _DetailPage extends StatelessWidget {
                       child: Container(
                         width: 46, height: 46,
                         decoration: BoxDecoration(
-                          color: _isLight ? const Color(0xFF000000) : const Color(0xFF333333),
+                          color: widget.txt,
                           shape: BoxShape.circle,
-                          border: Border.all(color: _isLight ? Colors.transparent : Colors.white.withOpacity(0.25)),
                         ),
-                        child: Icon(Icons.arrow_back, color: _isLight ? Colors.white : txt, size: 22),
+                        child: Icon(Icons.arrow_back,
+                          color: widget.bg1, size: 22),
                       ),
                     ),
                     const SizedBox(width: 14),
-                    Expanded(child: Text(title,
-                      style: TextStyle(color: txt, fontSize: 21, fontWeight: FontWeight.w600))),
+                    Expanded(child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 400),
+                      child: Text(
+                        _content['title'] ?? '',
+                        key: ValueKey(_currentType),
+                        style: TextStyle(color: widget.txt, fontSize: 21, fontWeight: FontWeight.w600),
+                      ),
+                    )),
                   ],
                 ),
                 const SizedBox(height: 28),
-
-                // Value
-                Text(value, style: TextStyle(color: txt, fontSize: 60,
-                  fontWeight: FontWeight.w200, height: 1)),
-                const SizedBox(height: 6),
-                Text(label, style: TextStyle(color: txt.withOpacity(0.7), fontSize: 14)),
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 400),
+                  child: Column(
+                    key: ValueKey('val_$_currentType'),
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(_content['value'] ?? '',
+                        style: TextStyle(color: widget.txt, fontSize: 60,
+                          fontWeight: FontWeight.w200, height: 1)),
+                      const SizedBox(height: 6),
+                      Text(_content['label'] ?? '',
+                        style: TextStyle(color: widget.txt.withOpacity(0.7), fontSize: 14)),
+                    ],
+                  ),
+                ),
                 const SizedBox(height: 32),
-
-                // About section
-                Text(aboutLabel, style: TextStyle(color: txt.withOpacity(0.9),
+                Text(widget.aboutLabel, style: TextStyle(color: widget.txt.withOpacity(0.9),
                   fontSize: 16, fontWeight: FontWeight.w600)),
                 const SizedBox(height: 10),
-                Text(desc, style: TextStyle(color: txt.withOpacity(0.8),
+                Text(_content['desc'] ?? '', style: TextStyle(color: widget.txt.withOpacity(0.8),
                   fontSize: 14, height: 1.6)),
                 const SizedBox(height: 28),
-
-                // Context section
-                Text(contextLabel, style: TextStyle(color: txt.withOpacity(0.9),
+                Text(widget.contextLabel, style: TextStyle(color: widget.txt.withOpacity(0.9),
                   fontSize: 16, fontWeight: FontWeight.w600)),
                 const SizedBox(height: 10),
-                Text(ctx, style: TextStyle(color: txt.withOpacity(0.8),
+                Text(_content['ctx'] ?? '', style: TextStyle(color: widget.txt.withOpacity(0.8),
                   fontSize: 14, height: 1.6)),
                 const SizedBox(height: 32),
-
-                // Explore
-                Divider(color: txt.withOpacity(0.15)),
+                Divider(color: widget.txt.withOpacity(0.15)),
                 const SizedBox(height: 20),
-                Text(exploreLabel, style: TextStyle(color: txt.withOpacity(0.9),
+                Text(widget.exploreLabel, style: TextStyle(color: widget.txt.withOpacity(0.9),
                   fontSize: 16, fontWeight: FontWeight.w600)),
                 const SizedBox(height: 16),
-
-                // Weather Metrics
-                if (metrics.isNotEmpty) ...[
-                  Text(metricsLabel.toUpperCase(), style: TextStyle(
-                    color: txt.withOpacity(0.6), fontSize: 13,
+                if (widget.metricsList.any((m) => m['key'] != _currentType)) ...[
+                  Text(widget.metricsLabel.toUpperCase(), style: TextStyle(
+                    color: widget.txt.withOpacity(0.6), fontSize: 13,
                     fontWeight: FontWeight.w600, letterSpacing: 1.2)),
                   const SizedBox(height: 12),
-                  ...metrics.map((m) => _listItem(m['name']!, m['val'] ?? '', txt,
-                    () => onTapItem(m['key']!))),
+                  ...widget.metricsList
+                    .where((m) => m['key'] != _currentType)
+                    .map((m) => _listItem(m['name']!, m['val'] ?? '', () => _onExploreTap(m['key']!))),
                   const SizedBox(height: 20),
                 ],
-
-                // Lifestyle Index
-                if (lifestyle.isNotEmpty) ...[
-                  Text(lifestyleLabel.toUpperCase(), style: TextStyle(
-                    color: txt.withOpacity(0.6), fontSize: 13,
+                if (widget.lifestyleList.any((m) => m['key'] != _currentType)) ...[
+                  Text(widget.lifestyleLabel.toUpperCase(), style: TextStyle(
+                    color: widget.txt.withOpacity(0.6), fontSize: 13,
                     fontWeight: FontWeight.w600, letterSpacing: 1.2)),
                   const SizedBox(height: 12),
-                  ...lifestyle.map((m) => _listItem(m['name']!, '', txt,
-                    () => onTapItem(m['key']!))),
+                  ...widget.lifestyleList
+                    .where((m) => m['key'] != _currentType)
+                    .map((m) => _listItem(m['name']!, '', () => _onExploreTap(m['key']!))),
                 ],
                 const SizedBox(height: 40),
               ],
@@ -1001,26 +1097,26 @@ class _DetailPage extends StatelessWidget {
     );
   }
 
-  Widget _listItem(String name, String val, Color txt, VoidCallback onTap) {
+  Widget _listItem(String name, String val, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         decoration: BoxDecoration(
-          color: _isLight ? const Color(0xFFF0F4F8) : Colors.white.withOpacity(0.08),
+          color: _isLight ? const Color(0xFFFFFFFF) : const Color(0xFF1A1A1A),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: _cardBorder()),
         ),
         child: Row(
           children: [
-            Expanded(child: Text(name, style: TextStyle(color: txt,
+            Expanded(child: Text(name, style: TextStyle(color: widget.txt,
               fontSize: 14, fontWeight: FontWeight.w500))),
             if (val.isNotEmpty) ...[
-              Text(val, style: TextStyle(color: txt.withOpacity(0.7), fontSize: 14)),
+              Text(val, style: TextStyle(color: widget.txt.withOpacity(0.7), fontSize: 14)),
               const SizedBox(width: 8),
             ],
-            Text('›', style: TextStyle(color: txt.withOpacity(0.5), fontSize: 22)),
+            Text('›', style: TextStyle(color: widget.txt.withOpacity(0.5), fontSize: 22)),
           ],
         ),
       ),
