@@ -192,13 +192,13 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
   }
 
   Future<void> _saveSettings() async {
+    if (mounted) setState(() {});  // Rebuild outer IMMEDIATELY
     final p = await SharedPreferences.getInstance();
     await p.setString('lang', _lang);
     await p.setString('theme', _theme);
     await p.setString('unit', _unit);
     await p.setString('windUnit', _windUnit);
     await p.setString('timeFmt', _timeFmt);
-    if (mounted) setState(() {});
   }
 
   Future<void> _fetch(String city) async {
@@ -504,45 +504,62 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
       Text(T('daily').toUpperCase(), style: TextStyle(color: _muted(),
         fontSize: 13, letterSpacing: 1.2, fontWeight: FontWeight.w500)),
       const SizedBox(height: 12),
-      ...days.asMap().entries.map((e) => GestureDetector(
-        onTap: () => _showDayDetail(e.value, e.key == 0),
-        child: Container(
-          margin: const EdgeInsets.only(bottom: 8),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          decoration: BoxDecoration(
-            color: _itemBg(),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: _cardBorder()),
-          ),
-          child: Row(children: [
-            SizedBox(width: 60, child: Text(
-              e.key == 0 ? T('today') : _day(e.value['date']),
-              style: TextStyle(color: _txt(), fontSize: 14, fontWeight: FontWeight.w500),
+      AnimatedSize(
+        duration: const Duration(milliseconds: 700),
+        curve: Curves.easeInOutCubic,
+        alignment: Alignment.topCenter,
+        child: Column(
+          children: [
+            ...days.asMap().entries.map((e) => GestureDetector(
+              onTap: () => _showDayDetail(e.value, e.key == 0),
+              child: Container(
+                margin: const EdgeInsets.only(bottom: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: _itemBg(),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: _cardBorder()),
+                ),
+                child: Row(children: [
+                  SizedBox(width: 60, child: Text(
+                    e.key == 0 ? T('today') : _day(e.value['date']),
+                    style: TextStyle(color: _txt(), fontSize: 14, fontWeight: FontWeight.w500),
+                  )),
+                  Text(_icon(e.value['code']), style: const TextStyle(fontSize: 20)),
+                  const Spacer(),
+                  Text('${_fmtT((e.value['max'] as num).toDouble())} / ${_fmtT((e.value['min'] as num).toDouble())}',
+                    style: TextStyle(color: _muted(), fontSize: 14)),
+                  const SizedBox(width: 6),
+                  Icon(Icons.chevron_right, size: 16, color: _faint()),
+                ]),
+              ),
             )),
-            Text(_icon(e.value['code']), style: const TextStyle(fontSize: 20)),
-            const Spacer(),
-            Text('${_fmtT((e.value['max'] as num).toDouble())} / ${_fmtT((e.value['min'] as num).toDouble())}',
-              style: TextStyle(color: _muted(), fontSize: 14)),
-            const SizedBox(width: 6),
-            Icon(Icons.chevron_right, size: 16, color: _faint()),
-          ]),
+          ],
         ),
-      )),
+      ),
       const SizedBox(height: 8),
       SizedBox(
         width: double.infinity, height: 52,
-        child: ElevatedButton(
-          onPressed: () => setState(() => _allDays = !_allDays),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: _isLight ? const Color(0xFF000000) : const Color(0xFFFFFFFF),
-            foregroundColor: _isLight ? const Color(0xFFFFFFFF) : const Color(0xFF000000),
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 400),
+          transitionBuilder: (child, animation) => FadeTransition(
+            opacity: animation,
+            child: child,
           ),
-          child: Text(_allDays ? 'Less' : 'More',
-            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+          child: ElevatedButton(
+            key: ValueKey('btn_$_allDays'),
+            onPressed: () => setState(() => _allDays = !_allDays),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: _isLight ? const Color(0xFF000000) : const Color(0xFFFFFFFF),
+              foregroundColor: _isLight ? const Color(0xFFFFFFFF) : const Color(0xFF000000),
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
+            child: Text(_allDays ? 'Less' : 'More',
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+          ),
         ),
       ),
     ]));
@@ -904,17 +921,17 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
               const SizedBox(height: 20),
               _settingDrop(T('theme'), _theme, ['auto','dark','light'],
                 [T('auto'), T('dark'), T('light')],
-                (v) { setSheet(() { _theme = v!; }); _saveSettings(); }),
+                (v) { setState(() { _theme = v!; }); setSheet(() {}); _saveSettings(); }),
               _settingDrop(T('temp_unit'), _unit, ['C','F'],
                 ['Celsius (°C)','Fahrenheit (°F)'],
-                (v) { setSheet(() { _unit = v!; }); _saveSettings(); }),
+                (v) { setState(() { _unit = v!; }); setSheet(() {}); _saveSettings(); }),
               _settingDrop(T('wind_unit'), _windUnit, ['kmh','mph'], ['km/h','mph'],
-                (v) { setSheet(() { _windUnit = v!; }); _saveSettings(); }),
+                (v) { setState(() { _windUnit = v!; }); setSheet(() {}); _saveSettings(); }),
               _settingDrop(T('time_format'), _timeFmt, ['12h','24h'], ['12-hour','24-hour'],
-                (v) { setSheet(() { _timeFmt = v!; }); _saveSettings(); }),
+                (v) { setState(() { _timeFmt = v!; }); setSheet(() {}); _saveSettings(); }),
               _settingDrop(T('language'), _lang, ['en','ur','sd','es'],
                 ['English','اردو','سنڌي','Español'],
-                (v) { setSheet(() { _lang = v!; }); _saveSettings(); }),
+                (v) { setState(() { _lang = v!; }); setSheet(() {}); _saveSettings(); }),
               const SizedBox(height: 10),
               SizedBox(width: double.infinity, height: 50,
                 child: ElevatedButton(
