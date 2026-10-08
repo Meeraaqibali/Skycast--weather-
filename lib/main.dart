@@ -320,7 +320,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
   double _temp = 0, _feels = 0, _wind = 0, _precip = 0, _uv = 0;
   int _humidity = 0, _wcode = 0, _precipChance = 0, _aqi = 0;
   String _sunrise = '', _sunset = '';
-  bool _loading = true, _allDays = false, _refreshing = false;
+  bool _loading = true, _allDays = false;
   double _mainOpacity = 1.0;
   List<dynamic> _hourly = [], _daily = [];
 
@@ -930,6 +930,145 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
           borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
         ),
         child: builder(ctx),
+      ),
+    );
+  }
+
+  PageRouteBuilder _smoothRoute({required WidgetBuilder builder}) {
+    return PageRouteBuilder(
+      opaque: true,
+      pageBuilder: (context, animation, secondaryAnimation) => builder(context),
+      transitionDuration: const Duration(milliseconds: 900),
+      reverseTransitionDuration: const Duration(milliseconds: 700),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        final curved = CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeInOutCubic,
+          reverseCurve: Curves.easeInOutCubic,
+        );
+        return FadeTransition(opacity: curved, child: child);
+      },
+    );
+  }
+
+  String _dayPrediction(int code) {
+    if (code == 0) return 'Clear sunny day. Perfect for outdoor activities.';
+    if (code == 1) return 'Mostly clear. Great weather to be outside.';
+    if (code == 2) return 'Partly cloudy with some sunshine.';
+    if (code == 3) return 'Overcast skies. Might feel a bit gloomy.';
+    if (code == 45 || code == 48) return 'Foggy conditions. Drive carefully.';
+    if (code >= 51 && code <= 55) return 'Light drizzle expected. Carry an umbrella.';
+    if (code >= 61 && code <= 65) return 'Rain expected. Bring an umbrella and wear waterproof shoes.';
+    if (code >= 71 && code <= 75) return 'Snow expected. Dress warmly and drive carefully.';
+    if (code >= 95) return 'Thunderstorms expected. Stay indoors if possible.';
+    return 'Mixed conditions throughout the day.';
+  }
+
+  void _showHourDetail(Map<String, dynamic> h) {
+    final code = h['code'] as int;
+    final temp = (h['temp'] as num).toDouble();
+    _smoothBottomSheet(
+      context: context,
+      backgroundColor: _cardBg(),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Row(children: [
+            Text(_icon(code), style: const TextStyle(fontSize: 40)),
+            const SizedBox(width: 16),
+            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(_fmtHour(h['time']), style: TextStyle(color: _txt(), fontSize: 22, fontWeight: FontWeight.w600)),
+              Text(_desc(code), style: TextStyle(color: _muted(), fontSize: 14)),
+            ])),
+          ]),
+          const SizedBox(height: 24),
+          Text(_fmtT(temp), style: TextStyle(color: _txt(), fontSize: 48, fontWeight: FontWeight.w200, height: 1)),
+          const SizedBox(height: 24),
+          SizedBox(width: double.infinity, height: 52,
+            child: ElevatedButton(
+              onPressed: () => Navigator.pop(ctx),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _isLight ? const Color(0xFF000000) : const Color(0xFFFFFFFF),
+                foregroundColor: _isLight ? const Color(0xFFFFFFFF) : const Color(0xFF000000),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
+              child: Text(T('done'), style: const TextStyle(fontWeight: FontWeight.w600)),
+            )),
+        ]),
+      ),
+    );
+  }
+
+  void _showDayDetail(Map<String, dynamic> d, bool isToday) {
+    final code = d['code'] as int;
+    final max = (d['max'] as num).toDouble();
+    final min = (d['min'] as num).toDouble();
+    final date = DateTime.parse(d['date']);
+    _smoothBottomSheet(
+      context: context,
+      backgroundColor: _cardBg(),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Row(children: [
+            Text(_icon(code), style: const TextStyle(fontSize: 44)),
+            const SizedBox(width: 16),
+            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(isToday ? T('today') : _day(d['date']),
+                style: TextStyle(color: _txt(), fontSize: 22, fontWeight: FontWeight.w600)),
+              Text('${date.day}/${date.month}/${date.year}',
+                style: TextStyle(color: _muted(), fontSize: 13)),
+              Text(_desc(code), style: TextStyle(color: _muted(), fontSize: 14)),
+            ])),
+          ]),
+          const SizedBox(height: 20),
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(color: _itemBg(),
+              borderRadius: BorderRadius.circular(14), border: Border.all(color: _cardBorder())),
+            child: Row(children: [
+              Icon(Icons.info_outline, color: _muted(), size: 20),
+              const SizedBox(width: 10),
+              Expanded(child: Text(_dayPrediction(code),
+                style: TextStyle(color: _txt(), fontSize: 13, height: 1.5))),
+            ]),
+          ),
+          const SizedBox(height: 20),
+          Row(children: [
+            Expanded(child: Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(color: _itemBg(),
+                borderRadius: BorderRadius.circular(14), border: Border.all(color: _cardBorder())),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text('High', style: TextStyle(color: _muted(), fontSize: 12, fontWeight: FontWeight.w500)),
+                const SizedBox(height: 4),
+                Text(_fmtT(max), style: TextStyle(color: _txt(), fontSize: 32, fontWeight: FontWeight.w300, height: 1)),
+              ]),
+            )),
+            const SizedBox(width: 12),
+            Expanded(child: Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(color: _itemBg(),
+                borderRadius: BorderRadius.circular(14), border: Border.all(color: _cardBorder())),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text('Low', style: TextStyle(color: _muted(), fontSize: 12, fontWeight: FontWeight.w500)),
+                const SizedBox(height: 4),
+                Text(_fmtT(min), style: TextStyle(color: _txt(), fontSize: 32, fontWeight: FontWeight.w300, height: 1)),
+              ]),
+            )),
+          ]),
+          const SizedBox(height: 24),
+          SizedBox(width: double.infinity, height: 52,
+            child: ElevatedButton(
+              onPressed: () => Navigator.pop(ctx),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _isLight ? const Color(0xFF000000) : const Color(0xFFFFFFFF),
+                foregroundColor: _isLight ? const Color(0xFFFFFFFF) : const Color(0xFF000000),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
+              child: Text(T('done'), style: const TextStyle(fontWeight: FontWeight.w600)),
+            )),
+        ]),
       ),
     );
   }
