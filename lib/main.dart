@@ -768,11 +768,10 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
           fontSize: 13, letterSpacing: 1.2, fontWeight: FontWeight.w500)),
         const SizedBox(height: 12),
         ClipRect(
-          child: AnimatedAlign(
-            alignment: Alignment.topCenter,
-            heightFactor: 1.0,
-            duration: const Duration(milliseconds: 400),
+          child: AnimatedSize(
+            duration: const Duration(milliseconds: 700),
             curve: Curves.easeInOutCubic,
+            alignment: Alignment.topCenter,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -928,8 +927,8 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
     return PageRouteBuilder(
       opaque: true,
       pageBuilder: (context, animation, secondaryAnimation) => builder(context),
-      transitionDuration: const Duration(milliseconds: 1300),
-      reverseTransitionDuration: const Duration(milliseconds: 1100),
+      transitionDuration: const Duration(milliseconds: 700),
+      reverseTransitionDuration: const Duration(milliseconds: 500),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         final curved = CurvedAnimation(
           parent: animation,
@@ -1150,130 +1149,149 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
   }
 
   void _openSettings() {
+    // Local copies — only applied on Done
+    String localTheme = _theme;
+    String localUnit = _unit;
+    String localWindUnit = _windUnit;
+    String localTimeFmt = _timeFmt;
+    String localLang = _lang;
+    String localTextSize = _textSize;
+
     _smoothBottomSheet(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: _isLight ? const Color(0xFFFFFFFF) : const Color(0xFF1A1A1A),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
-      builder: (ctx) => StatefulBuilder(builder: (ctx, setSheet) => SafeArea(
-        child: Padding(
+      builder: (ctx) => StatefulBuilder(builder: (ctx, setSheet) => Container(
+        decoration: BoxDecoration(color: _cardBg(),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(28))),
+        child: SafeArea(child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
-          child: SingleChildScrollView(child: Column(
-            mainAxisSize: MainAxisSize.min, children: [
-              Text(T('settings'), style: TextStyle(color: _txt(), fontSize: 20, fontWeight: FontWeight.w600)),
-              const SizedBox(height: 20),
-              _settingDrop(T('theme'), _theme, ['auto','dark','light'],
-                [T('auto'), T('dark'), T('light')],
-                (v) { setState(() { _theme = v!; }); setSheet(() {}); _saveSettings(); }),
-              _settingDrop(T('temp_unit'), _unit, ['C','F'],
-                ['Celsius (°C)','Fahrenheit (°F)'],
-                (v) { setState(() { _unit = v!; }); setSheet(() {}); _saveSettings(); }),
-              _settingDrop(T('wind_unit'), _windUnit, ['kmh','mph'], ['km/h','mph'],
-                (v) { setState(() { _windUnit = v!; }); setSheet(() {}); _saveSettings(); }),
-              _settingDrop(T('time_format'), _timeFmt, ['12h','24h'], ['12-hour','24-hour'],
-                (v) { setState(() { _timeFmt = v!; }); setSheet(() {}); _saveSettings(); }),
-              _settingDrop(T('language'), _lang, ['en','ur','sd','es'],
-                ['English','اردو','سنڌي','Español'],
-                (v) { setState(() { _lang = v!; }); setSheet(() {}); _saveSettings(); }),
-              _settingDrop(T('text_size'), _textSize, ['small','medium','large','xlarge'],
-                [T('text_small'), T('text_medium'), T('text_large'), T('text_xlarge')],
-                (v) { setState(() { _textSize = v!; }); setSheet(() {}); _saveSettings(); }),
-              const SizedBox(height: 10),
-              SizedBox(width: double.infinity, height: 50,
-                child: ElevatedButton(
-                  onPressed: () => Navigator.pop(ctx),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _theme == 'light' ? const Color(0xFF1A1A1A) : Colors.white,
-                    foregroundColor: _theme == 'light' ? Colors.white : const Color(0xFF1A1A1A),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
-                  child: Text(T('done'), style: const TextStyle(
-                    fontWeight: FontWeight.w600, fontSize: 16)),
-                )),
-            ],
-          )),
-        ),
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            Text(T('settings'), style: TextStyle(color: _txt(), fontSize: 20, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 20),
+            _settingRow(T('theme'), localTheme, ['auto','dark','light'],
+              [T('auto'), T('dark'), T('light')],
+              (v) => setSheet(() => localTheme = v)),
+            _settingRow(T('temp_unit'), localUnit, ['C','F'],
+              ['Celsius (°C)','Fahrenheit (°F)'],
+              (v) => setSheet(() => localUnit = v)),
+            _settingRow(T('wind_unit'), localWindUnit, ['kmh','mph'], ['km/h','mph'],
+              (v) => setSheet(() => localWindUnit = v)),
+            _settingRow(T('time_format'), localTimeFmt, ['12h','24h'], ['12-hour','24-hour'],
+              (v) => setSheet(() => localTimeFmt = v)),
+            _settingRow(T('language'), localLang, ['en','ur','sd','es'],
+              ['English','اردو','سنڌي','Español'],
+              (v) => setSheet(() => localLang = v)),
+            _settingRow(T('text_size'), localTextSize, ['small','medium','large','xlarge'],
+              [T('text_small'), T('text_medium'), T('text_large'), T('text_xlarge')],
+              (v) => setSheet(() => localTextSize = v)),
+            const SizedBox(height: 10),
+            SizedBox(width: double.infinity, height: 54,
+              child: ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    _theme = localTheme;
+                    _unit = localUnit;
+                    _windUnit = localWindUnit;
+                    _timeFmt = localTimeFmt;
+                    _lang = localLang;
+                    _textSize = localTextSize;
+                  });
+                  _saveSettings();
+                  Navigator.pop(ctx);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _isLight ? const Color(0xFF000000) : const Color(0xFFFFFFFF),
+                  foregroundColor: _isLight ? const Color(0xFFFFFFFF) : const Color(0xFF000000),
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
+                child: Text(T('done'), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+              )),
+          ]),
+        )),
       )),
     );
   }
 
-  Widget _settingDrop(String label, String val, List<String> vals, List<String> disp,
-      Function(String?) onChange) => Padding(
-    padding: const EdgeInsets.only(bottom: 18),
-    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Padding(
-        padding: const EdgeInsets.only(left: 4, bottom: 8),
-        child: Text(label,
-          style: TextStyle(
-            color: _isLight ? const Color(0xFF333333) : const Color(0xFFCCCCCC),
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 0.3,
-          )),
-      ),
-      Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-        decoration: BoxDecoration(
-          color: _isLight ? const Color(0xFFF8F8F8) : const Color(0xFF252525),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: _isLight ? const Color(0xFFBBBBBB) : const Color(0xFF444444),
-            width: 1.5,
-          ),
-          boxShadow: _isLight
-            ? [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2))]
-            : null,
+  Widget _settingRow(String label, String val, List<String> vals, List<String> disp,
+      Function(String) onChange) {
+    final idx = vals.indexOf(val);
+    final displayVal = idx >= 0 && idx < disp.length ? disp[idx] : val;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 18),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 8),
+          child: Text(label, style: TextStyle(
+            color: _muted(), fontSize: 13, fontWeight: FontWeight.w600, letterSpacing: 0.3)),
         ),
-        child: DropdownButtonHideUnderline(
-          child: DropdownButton<String>(
-            value: val,
-            dropdownColor: _isLight ? const Color(0xFFFFFFFF) : const Color(0xFF1A1A1A),
-            isExpanded: true,
-            icon: Icon(Icons.keyboard_arrow_down_rounded,
-              color: _isLight ? const Color(0xFF333333) : const Color(0xFFFFFFFF),
-              size: 22),
-            style: TextStyle(
-              color: _isLight ? const Color(0xFF000000) : const Color(0xFFFFFFFF),
-              fontSize: 15,
-              fontWeight: FontWeight.w500,
-            ),
-            items: vals.asMap().entries.map((e) => DropdownMenuItem(
-              value: e.value,
-              child: Text(disp[e.key],
-                style: TextStyle(
-                  color: _isLight ? const Color(0xFF000000) : const Color(0xFFFFFFFF),
+        GestureDetector(
+          onTap: () async {
+            final result = await _smoothBottomSheet<String>(
+              context: context,
+              builder: (ctx) => Container(
+                decoration: BoxDecoration(
+                  color: _cardBg(),
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+                ),
+                child: SafeArea(child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const SizedBox(height: 12),
+                    Container(
+                      width: 40, height: 4,
+                      decoration: BoxDecoration(
+                        color: _muted().withOpacity(0.3),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(label, style: TextStyle(color: _txt(), fontSize: 18, fontWeight: FontWeight.w600)),
+                    const SizedBox(height: 12),
+                    ...vals.asMap().entries.map((e) {
+                      final isSelected = e.value == val;
+                      return GestureDetector(
+                        onTap: () => Navigator.pop(ctx, e.value),
+                        child: Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                          decoration: BoxDecoration(
+                            color: isSelected ? _txt().withOpacity(0.08) : Colors.transparent,
+                            borderRadius: BorderRadius.circular(14),
+                            border: isSelected ? Border.all(color: _cardBorder(), width: 1.5) : null,
+                          ),
+                          child: Row(children: [
+                            Expanded(child: Text(disp[e.key], style: TextStyle(
+                              color: _txt(), fontSize: 16,
+                              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400))),
+                            if (isSelected) Icon(Icons.check, color: _txt(), size: 20),
+                          ]),
+                        ),
+                      );
+                    }),
+                    const SizedBox(height: 20),
+                  ],
                 )),
-            )).toList(),
-            onChanged: onChange,
+              ),
+            );
+            if (result != null) onChange(result);
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+            decoration: BoxDecoration(
+              color: _itemBg(),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: _cardBorder(), width: 1.2),
+            ),
+            child: Row(children: [
+              Expanded(child: Text(displayVal, style: TextStyle(
+                color: _txt(), fontSize: 15, fontWeight: FontWeight.w500))),
+              Icon(Icons.keyboard_arrow_down_rounded, color: _txt(), size: 22),
+            ]),
           ),
         ),
-      ),
-    ]),
-  );
-}
+      ]),
+    );
+  }
 
-
-// ============ FULL-SCREEN DETAIL PAGE WIDGET ============
-class _DetailPage extends StatefulWidget {
-  final Color bg1, bg2, txt;
-  final Function(String) getContent;  // returns content for a type
-  final Function(String) getIconKey;
-  final String initialType;
-  final String aboutLabel, contextLabel, exploreLabel, metricsLabel, lifestyleLabel;
-  final List<Map<String, String>> metricsList, lifestyleList;
-
-  const _DetailPage({
-    required this.bg1, required this.bg2, required this.txt,
-    required this.getContent,
-    required this.getIconKey,
-    required this.initialType,
-    required this.aboutLabel, required this.contextLabel, required this.exploreLabel,
-    required this.metricsLabel, required this.lifestyleLabel,
-    required this.metricsList, required this.lifestyleList,
-  });
-
-  @override
-  State<_DetailPage> createState() => _DetailPageState();
 }
 
 class _DetailPageState extends State<_DetailPage> {
@@ -1369,14 +1387,10 @@ class _DetailPageState extends State<_DetailPage> {
                   children: [
                     GestureDetector(
                       onTap: () => Navigator.pop(context),
-                      child: Container(
-                        width: 46, height: 46,
-                        decoration: BoxDecoration(
-                          color: widget.txt,
-                          shape: BoxShape.circle,
-                        ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8),
                         child: Icon(Icons.arrow_back,
-                          color: widget.bg1, size: 22),
+                          color: widget.txt, size: 26),
                       ),
                     ),
                     const SizedBox(width: 14),
