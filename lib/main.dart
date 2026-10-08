@@ -157,7 +157,8 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
   double _temp = 0, _feels = 0, _wind = 0, _precip = 0, _uv = 0;
   int _humidity = 0, _wcode = 0, _precipChance = 0, _aqi = 0;
   String _sunrise = '', _sunset = '';
-  bool _loading = true, _allDays = false;
+  bool _loading = true, _allDays = false, _refreshing = false;
+  double _mainOpacity = 1.0;
   List<dynamic> _hourly = [], _daily = [];
 
   late AnimationController _animCtrl;
@@ -203,6 +204,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
 
   Future<void> _fetch(String city) async {
     setState(() => _loading = true);
+    _refreshing = false;
     try {
       final geo = await http.get(Uri.parse(
         'https://geocoding-api.open-meteo.com/v1/search?name=${Uri.encodeComponent(city)}&count=10&language=en&format=json')).timeout(const Duration(seconds: 10));
@@ -270,6 +272,11 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
   }
 
   String _desc(int c) {
+    // Use translated weather code if available
+    final key = 'w$c';
+    final translated = TR[_lang]?[key];
+    if (translated != null) return translated;
+    // Fallback to English
     const m = {0:'Clear sky',1:'Mainly clear',2:'Partly cloudy',3:'Overcast',45:'Fog',48:'Rime fog',
       51:'Light drizzle',53:'Drizzle',55:'Dense drizzle',61:'Slight rain',63:'Rain',65:'Heavy rain',
       71:'Slight snow',73:'Snow',75:'Heavy snow',95:'Thunderstorm',96:'Storm with hail',99:'Heavy storm'};
@@ -369,11 +376,17 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
         child: SafeArea(
           child: RefreshIndicator(
             onRefresh: () => _fetch(_city),
-            color: Colors.white,
+            color: _txt(),
+            backgroundColor: _cardBg(),
+            displacement: 100,
             child: SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
               padding: const EdgeInsets.all(16),
-              child: Column(children: [
+              child: AnimatedOpacity(
+                opacity: _mainOpacity,
+                duration: const Duration(milliseconds: 400),
+                curve: Curves.easeInOutCubic,
+                child: Column(children: [
                 _searchBar(),
                 const SizedBox(height: 12),
                 _mainCard(),
@@ -387,6 +400,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
                 _lifeCard(),
                 const SizedBox(height: 80),
               ]),
+              ),
             ),
           ),
         ),
@@ -542,17 +556,18 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
         ),
         const SizedBox(height: 8),
         SizedBox(
-          width: double.infinity, height: 52,
+          width: double.infinity, height: 54,
           child: ElevatedButton(
             onPressed: () => setState(() => _allDays = !_allDays),
             style: ElevatedButton.styleFrom(
               backgroundColor: _isLight ? const Color(0xFF000000) : const Color(0xFFFFFFFF),
               foregroundColor: _isLight ? const Color(0xFFFFFFFF) : const Color(0xFF000000),
               elevation: 0,
+              minimumSize: const Size(double.infinity, 54),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             ),
             child: Text(_allDays ? 'Less' : 'More',
-              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, letterSpacing: 0.3)),
           ),
         ),
       ],
@@ -774,7 +789,14 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
                 (v) { setState(() { _timeFmt = v!; }); setSheet(() {}); _saveSettings(); }),
               _settingDrop(T('language'), _lang, ['en','ur','sd','es'],
                 ['English','اردو','سنڌي','Español'],
-                (v) { setState(() { _lang = v!; }); setSheet(() {}); _saveSettings(); }),
+                (v) async {
+              if (v == _lang) return;
+              setState(() => _mainOpacity = 0.0);
+              await Future.delayed(const Duration(milliseconds: 350));
+              setState(() { _lang = v!; _mainOpacity = 1.0; });
+              setSheet(() {});
+              _saveSettings();
+            }),
               const SizedBox(height: 10),
               SizedBox(width: double.infinity, height: 50,
                 child: ElevatedButton(
