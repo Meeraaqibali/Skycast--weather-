@@ -38,6 +38,9 @@ jobs:
       - name: Restore our custom main.dart
         run: cp /tmp/custom_main.dart lib/main.dart
 
+      - name: Patch native splash styles
+        run: python3 scripts/patch_styles.py
+
       - name: Delete auto-generated test
         run: |
           rm -f test/widget_test.dart

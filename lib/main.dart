@@ -708,38 +708,40 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
         Text(T('daily').toUpperCase(), style: TextStyle(color: _muted(),
           fontSize: 13, letterSpacing: 1.2, fontWeight: FontWeight.w500)),
         const SizedBox(height: 12),
-        AnimatedSize(
-          duration: const Duration(milliseconds: 650),
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 550),
           curve: Curves.easeInOutCubic,
-          alignment: Alignment.topCenter,
+          height: (_allDays ? _daily.length : 3) * 76.0,
           clipBehavior: Clip.hardEdge,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              for (var i = 0; i < days.length; i++)
-                Padding(
-                  padding: EdgeInsets.only(bottom: i == days.length - 1 ? 0 : 8),
-                  child: GestureDetector(
-                    onTap: () => _showDayDetail(days[i], i == 0),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      decoration: BoxDecoration(color: _itemBg(),
-                        borderRadius: BorderRadius.circular(16), border: Border.all(color: _cardBorder())),
-                      child: Row(children: [
-                        SizedBox(width: 60, child: Text(
-                          i == 0 ? T('today') : _day(days[i]['date']),
-                          style: TextStyle(color: _txt(), fontSize: 14, fontWeight: FontWeight.w500))),
-                        Text(_icon(days[i]['code']), style: const TextStyle(fontSize: 20)),
-                        const Spacer(),
-                        Text('${_fmtT((days[i]['max'] as num).toDouble())} / ${_fmtT((days[i]['min'] as num).toDouble())}',
-                          style: TextStyle(color: _muted(), fontSize: 14)),
-                        const SizedBox(width: 6),
-                        Icon(Icons.chevron_right, size: 16, color: _faint()),
-                      ]),
-                    ),
+          decoration: const BoxDecoration(),
+          child: ListView.builder(
+            physics: const NeverScrollableScrollPhysics(),
+            padding: EdgeInsets.zero,
+            itemCount: _daily.length,
+            itemBuilder: (c, i) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: GestureDetector(
+                  onTap: () => _showDayDetail(_daily[i], i == 0),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(color: _itemBg(),
+                      borderRadius: BorderRadius.circular(16), border: Border.all(color: _cardBorder())),
+                    child: Row(children: [
+                      SizedBox(width: 60, child: Text(
+                        i == 0 ? T('today') : _day(_daily[i]['date']),
+                        style: TextStyle(color: _txt(), fontSize: 14, fontWeight: FontWeight.w500))),
+                      Text(_icon(_daily[i]['code']), style: const TextStyle(fontSize: 20)),
+                      const Spacer(),
+                      Text('${_fmtT((_daily[i]['max'] as num).toDouble())} / ${_fmtT((_daily[i]['min'] as num).toDouble())}',
+                        style: TextStyle(color: _muted(), fontSize: 14)),
+                      const SizedBox(width: 6),
+                      Icon(Icons.chevron_right, size: 16, color: _faint()),
+                    ]),
                   ),
                 ),
-            ],
+              );
+            },
           ),
         ),
         const SizedBox(height: 12),
@@ -1404,46 +1406,55 @@ class _DetailPageState extends State<DetailPage> {
             ]),
             const SizedBox(height: 32),
 
-            // Big value
+            // Big value — dynamic size based on text length
             Text(_content['value'] ?? '',
-              style: TextStyle(color: widget.txt, fontSize: 64,
-                fontWeight: FontWeight.w200, height: 1, letterSpacing: -1.5)),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: widget.txt,
+                fontSize: (_content['value'] ?? '').length > 12 ? 32 : 52,
+                fontWeight: FontWeight.w200,
+                height: 1.15,
+                letterSpacing: -0.8,
+              )),
             const SizedBox(height: 8),
             Text(_content['label'] ?? '',
               style: TextStyle(color: widget.muted, fontSize: 15, fontWeight: FontWeight.w500)),
 
             const SizedBox(height: 36),
 
-            // ABOUT section — premium card
+            // ABOUT section — quote-block (visually distinct from buttons)
             _sectionHeader(widget.aboutLabel),
-            const SizedBox(height: 12),
+            const SizedBox(height: 14),
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(18),
+              padding: const EdgeInsets.only(left: 16),
               decoration: BoxDecoration(
-                color: widget.itemBg,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: widget.cardBorder),
+                border: Border(
+                  left: BorderSide(color: widget.txt.withOpacity(0.3), width: 3),
+                ),
               ),
               child: Text(_content['desc'] ?? '',
-                style: TextStyle(color: widget.txt, fontSize: 14.5, height: 1.6, letterSpacing: 0.1)),
+                style: TextStyle(color: widget.muted, fontSize: 15,
+                  height: 1.7, letterSpacing: 0.1, fontStyle: FontStyle.italic)),
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 28),
 
-            // CONTEXT section
+            // CONTEXT section — quote-block
             _sectionHeader(widget.contextLabel),
-            const SizedBox(height: 12),
+            const SizedBox(height: 14),
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(18),
+              padding: const EdgeInsets.only(left: 16),
               decoration: BoxDecoration(
-                color: widget.itemBg,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: widget.cardBorder),
+                border: Border(
+                  left: BorderSide(color: widget.txt.withOpacity(0.3), width: 3),
+                ),
               ),
               child: Text(_content['ctx'] ?? '',
-                style: TextStyle(color: widget.txt, fontSize: 14.5, height: 1.6, letterSpacing: 0.1)),
+                style: TextStyle(color: widget.muted, fontSize: 15,
+                  height: 1.7, letterSpacing: 0.1, fontStyle: FontStyle.italic)),
             ),
 
             const SizedBox(height: 36),
