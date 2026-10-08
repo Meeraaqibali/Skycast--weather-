@@ -637,8 +637,8 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
       isScrollControlled: isScrollControlled,
       transitionAnimationController: AnimationController(
         vsync: this,
-        duration: const Duration(milliseconds: 500),
-        reverseDuration: const Duration(milliseconds: 350),
+        duration: const Duration(milliseconds: 1000),
+        reverseDuration: const Duration(milliseconds: 700),
       ),
       builder: builder,
     );
@@ -788,8 +788,8 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
     return PageRouteBuilder(
       opaque: true,
       pageBuilder: (context, animation, secondaryAnimation) => builder(context),
-      transitionDuration: const Duration(milliseconds: 900),
-      reverseTransitionDuration: const Duration(milliseconds: 700),
+      transitionDuration: const Duration(milliseconds: 1300),
+      reverseTransitionDuration: const Duration(milliseconds: 1000),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         final curved = CurvedAnimation(
           parent: animation,
@@ -1016,6 +1016,7 @@ class _DetailPageState extends State<_DetailPage> {
   late String _currentType;
   late Map<String, String> _content;
   final ScrollController _scrollCtrl = ScrollController();
+  double _contentOpacity = 1.0;
 
   bool get _isLight => widget.bg1 == const Color(0xFFFFFFFF);
   Color _cardBorder() => _isLight ? const Color(0xFFDDDDDD) : const Color(0xFF333333);
@@ -1046,18 +1047,29 @@ class _DetailPageState extends State<_DetailPage> {
     };
   }
 
-  void _onExploreTap(String key) {
-    setState(() {
-      _currentType = key;
-      _content = _parseContent(widget.getContent(key));
-    });
-    // Smooth scroll to top
-    if (_scrollCtrl.hasClients) {
-      _scrollCtrl.animateTo(
+  void _onExploreTap(String key) async {
+    if (key == _currentType) return;
+
+    // Step 1: Scroll to top first (if scrolled down)
+    if (_scrollCtrl.hasClients && _scrollCtrl.offset > 0) {
+      await _scrollCtrl.animateTo(
         0,
-        duration: const Duration(milliseconds: 800),
+        duration: const Duration(milliseconds: 700),
         curve: Curves.easeInOutCubic,
       );
+    }
+
+    // Step 2: Fade out old content
+    if (mounted) setState(() => _contentOpacity = 0.0);
+    await Future.delayed(const Duration(milliseconds: 600));
+
+    // Step 3: Swap content + fade in
+    if (mounted) {
+      setState(() {
+        _currentType = key;
+        _content = _parseContent(widget.getContent(key));
+        _contentOpacity = 1.0;
+      });
     }
   }
 
@@ -1104,6 +1116,13 @@ class _DetailPageState extends State<_DetailPage> {
                 ),
                 const SizedBox(height: 28),
 
+                AnimatedOpacity(
+                  opacity: _contentOpacity,
+                  duration: const Duration(milliseconds: 600),
+                  curve: Curves.easeOutCubic,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                 // Main value
                 Text(_content['value'] ?? '',
                   style: TextStyle(color: widget.txt, fontSize: 60,
@@ -1128,6 +1147,9 @@ class _DetailPageState extends State<_DetailPage> {
                 Text(_content['ctx'] ?? '', style: TextStyle(color: widget.txt.withOpacity(0.8),
                   fontSize: 14, height: 1.6)),
                 const SizedBox(height: 32),
+                    ],
+                  ),
+                ),
 
                 Divider(color: widget.txt.withOpacity(0.15)),
                 const SizedBox(height: 20),
@@ -1212,7 +1234,7 @@ class _TapCardState extends State<_TapCard> {
       onTapCancel: () => setState(() => _pressed = false),
       child: AnimatedScale(
         scale: _pressed ? 0.97 : 1.0,
-        duration: const Duration(milliseconds: 800),
+        duration: const Duration(milliseconds: 1000),
         curve: Curves.easeInOutCubic,
         child: widget.child,
       ),
