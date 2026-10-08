@@ -193,19 +193,14 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
 
     Future.delayed(const Duration(milliseconds: 2200), () {
       if (!mounted) return;
+      // Instant switch — no fade, no blank
       Navigator.pushReplacement(
         context,
         PageRouteBuilder(
           opaque: true,
           pageBuilder: (_, __, ___) => const WeatherHome(),
-          transitionDuration: const Duration(milliseconds: 700),
-          transitionsBuilder: (_, animation, __, child) {
-            final curved = CurvedAnimation(
-              parent: animation,
-              curve: Curves.easeInOutCubic,
-            );
-            return FadeTransition(opacity: curved, child: child);
-          },
+          transitionDuration: Duration.zero,
+          reverseTransitionDuration: Duration.zero,
         ),
       );
     });
@@ -321,7 +316,6 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
   int _humidity = 0, _wcode = 0, _precipChance = 0, _aqi = 0;
   String _sunrise = '', _sunset = '';
   bool _loading = true, _allDays = false;
-  double _mainOpacity = 1.0;
   List<dynamic> _hourly = [], _daily = [];
 
   late AnimationController _animCtrl;
@@ -636,11 +630,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
             child: SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
               padding: const EdgeInsets.all(16),
-              child: AnimatedOpacity(
-                opacity: _mainOpacity,
-                duration: const Duration(milliseconds: 400),
-                curve: Curves.easeInOutCubic,
-                child: Column(children: [
+              child: Column(children: [
                 _searchBar(),
                 const SizedBox(height: 12),
                 _mainCard(),
@@ -652,9 +642,8 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
                 _extrasCard(),
                 const SizedBox(height: 12),
                 _lifeCard(),
-                const SizedBox(height: 80),
+                const SizedBox(height: 16),
               ]),
-              ),
             ),
           ),
         ),
@@ -814,17 +803,18 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
         const SizedBox(height: 8),
         SizedBox(
           width: double.infinity, height: 54,
-          child: ElevatedButton(
+          child: OutlinedButton(
             onPressed: () => setState(() => _allDays = !_allDays),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: _isLight ? const Color(0xFF000000) : const Color(0xFFFFFFFF),
-              foregroundColor: _isLight ? const Color(0xFFFFFFFF) : const Color(0xFF000000),
+            style: OutlinedButton.styleFrom(
+              backgroundColor: Colors.transparent,
+              foregroundColor: _txt(),
+              side: BorderSide(color: _cardBorder(), width: 1.5),
               elevation: 0,
               minimumSize: const Size(double.infinity, 54),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             ),
             child: Text(_allDays ? 'Less' : 'More',
-              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, letterSpacing: 0.3)),
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, letterSpacing: 0.3, color: _txt())),
           ),
         ),
       ],
@@ -887,14 +877,14 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
       _life('👕', _temp > 30 ? T('light_cloth') : _temp > 20 ? T('ok_cloth') : T('warm_cloth'),
         () => _openDetail('clothing')),
       _life('💊', isHighCold ? T('high_cold') : T('low_cold'), () => _openDetail('cold')),
-      _life('🚗', isBadDrv ? T('bad_drive') : T('ok_drive'), () => _openDetail('drive')),
+      _life('🚗', isBadDrv ? T('bad_drive') : T('ok_drive'), () => _openDetail('drive'), isLast: true),
     ]));
   }
 
-  Widget _life(String emoji, String text, VoidCallback onTap) => _TapCard(
+  Widget _life(String emoji, String text, VoidCallback onTap, {bool isLast = false}) => _TapCard(
     onTap: onTap,
     child: Container(
-      margin: const EdgeInsets.only(bottom: 8), padding: const EdgeInsets.all(14),
+      margin: EdgeInsets.only(bottom: isLast ? 0 : 8), padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(color: _isLight ? const Color(0xFFF0F4F8) : Colors.white.withOpacity(0.08),
         borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.white.withOpacity(0.15))),
       child: Row(children: [
@@ -938,8 +928,8 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
     return PageRouteBuilder(
       opaque: true,
       pageBuilder: (context, animation, secondaryAnimation) => builder(context),
-      transitionDuration: const Duration(milliseconds: 900),
-      reverseTransitionDuration: const Duration(milliseconds: 700),
+      transitionDuration: const Duration(milliseconds: 1300),
+      reverseTransitionDuration: const Duration(milliseconds: 1100),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         final curved = CurvedAnimation(
           parent: animation,
@@ -1185,24 +1175,10 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
                 (v) { setState(() { _timeFmt = v!; }); setSheet(() {}); _saveSettings(); }),
               _settingDrop(T('language'), _lang, ['en','ur','sd','es'],
                 ['English','اردو','سنڌي','Español'],
-                (v) async {
-              if (v == _lang) return;
-              setState(() => _mainOpacity = 0.0);
-              await Future.delayed(const Duration(milliseconds: 350));
-              setState(() { _lang = v!; _mainOpacity = 1.0; });
-              setSheet(() {});
-              _saveSettings();
-            }),
+                (v) { setState(() { _lang = v!; }); setSheet(() {}); _saveSettings(); }),
               _settingDrop(T('text_size'), _textSize, ['small','medium','large','xlarge'],
                 [T('text_small'), T('text_medium'), T('text_large'), T('text_xlarge')],
-                (v) async {
-              if (v == _textSize) return;
-              setState(() => _mainOpacity = 0.0);
-              await Future.delayed(const Duration(milliseconds: 250));
-              setState(() { _textSize = v!; _mainOpacity = 1.0; });
-              setSheet(() {});
-              _saveSettings();
-            }),
+                (v) { setState(() { _textSize = v!; }); setSheet(() {}); _saveSettings(); }),
               const SizedBox(height: 10),
               SizedBox(width: double.infinity, height: 50,
                 child: ElevatedButton(
@@ -1304,7 +1280,6 @@ class _DetailPageState extends State<_DetailPage> {
   late String _currentType;
   late Map<String, String> _content;
   final ScrollController _scrollCtrl = ScrollController();
-  double _contentOpacity = 1.0;
   bool _isTransitioning = false;
 
   bool get _isLight => widget.bg1 == const Color(0xFFFFFFFF);
@@ -1352,7 +1327,6 @@ class _DetailPageState extends State<_DetailPage> {
     }
 
     // Step 2: Fade out old content
-    if (mounted) setState(() => _contentOpacity = 0.0);
     await Future.delayed(const Duration(milliseconds: 400));
 
     // Step 3: Swap content
@@ -1365,7 +1339,6 @@ class _DetailPageState extends State<_DetailPage> {
     
     // Step 4: Fade in new content
     await Future.delayed(const Duration(milliseconds: 50));
-    if (mounted) setState(() => _contentOpacity = 1.0);
     
     // Step 5: Release lock after full animation
     await Future.delayed(const Duration(milliseconds: 400));
@@ -1415,11 +1388,7 @@ class _DetailPageState extends State<_DetailPage> {
                 ),
                 const SizedBox(height: 28),
 
-                AnimatedOpacity(
-                  opacity: _contentOpacity,
-                  duration: const Duration(milliseconds: 400),
-                  curve: Curves.easeOutCubic,
-                  child: Column(
+                Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                 // Main value
@@ -1448,7 +1417,6 @@ class _DetailPageState extends State<_DetailPage> {
                 const SizedBox(height: 32),
                     ],
                   ),
-                ),
 
                 Divider(color: widget.txt.withOpacity(0.15)),
                 const SizedBox(height: 20),
