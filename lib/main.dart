@@ -1034,6 +1034,7 @@ class _DetailPageState extends State<_DetailPage> {
   late Map<String, String> _content;
   final ScrollController _scrollCtrl = ScrollController();
   double _contentOpacity = 1.0;
+  bool _isTransitioning = false;
 
   bool get _isLight => widget.bg1 == const Color(0xFFFFFFFF);
   Color _cardBorder() => _isLight ? const Color(0xFFDDDDDD) : const Color(0xFF333333);
@@ -1066,28 +1067,38 @@ class _DetailPageState extends State<_DetailPage> {
 
   void _onExploreTap(String key) async {
     if (key == _currentType) return;
+    if (_isTransitioning) return;  // Prevent fast taps
+    
+    _isTransitioning = true;
 
     // Step 1: Scroll to top first (if scrolled down)
     if (_scrollCtrl.hasClients && _scrollCtrl.offset > 0) {
       await _scrollCtrl.animateTo(
         0,
-        duration: const Duration(milliseconds: 700),
+        duration: const Duration(milliseconds: 500),
         curve: Curves.easeInOutCubic,
       );
     }
 
     // Step 2: Fade out old content
     if (mounted) setState(() => _contentOpacity = 0.0);
-    await Future.delayed(const Duration(milliseconds: 600));
+    await Future.delayed(const Duration(milliseconds: 400));
 
-    // Step 3: Swap content + fade in
+    // Step 3: Swap content
     if (mounted) {
       setState(() {
         _currentType = key;
         _content = _parseContent(widget.getContent(key));
-        _contentOpacity = 1.0;
       });
     }
+    
+    // Step 4: Fade in new content
+    await Future.delayed(const Duration(milliseconds: 50));
+    if (mounted) setState(() => _contentOpacity = 1.0);
+    
+    // Step 5: Release lock after full animation
+    await Future.delayed(const Duration(milliseconds: 400));
+    _isTransitioning = false;
   }
 
   @override
@@ -1135,7 +1146,7 @@ class _DetailPageState extends State<_DetailPage> {
 
                 AnimatedOpacity(
                   opacity: _contentOpacity,
-                  duration: const Duration(milliseconds: 600),
+                  duration: const Duration(milliseconds: 400),
                   curve: Curves.easeOutCubic,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
