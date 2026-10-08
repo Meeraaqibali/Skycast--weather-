@@ -293,14 +293,17 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
     final h = DateTime.now().hour;
     return h >= 6 && h < 18;
   }
-  Color _bg1() => _theme == 'light' ? const Color(0xFFE0EAFC) : const Color(0xFF1E3C4F);
-  Color _bg2() => _theme == 'light' ? const Color(0xFFCFDEF3) : const Color(0xFF3A6B8A);
-  Color _txt() => _theme == 'light' ? const Color(0xFF1A1A1A) : Colors.white;
-  Color _cardBg() => _theme == 'light' ? Colors.white.withOpacity(0.65) : Colors.white.withOpacity(0.13);
-  Color _cardBorder() => _isLight ? const Color(0xFFB0C0D0) : Colors.white.withOpacity(0.2);
-  Color _muted() => _isLight ? const Color(0xFF2A2A2A) : Colors.white.withOpacity(0.75);
-  Color _faint() => _isLight ? const Color(0xFF444444) : Colors.white.withOpacity(0.55);
-  Color _divider() => _isLight ? const Color(0xFFB0C0D0) : Colors.white.withOpacity(0.15);
+
+  // ==== BLACK & WHITE THEME ====
+  Color _bg1() => _isLight ? const Color(0xFFFFFFFF) : const Color(0xFF000000);
+  Color _bg2() => _isLight ? const Color(0xFFFFFFFF) : const Color(0xFF000000);
+  Color _txt() => _isLight ? const Color(0xFF000000) : const Color(0xFFFFFFFF);
+  Color _muted() => _isLight ? const Color(0xFF555555) : const Color(0xFFAAAAAA);
+  Color _faint() => _isLight ? const Color(0xFF888888) : const Color(0xFF777777);
+  Color _cardBg() => _isLight ? const Color(0xFFFFFFFF) : const Color(0xFF1A1A1A);
+  Color _cardBorder() => _isLight ? const Color(0xFFDDDDDD) : const Color(0xFF333333);
+  Color _divider() => _isLight ? const Color(0xFFDDDDDD) : const Color(0xFF333333);
+  Color _itemBg() => _isLight ? const Color(0xFFF5F5F5) : const Color(0xFF252525);
 
   String _aqiCategory() {
     if (_aqi <= 20) return T('good');
@@ -322,7 +325,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
       body: Container(
         decoration: BoxDecoration(gradient: LinearGradient(
           begin: Alignment.topLeft, end: Alignment.bottomRight,
-          colors: [_bg1(), const Color(0xFF2C5364), _bg2()])),
+          colors: [_bg1(), _bg2()])),
         child: SafeArea(
           child: RefreshIndicator(
             onRefresh: () => _fetch(_city),
@@ -349,7 +352,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: _isLight ? const Color(0xFF1E3C4F) : const Color(0xFF1A2A34),
+        backgroundColor: _isLight ? const Color(0xFF000000) : const Color(0xFF333333),
         onPressed: _openSettings,
         child: Icon(Icons.settings, color: Colors.white),
       ),
@@ -381,7 +384,8 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
     ElevatedButton(
       onPressed: () { final v = _ctrl.text.trim(); if (v.isNotEmpty) _fetch(v); },
       style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.white.withOpacity(0.13), foregroundColor: _txt(),
+        backgroundColor: _isLight ? const Color(0xFF000000) : const Color(0xFF333333),
+        foregroundColor: Colors.white,
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         elevation: 0),
@@ -480,7 +484,8 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
         child: ElevatedButton(
           onPressed: () => setState(() => _allDays = !_allDays),
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.white.withOpacity(0.13), foregroundColor: _txt(),
+            backgroundColor: _isLight ? const Color(0xFF000000) : const Color(0xFF333333),
+        foregroundColor: Colors.white,
             elevation: 0, shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
               side: BorderSide(color: Colors.white.withOpacity(0.2))),
@@ -567,12 +572,32 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
     ),
   );
 
+  Future<T?> _smoothBottomSheet<T>({
+    required BuildContext context,
+    required WidgetBuilder builder,
+    Color? backgroundColor,
+    ShapeBorder? shape,
+  }) {
+    return showModalBottomSheet<T>(
+      context: context,
+      backgroundColor: backgroundColor,
+      shape: shape,
+      isScrollControlled: true,
+      transitionAnimationController: AnimationController(
+        vsync: this,
+        duration: const Duration(milliseconds: 500),
+        reverseDuration: const Duration(milliseconds: 350),
+      ),
+      builder: builder,
+    );
+  }
+
   void _showHourDetail(Map<String, dynamic> h) {
     final code = h['code'] as int;
     final temp = (h['temp'] as num).toDouble();
-    showModalBottomSheet(
+    _smoothBottomSheet(
       context: context,
-      backgroundColor: _isLight ? Colors.white : const Color(0xFF1E3C4F),
+      backgroundColor: _isLight ? const Color(0xFFFFFFFF) : const Color(0xFF1A1A1A),
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
       builder: (ctx) => Padding(
         padding: const EdgeInsets.all(24),
@@ -592,7 +617,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
             child: ElevatedButton(
               onPressed: () => Navigator.pop(ctx),
               style: ElevatedButton.styleFrom(
-                backgroundColor: _isLight ? const Color(0xFF1E3C4F) : const Color(0xFF2C5364),
+                backgroundColor: _isLight ? const Color(0xFF000000) : const Color(0xFF333333),
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
               child: Text(T('done'), style: const TextStyle(fontWeight: FontWeight.w600)),
@@ -607,9 +632,9 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
     final max = (d['max'] as num).toDouble();
     final min = (d['min'] as num).toDouble();
     final date = DateTime.parse(d['date']);
-    showModalBottomSheet(
+    _smoothBottomSheet(
       context: context,
-      backgroundColor: _isLight ? Colors.white : const Color(0xFF1E3C4F),
+      backgroundColor: _isLight ? const Color(0xFFFFFFFF) : const Color(0xFF1A1A1A),
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
       builder: (ctx) => Padding(
         padding: const EdgeInsets.all(24),
@@ -639,7 +664,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
             child: ElevatedButton(
               onPressed: () => Navigator.pop(ctx),
               style: ElevatedButton.styleFrom(
-                backgroundColor: _isLight ? const Color(0xFF1E3C4F) : const Color(0xFF2C5364),
+                backgroundColor: _isLight ? const Color(0xFF000000) : const Color(0xFF333333),
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
               child: Text(T('done'), style: const TextStyle(fontWeight: FontWeight.w600)),
@@ -688,64 +713,64 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
       title = '🌧️ ${T('precip')}';
       value = '${_precip.round()} mm';
       label = '$_precipChance% ${T('chance')}';
-      desc = 'Precipitation includes rain, snow, and hail. 0mm means it is currently dry.';
+      desc = T('desc_precip');
       ctx = _precip > 0 ? T('raining') : T('dry');
     } else if (type == 'wind') {
       title = '💨 ${T('wind')}';
       value = _fmtW(_wind);
       label = '${T('direction')}: ' + ['N','NE','E','SE','S','SW','W','NW'][((_wind / 45).round()) % 8];
-      desc = 'Wind direction indicates where the wind is coming from.';
+      desc = T('desc_wind');
       ctx = _wind > 20 ? T('strong_winds') : T('light_breeze');
     } else if (type == 'aqi') {
       title = '🌍 ${T('aqi')}';
       value = '$_aqi';
       label = '${T('category')}: ${_aqiCategory()}';
-      desc = 'Air quality affects your respiratory health.';
+      desc = T('desc_aqi');
       ctx = '${T('context')}: ${_aqiCategory()}';
     } else if (type == 'uv') {
       title = '☀️ ${T('uv')}';
       value = '${_uv.round()}';
       label = '${T('category')}: ${_uvCategory()}';
-      desc = 'UV radiation from the sun can damage your skin.';
+      desc = T('desc_uv');
       ctx = '${T('uv')}: ${_uvCategory()}';
     } else if (type == 'humidity') {
       title = '💧 ${T('humidity')}';
       value = '$_humidity%';
       label = _humidity > 60 ? T('muggy') : T('comfortable');
-      desc = 'Humidity is the amount of water vapor in the air.';
+      desc = T('desc_humidity');
       ctx = '$_humidity%';
     } else if (type == 'sun') {
       title = '🌅 ${T('sun')}';
       value = '${_fmtTime(_sunrise)} / ${_fmtTime(_sunset)}';
       label = '${T('sunrise')} / ${T('sunset')}';
-      desc = 'The sun provides essential Vitamin D.';
+      desc = T('desc_sun');
       ctx = '${T('sunrise')}: ${_fmtTime(_sunrise)} · ${T('sunset')}: ${_fmtTime(_sunset)}';
     } else if (type == 'outdoor') {
       final isBad = _wcode >= 51 || _temp > 38 || _temp < 5;
       title = '🏃 ${T('outdoor')}';
       value = isBad ? T('bad_out').split('.').first : T('great_out').split('.').first;
       label = T('about');
-      desc = 'Consider the weather before planning outdoor activities.';
+      desc = T('desc_outdoor');
       ctx = isBad ? T('bad_out') : T('great_out');
     } else if (type == 'clothing') {
       title = '👕 ${T('clothing')}';
       value = _temp > 30 ? 'Light' : _temp > 20 ? 'Comfortable' : 'Warm';
       label = T('about');
-      desc = 'Dress appropriately for the current temperature.';
+      desc = T('desc_clothing');
       ctx = _temp > 30 ? T('light_cloth') : _temp > 20 ? T('ok_cloth') : T('warm_cloth');
     } else if (type == 'cold') {
       final isHigh = _feels < 15 || _humidity > 80;
       title = '💊 ${T('cold')}';
       value = isHigh ? 'Higher Risk' : 'Low Risk';
       label = T('about');
-      desc = 'Weather conditions can affect your risk of catching a cold.';
+      desc = T('desc_cold');
       ctx = isHigh ? T('high_cold') : T('low_cold');
     } else if (type == 'drive') {
       final isBad = (_wcode >= 45 && _wcode <= 48) || _wcode >= 61;
       title = '🚗 ${T('drive')}';
       value = isBad ? 'Caution' : 'Excellent';
       label = T('about');
-      desc = 'Weather can significantly impact driving safety.';
+      desc = T('desc_drive');
       ctx = isBad ? T('bad_drive') : T('ok_drive');
     }
 
@@ -785,10 +810,10 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
   }
 
   void _openSettings() {
-    showModalBottomSheet(
+    _smoothBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: _theme == 'light' ? Colors.white : const Color(0xFF1E3C4F),
+      backgroundColor: isLight ? const Color(0xFFFFFFFF) : const Color(0xFF1A1A1A),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
       builder: (ctx) => StatefulBuilder(builder: (ctx, setSheet) => SafeArea(
@@ -844,7 +869,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
           border: Border.all(
             color: _theme == 'light' ? Colors.black.withOpacity(0.15) : Colors.white.withOpacity(0.2))),
         child: DropdownButtonHideUnderline(child: DropdownButton<String>(
-          value: val, dropdownColor: _theme == 'light' ? Colors.white : const Color(0xFF1E3C4F),
+          value: val, dropdownColor: isLight ? const Color(0xFFFFFFFF) : const Color(0xFF1A1A1A),
           isExpanded: true, style: TextStyle(color: _txt(), fontSize: 15),
           items: vals.asMap().entries.map((e) => DropdownMenuItem(
             value: e.value, child: Text(disp[e.key]))).toList(),
@@ -875,7 +900,6 @@ class _DetailPage extends StatelessWidget {
   });
 
   bool get _isLight => bg1 == const Color(0xFFB8D4F0) || bg1 == const Color(0xFFDCE8F5);
-  Color _cardBorder() => _isLight ? const Color(0xFFB0C0D0) : Colors.white.withOpacity(0.2);
 
   @override
   Widget build(BuildContext context) {
@@ -885,7 +909,7 @@ class _DetailPage extends StatelessWidget {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft, end: Alignment.bottomRight,
-            colors: [bg1, const Color(0xFF2C5364), bg2],
+            colors: [bg1, bg2],
           ),
         ),
         child: SafeArea(
@@ -902,7 +926,7 @@ class _DetailPage extends StatelessWidget {
                       child: Container(
                         width: 46, height: 46,
                         decoration: BoxDecoration(
-                          color: _isLight ? const Color(0xFF1E3C4F) : Colors.white.withOpacity(0.15),
+                          color: _isLight ? const Color(0xFF000000) : const Color(0xFF333333),
                           shape: BoxShape.circle,
                           border: Border.all(color: _isLight ? Colors.transparent : Colors.white.withOpacity(0.25)),
                         ),
@@ -1022,7 +1046,7 @@ class _TapCardState extends State<_TapCard> {
       },
       onTapCancel: () => setState(() => _pressed = false),
       child: AnimatedScale(
-        scale: _pressed ? 0.94 : 1.0,
+        scale: _pressed ? 0.97 : 1.0,
         duration: const Duration(milliseconds: 700),
         curve: Curves.easeOutCubic,
         child: widget.child,
