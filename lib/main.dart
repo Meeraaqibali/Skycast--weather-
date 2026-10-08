@@ -500,69 +500,63 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
 
   Widget _dailyCard() {
     final days = _allDays ? _daily : _daily.take(3).toList();
-    return _card(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text(T('daily').toUpperCase(), style: TextStyle(color: _muted(),
-        fontSize: 13, letterSpacing: 1.2, fontWeight: FontWeight.w500)),
-      const SizedBox(height: 12),
-      AnimatedSize(
-        duration: const Duration(milliseconds: 700),
-        curve: Curves.easeInOutCubic,
-        alignment: Alignment.topCenter,
-        child: Column(
-          children: [
-            ...days.asMap().entries.map((e) => GestureDetector(
-              onTap: () => _showDayDetail(e.value, e.key == 0),
-              child: Container(
-                margin: const EdgeInsets.only(bottom: 8),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                decoration: BoxDecoration(
-                  color: _itemBg(),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: _cardBorder()),
-                ),
-                child: Row(children: [
-                  SizedBox(width: 60, child: Text(
-                    e.key == 0 ? T('today') : _day(e.value['date']),
-                    style: TextStyle(color: _txt(), fontSize: 14, fontWeight: FontWeight.w500),
-                  )),
-                  Text(_icon(e.value['code']), style: const TextStyle(fontSize: 20)),
-                  const Spacer(),
-                  Text('${_fmtT((e.value['max'] as num).toDouble())} / ${_fmtT((e.value['min'] as num).toDouble())}',
-                    style: TextStyle(color: _muted(), fontSize: 14)),
-                  const SizedBox(width: 6),
-                  Icon(Icons.chevron_right, size: 16, color: _faint()),
-                ]),
-              ),
-            )),
-          ],
-        ),
-      ),
-      const SizedBox(height: 8),
-      SizedBox(
-        width: double.infinity, height: 52,
-        child: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 400),
-          transitionBuilder: (child, animation) => FadeTransition(
-            opacity: animation,
-            child: child,
+    return _card(child: Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(T('daily').toUpperCase(), style: TextStyle(color: _muted(),
+          fontSize: 13, letterSpacing: 1.2, fontWeight: FontWeight.w500)),
+        const SizedBox(height: 12),
+        ClipRect(
+          child: AnimatedAlign(
+            alignment: Alignment.topCenter,
+            heightFactor: 1.0,
+            duration: const Duration(milliseconds: 400),
+            curve: Curves.easeInOutCubic,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ...days.asMap().entries.map((e) => GestureDetector(
+                  onTap: () => _showDayDetail(e.value, e.key == 0),
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(color: _itemBg(),
+                      borderRadius: BorderRadius.circular(16), border: Border.all(color: _cardBorder())),
+                    child: Row(children: [
+                      SizedBox(width: 60, child: Text(
+                        e.key == 0 ? T('today') : _day(e.value['date']),
+                        style: TextStyle(color: _txt(), fontSize: 14, fontWeight: FontWeight.w500))),
+                      Text(_icon(e.value['code']), style: const TextStyle(fontSize: 20)),
+                      const Spacer(),
+                      Text('${_fmtT((e.value['max'] as num).toDouble())} / ${_fmtT((e.value['min'] as num).toDouble())}',
+                        style: TextStyle(color: _muted(), fontSize: 14)),
+                      const SizedBox(width: 6),
+                      Icon(Icons.chevron_right, size: 16, color: _faint()),
+                    ]),
+                  ),
+                )),
+              ],
+            ),
           ),
+        ),
+        const SizedBox(height: 8),
+        SizedBox(
+          width: double.infinity, height: 52,
           child: ElevatedButton(
-            key: ValueKey('btn_$_allDays'),
             onPressed: () => setState(() => _allDays = !_allDays),
             style: ElevatedButton.styleFrom(
               backgroundColor: _isLight ? const Color(0xFF000000) : const Color(0xFFFFFFFF),
               foregroundColor: _isLight ? const Color(0xFFFFFFFF) : const Color(0xFF000000),
               elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             ),
             child: Text(_allDays ? 'Less' : 'More',
               style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
           ),
         ),
-      ),
-    ]));
+      ],
+    ));
   }
 
   Widget _extrasCard() => _card(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -649,175 +643,24 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
   }) {
     return showModalBottomSheet<T>(
       context: context,
-      backgroundColor: backgroundColor,
-      shape: shape,
+      backgroundColor: Colors.transparent,
+      shape: shape ?? const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
       isScrollControlled: isScrollControlled,
       transitionAnimationController: AnimationController(
         vsync: this,
-        duration: const Duration(milliseconds: 1000),
-        reverseDuration: const Duration(milliseconds: 700),
+        duration: const Duration(milliseconds: 800),
+        reverseDuration: const Duration(milliseconds: 500),
       ),
-      builder: builder,
-    );
-  }
-
-  void _showHourDetail(Map<String, dynamic> h) {
-    final code = h['code'] as int;
-    final temp = (h['temp'] as num).toDouble();
-    _smoothBottomSheet(
-      context: context,
-      backgroundColor: _isLight ? const Color(0xFFFFFFFF) : const Color(0xFF1A1A1A),
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
-      builder: (ctx) => Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(children: [
-            Text(_icon(code), style: const TextStyle(fontSize: 40)),
-            const SizedBox(width: 16),
-            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(_fmtHour(h['time']), style: TextStyle(color: _txt(), fontSize: 22, fontWeight: FontWeight.w600)),
-              Text(_desc(code), style: TextStyle(color: _muted(), fontSize: 14)),
-            ])),
-          ]),
-          const SizedBox(height: 24),
-          Text(_fmtT(temp), style: TextStyle(color: _txt(), fontSize: 48, fontWeight: FontWeight.w200, height: 1)),
-          const SizedBox(height: 24),
-          SizedBox(width: double.infinity, height: 48,
-            child: ElevatedButton(
-              onPressed: () => Navigator.pop(ctx),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: _isLight ? const Color(0xFF000000) : const Color(0xFF333333),
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
-              child: Text(T('done'), style: const TextStyle(fontWeight: FontWeight.w600)),
-            )),
-        ]),
+      builder: (ctx) => Container(
+        decoration: BoxDecoration(
+          color: _cardBg(),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+        child: builder(ctx),
       ),
     );
   }
-
-  String _dayPrediction(int code) {
-    if (code == 0) return 'Clear sunny day. Perfect for outdoor activities.';
-    if (code == 1) return 'Mostly clear. Great weather to be outside.';
-    if (code == 2) return 'Partly cloudy with some sunshine.';
-    if (code == 3) return 'Overcast skies. Might feel a bit gloomy.';
-    if (code == 45 || code == 48) return 'Foggy conditions. Drive carefully.';
-    if (code >= 51 && code <= 55) return 'Light drizzle expected. Carry an umbrella.';
-    if (code >= 61 && code <= 65) return 'Rain expected. Bring an umbrella and wear waterproof shoes.';
-    if (code >= 71 && code <= 75) return 'Snow expected. Dress warmly and drive carefully.';
-    if (code >= 95) return 'Thunderstorms expected. Stay indoors if possible.';
-    return 'Mixed conditions throughout the day.';
-  }
-
-  void _showDayDetail(Map<String, dynamic> d, bool isToday) {
-    final code = d['code'] as int;
-    final max = (d['max'] as num).toDouble();
-    final min = (d['min'] as num).toDouble();
-    final date = DateTime.parse(d['date']);
-    _smoothBottomSheet(
-      context: context,
-      backgroundColor: _isLight ? const Color(0xFFFFFFFF) : const Color(0xFF1A1A1A),
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
-      builder: (ctx) => Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-          // Header: icon + name + date
-          Row(children: [
-            Text(_icon(code), style: const TextStyle(fontSize: 44)),
-            const SizedBox(width: 16),
-            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(isToday ? T('today') : _day(d['date']),
-                style: TextStyle(color: _txt(), fontSize: 22, fontWeight: FontWeight.w600)),
-              Text('${date.day}/${date.month}/${date.year}',
-                style: TextStyle(color: _muted(), fontSize: 13)),
-              Text(_desc(code), style: TextStyle(color: _muted(), fontSize: 14)),
-            ])),
-          ]),
-          const SizedBox(height: 20),
-          // Weather prediction box
-          Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: _itemBg(),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: _cardBorder()),
-            ),
-            child: Row(children: [
-              Icon(Icons.info_outline, color: _muted(), size: 20),
-              const SizedBox(width: 10),
-              Expanded(child: Text(
-                _dayPrediction(code),
-                style: TextStyle(color: _txt(), fontSize: 13, height: 1.5),
-              )),
-            ]),
-          ),
-          const SizedBox(height: 20),
-          // High / Low boxes
-          Row(children: [
-            Expanded(child: Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: _itemBg(),
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: _cardBorder()),
-              ),
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text('High', style: TextStyle(color: _muted(), fontSize: 12, fontWeight: FontWeight.w500)),
-                const SizedBox(height: 4),
-                Text(_fmtT(max), style: TextStyle(color: _txt(), fontSize: 32, fontWeight: FontWeight.w300, height: 1)),
-              ]),
-            )),
-            const SizedBox(width: 12),
-            Expanded(child: Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: _itemBg(),
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: _cardBorder()),
-              ),
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text('Low', style: TextStyle(color: _muted(), fontSize: 12, fontWeight: FontWeight.w500)),
-                const SizedBox(height: 4),
-                Text(_fmtT(min), style: TextStyle(color: _txt(), fontSize: 32, fontWeight: FontWeight.w300, height: 1)),
-              ]),
-            )),
-          ]),
-          const SizedBox(height: 24),
-          // Done button
-          SizedBox(width: double.infinity, height: 52,
-            child: ElevatedButton(
-              onPressed: () => Navigator.pop(ctx),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: _isLight ? const Color(0xFF000000) : const Color(0xFFFFFFFF),
-                foregroundColor: _isLight ? const Color(0xFFFFFFFF) : const Color(0xFF000000),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                elevation: 0,
-              ),
-              child: Text(T('done'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
-            )),
-        ]),
-      ),
-    );
-  }
-
-
-  PageRouteBuilder _smoothRoute({required WidgetBuilder builder}) {
-    return PageRouteBuilder(
-      opaque: true,
-      pageBuilder: (context, animation, secondaryAnimation) => builder(context),
-      transitionDuration: const Duration(milliseconds: 1300),
-      reverseTransitionDuration: const Duration(milliseconds: 1000),
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        final curved = CurvedAnimation(
-          parent: animation,
-          curve: Curves.easeInOutCubic,
-          reverseCurve: Curves.easeInOutCubic,
-        );
-        return FadeTransition(opacity: curved, child: child);
-      },
-    );
-  }
-
   String _getDetailContent(String type) {
     String title = '', value = '', label = '', desc = '', ctx = '';
     if (type == 'precip') {
