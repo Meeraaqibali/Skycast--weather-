@@ -995,7 +995,7 @@ class _DetailPageState extends State<_DetailPage> {
     if (_scrollCtrl.hasClients) {
       _scrollCtrl.animateTo(
         0,
-        duration: const Duration(milliseconds: 900),
+        duration: const Duration(milliseconds: 800),
         curve: Curves.easeInOutCubic,
       );
     }
@@ -1020,6 +1020,7 @@ class _DetailPageState extends State<_DetailPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Header
                 Row(
                   children: [
                     GestureDetector(
@@ -1035,64 +1036,46 @@ class _DetailPageState extends State<_DetailPage> {
                       ),
                     ),
                     const SizedBox(width: 14),
-                    Expanded(child: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 400),
-                      child: Text(
-                        _content['title'] ?? '',
-                        key: ValueKey(_currentType),
-                        style: TextStyle(color: widget.txt, fontSize: 21, fontWeight: FontWeight.w600),
-                      ),
+                    Expanded(child: Text(
+                      _content['title'] ?? '',
+                      style: TextStyle(color: widget.txt, fontSize: 21, fontWeight: FontWeight.w600),
                     )),
                   ],
                 ),
                 const SizedBox(height: 28),
-                AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 700),
-                  switchInCurve: Curves.easeOutCubic,
-                  switchOutCurve: Curves.easeInCubic,
-                  transitionBuilder: (child, animation) {
-                    return FadeTransition(
-                      opacity: animation,
-                      child: SlideTransition(
-                        position: Tween<Offset>(
-                          begin: const Offset(0, 0.03),
-                          end: Offset.zero,
-                        ).animate(animation),
-                        child: child,
-                      ),
-                    );
-                  },
-                  child: Column(
-                    key: ValueKey('content_$_currentType'),
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(_content['value'] ?? '',
-                        style: TextStyle(color: widget.txt, fontSize: 60,
-                          fontWeight: FontWeight.w200, height: 1)),
-                      const SizedBox(height: 6),
-                      Text(_content['label'] ?? '',
-                        style: TextStyle(color: widget.txt.withOpacity(0.7), fontSize: 14)),
-                      const SizedBox(height: 32),
-                      Text(widget.aboutLabel, style: TextStyle(color: widget.txt.withOpacity(0.9),
-                        fontSize: 16, fontWeight: FontWeight.w600)),
-                      const SizedBox(height: 10),
-                      Text(_content['desc'] ?? '', style: TextStyle(color: widget.txt.withOpacity(0.8),
-                        fontSize: 14, height: 1.6)),
-                      const SizedBox(height: 28),
-                      Text(widget.contextLabel, style: TextStyle(color: widget.txt.withOpacity(0.9),
-                        fontSize: 16, fontWeight: FontWeight.w600)),
-                      const SizedBox(height: 10),
-                      Text(_content['ctx'] ?? '', style: TextStyle(color: widget.txt.withOpacity(0.8),
-                        fontSize: 14, height: 1.6)),
-                    ],
-                  ),
-                ),
+
+                // Main value
+                Text(_content['value'] ?? '',
+                  style: TextStyle(color: widget.txt, fontSize: 60,
+                    fontWeight: FontWeight.w200, height: 1)),
+                const SizedBox(height: 6),
+                Text(_content['label'] ?? '',
+                  style: TextStyle(color: widget.txt.withOpacity(0.7), fontSize: 14)),
                 const SizedBox(height: 32),
+
+                // About
+                Text(widget.aboutLabel, style: TextStyle(color: widget.txt.withOpacity(0.9),
+                  fontSize: 16, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 10),
+                Text(_content['desc'] ?? '', style: TextStyle(color: widget.txt.withOpacity(0.8),
+                  fontSize: 14, height: 1.6)),
+                const SizedBox(height: 28),
+
+                // Context
+                Text(widget.contextLabel, style: TextStyle(color: widget.txt.withOpacity(0.9),
+                  fontSize: 16, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 10),
+                Text(_content['ctx'] ?? '', style: TextStyle(color: widget.txt.withOpacity(0.8),
+                  fontSize: 14, height: 1.6)),
+                const SizedBox(height: 32),
+
                 Divider(color: widget.txt.withOpacity(0.15)),
                 const SizedBox(height: 20),
+
                 Text(widget.exploreLabel, style: TextStyle(color: widget.txt.withOpacity(0.9),
                   fontSize: 16, fontWeight: FontWeight.w600)),
                 const SizedBox(height: 16),
+
                 if (widget.metricsList.any((m) => m['key'] != _currentType)) ...[
                   Text(widget.metricsLabel.toUpperCase(), style: TextStyle(
                     color: widget.txt.withOpacity(0.6), fontSize: 13,
@@ -1140,7 +1123,7 @@ class _DetailPageState extends State<_DetailPage> {
               Text(val, style: TextStyle(color: widget.txt.withOpacity(0.7), fontSize: 14)),
               const SizedBox(width: 8),
             ],
-            Text('›', style: TextStyle(color: widget.txt.withOpacity(0.5), fontSize: 22)),
+            Text('\u203A', style: TextStyle(color: widget.txt.withOpacity(0.5), fontSize: 22)),
           ],
         ),
       ),
@@ -1169,7 +1152,7 @@ class _TapCardState extends State<_TapCard> {
       onTapCancel: () => setState(() => _pressed = false),
       child: AnimatedScale(
         scale: _pressed ? 0.97 : 1.0,
-        duration: const Duration(milliseconds: 900),
+        duration: const Duration(milliseconds: 800),
         curve: Curves.easeInOutCubic,
         child: widget.child,
       ),
