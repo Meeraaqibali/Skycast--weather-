@@ -1133,11 +1133,12 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
       {'key': 'drive', 'name': '🚗 ${T('drive')}', 'val': ''},
     ];
 
-    Navigator.push(context, _smoothRoute(builder: (_) => _DetailPage(
+    Navigator.push(context, _smoothRoute(builder: (_) => DetailPage(
       bg1: _bg1(), bg2: _bg2(), txt: _txt(),
+      muted: _muted(), faint: _faint(),
+      cardBorder: _cardBorder(), itemBg: _itemBg(),
       initialType: type,
       getContent: _getDetailContent,
-      getIconKey: (k) => k,
       aboutLabel: T('about'),
       contextLabel: T('context'),
       exploreLabel: T('explore'),
@@ -1294,7 +1295,29 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
 
 }
 
-class _DetailPageState extends State<_DetailPage> {
+class DetailPage extends StatefulWidget {
+  final Color bg1, bg2, txt, muted, faint, cardBorder, itemBg;
+  final Function(String) getContent;
+  final String initialType;
+  final String aboutLabel, contextLabel, exploreLabel, metricsLabel, lifestyleLabel;
+  final List<Map<String, String>> metricsList, lifestyleList;
+
+  const DetailPage({
+    super.key,
+    required this.bg1, required this.bg2, required this.txt,
+    required this.muted, required this.faint,
+    required this.cardBorder, required this.itemBg,
+    required this.getContent, required this.initialType,
+    required this.aboutLabel, required this.contextLabel, required this.exploreLabel,
+    required this.metricsLabel, required this.lifestyleLabel,
+    required this.metricsList, required this.lifestyleList,
+  });
+
+  @override
+  State<DetailPage> createState() => _DetailPageState();
+}
+
+class _DetailPageState extends State<DetailPage> {
   late String _currentType;
   late Map<String, String> _content;
   final ScrollController _scrollCtrl = ScrollController();
