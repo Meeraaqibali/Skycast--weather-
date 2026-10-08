@@ -784,6 +784,79 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
   }
 
 
+  PageRouteBuilder _smoothRoute({required WidgetBuilder builder}) {
+    return PageRouteBuilder(
+      opaque: true,
+      pageBuilder: (context, animation, secondaryAnimation) => builder(context),
+      transitionDuration: const Duration(milliseconds: 900),
+      reverseTransitionDuration: const Duration(milliseconds: 700),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        final curved = CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeInOutCubic,
+          reverseCurve: Curves.easeInOutCubic,
+        );
+        return FadeTransition(opacity: curved, child: child);
+      },
+    );
+  }
+
+  String _getDetailContent(String type) {
+    String title = '', value = '', label = '', desc = '', ctx = '';
+    if (type == 'precip') {
+      title = '🌧️ ${T('precip')}'; value = '${_precip.round()} mm';
+      label = '$_precipChance% ${T('chance')}';
+      desc = T('desc_precip');
+      ctx = _precip > 0 ? T('raining') : T('dry');
+    } else if (type == 'wind') {
+      title = '💨 ${T('wind')}'; value = _fmtW(_wind);
+      label = '${T('direction')}: ' + ['N','NE','E','SE','S','SW','W','NW'][((_wind / 45).round()) % 8];
+      desc = T('desc_wind');
+      ctx = _wind > 20 ? T('strong_winds') : T('light_breeze');
+    } else if (type == 'aqi') {
+      title = '🌍 ${T('aqi')}'; value = '$_aqi';
+      label = '${T('category')}: ${_aqiCategory()}';
+      desc = T('desc_aqi'); ctx = '${T('context')}: ${_aqiCategory()}';
+    } else if (type == 'uv') {
+      title = '☀️ ${T('uv')}'; value = '${_uv.round()}';
+      label = '${T('category')}: ${_uvCategory()}';
+      desc = T('desc_uv'); ctx = '${T('uv')}: ${_uvCategory()}';
+    } else if (type == 'humidity') {
+      title = '💧 ${T('humidity')}'; value = '$_humidity%';
+      label = _humidity > 60 ? T('muggy') : T('comfortable');
+      desc = T('desc_humidity'); ctx = '$_humidity%';
+    } else if (type == 'sun') {
+      title = '🌅 ${T('sun')}'; value = '${_fmtTime(_sunrise)} / ${_fmtTime(_sunset)}';
+      label = '${T('sunrise')} / ${T('sunset')}';
+      desc = T('desc_sun');
+      ctx = '${T('sunrise')}: ${_fmtTime(_sunrise)} · ${T('sunset')}: ${_fmtTime(_sunset)}';
+    } else if (type == 'outdoor') {
+      final isBad = _wcode >= 51 || _temp > 38 || _temp < 5;
+      title = '🏃 ${T('outdoor')}';
+      value = isBad ? T('bad_out').split('.').first : T('great_out').split('.').first;
+      label = T('about'); desc = T('desc_outdoor');
+      ctx = isBad ? T('bad_out') : T('great_out');
+    } else if (type == 'clothing') {
+      title = '👕 ${T('clothing')}';
+      value = _temp > 30 ? 'Light' : _temp > 20 ? 'Comfortable' : 'Warm';
+      label = T('about'); desc = T('desc_clothing');
+      ctx = _temp > 30 ? T('light_cloth') : _temp > 20 ? T('ok_cloth') : T('warm_cloth');
+    } else if (type == 'cold') {
+      final isHigh = _feels < 15 || _humidity > 80;
+      title = '💊 ${T('cold')}';
+      value = isHigh ? 'Higher Risk' : 'Low Risk';
+      label = T('about'); desc = T('desc_cold');
+      ctx = isHigh ? T('high_cold') : T('low_cold');
+    } else if (type == 'drive') {
+      final isBad = (_wcode >= 45 && _wcode <= 48) || _wcode >= 61;
+      title = '🚗 ${T('drive')}';
+      value = isBad ? 'Caution' : 'Excellent';
+      label = T('about'); desc = T('desc_drive');
+      ctx = isBad ? T('bad_drive') : T('ok_drive');
+    }
+    return '$title|$value|$label|$desc|$ctx';
+  }
+
   void _openDetail(String type) {
     final metrics = [
       {'key': 'precip', 'name': '🌧️ ${T('precip')}', 'val': '${_precip.round()} mm'},
