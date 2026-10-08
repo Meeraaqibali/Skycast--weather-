@@ -577,12 +577,13 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
     required WidgetBuilder builder,
     Color? backgroundColor,
     ShapeBorder? shape,
+    bool isScrollControlled = true,
   }) {
     return showModalBottomSheet<T>(
       context: context,
       backgroundColor: backgroundColor,
       shape: shape,
-      isScrollControlled: true,
+      isScrollControlled: isScrollControlled,
       transitionAnimationController: AnimationController(
         vsync: this,
         duration: const Duration(milliseconds: 500),
@@ -813,7 +814,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
     _smoothBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: isLight ? const Color(0xFFFFFFFF) : const Color(0xFF1A1A1A),
+      backgroundColor: _isLight ? const Color(0xFFFFFFFF) : const Color(0xFF1A1A1A),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
       builder: (ctx) => StatefulBuilder(builder: (ctx, setSheet) => SafeArea(
@@ -869,7 +870,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
           border: Border.all(
             color: _theme == 'light' ? Colors.black.withOpacity(0.15) : Colors.white.withOpacity(0.2))),
         child: DropdownButtonHideUnderline(child: DropdownButton<String>(
-          value: val, dropdownColor: isLight ? const Color(0xFFFFFFFF) : const Color(0xFF1A1A1A),
+          value: val, dropdownColor: _isLight ? const Color(0xFFFFFFFF) : const Color(0xFF1A1A1A),
           isExpanded: true, style: TextStyle(color: _txt(), fontSize: 15),
           items: vals.asMap().entries.map((e) => DropdownMenuItem(
             value: e.value, child: Text(disp[e.key]))).toList(),
@@ -899,7 +900,8 @@ class _DetailPage extends StatelessWidget {
     required this.onTapItem,
   });
 
-  bool get _isLight => bg1 == const Color(0xFFB8D4F0) || bg1 == const Color(0xFFDCE8F5);
+  bool get _isLight => bg1 == const Color(0xFFFFFFFF);
+  Color _cardBorder() => _isLight ? const Color(0xFFDDDDDD) : const Color(0xFF333333);
 
   @override
   Widget build(BuildContext context) {
