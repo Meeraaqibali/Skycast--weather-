@@ -13,23 +13,25 @@ class WeatherApp extends StatelessWidget {
     return MaterialApp(
       title: 'SkyCast Weather',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(useMaterial3: true, colorScheme: ColorScheme.fromSeed(
-        seedColor: const Color(0xFF4A90E2), brightness: Brightness.dark)),
+      theme: ThemeData(useMaterial3: true),
       home: const SplashScreen(),
     );
   }
 }
 
+// ============================================================
+// TRANSLATIONS
+// ============================================================
 const Map<String, Map<String, String>> TR = {
   'en': {
     'search':'Search city...','go':'Go','wind':'Wind','humidity':'Humidity','feels':'Feels Like',
-    'hourly':'Hourly Forecast','daily':'7-Day Forecast','details':'More Details','life':'Life Index',
+    'hourly':'Hourly Forecast','daily':'Weekly Forecast','details':'More Details','life':'Life Index',
     'settings':'App Settings','theme':'Theme','temp_unit':'Temperature','wind_unit':'Wind Speed',
     'time_format':'Time Format','language':'Language','text_size':'Text Size','done':'Done',
-    'text_small':'Small','text_medium':'Medium','text_large':'Large','text_xlarge':'Extra Large',
     'auto':'Auto','dark':'Dark','light':'Light','now':'Now','today':'Today',
+    'text_small':'Small','text_medium':'Medium','text_large':'Large','text_xlarge':'Extra Large',
     'precip':'Precipitation','aqi':'Air Quality','uv':'UV Index','sun':'Sun',
-    'sunrise':'Sunrise','sunset':'Sunset','chance':'chance',
+    'sunrise':'Sunrise','sunset':'Sunset','chance':'chance','direction':'Direction','category':'Category',
     'outdoor':'Outdoor Activity','clothing':'Clothing Advice','cold':'Cold & Flu Risk','drive':'Driving Conditions',
     'great_out':'Nice weather! Great day outside.','bad_out':'Severe weather. Stay indoors.',
     'light_cloth':'Wear light, breathable clothing.','ok_cloth':'Comfortable clothing recommended.',
@@ -40,26 +42,31 @@ const Map<String, Map<String, String>> TR = {
     'light_breeze':'Light breeze','strong_winds':'Strong winds','muggy':'Muggy','comfortable':'Comfortable',
     'low':'Low','moderate':'Moderate','high':'High','very_high':'Very High',
     'good':'Good','fair':'Fair','poor':'Poor','dry':'Currently dry','raining':'It is currently raining.',
-      'desc_precip':'Precipitation includes rain, snow, and hail.',
-      'desc_wind':'Wind direction indicates where the wind is coming from.',
-      'desc_aqi':'Air quality affects your respiratory health.',
-      'desc_uv':'UV radiation from the sun can damage your skin.',
-      'desc_humidity':'Humidity is the amount of water vapor in the air.',
-      'desc_sun':'The sun provides essential Vitamin D.',
-      'desc_outdoor':'Consider the weather before planning outdoor activities.',
-      'desc_clothing':'Dress appropriately for the current temperature.',
-      'desc_cold':'Weather conditions can affect your risk of catching a cold.',
-      'desc_drive':'Weather can significantly impact driving safety.',
+    'desc_precip':'Precipitation includes rain, snow, and hail.',
+    'desc_wind':'Wind direction indicates where the wind is coming from.',
+    'desc_aqi':'Air quality affects your respiratory health.',
+    'desc_uv':'UV radiation from the sun can damage your skin.',
+    'desc_humidity':'Humidity is the amount of water vapor in the air.',
+    'desc_sun':'The sun provides essential Vitamin D.',
+    'desc_outdoor':'Consider the weather before planning outdoor activities.',
+    'desc_clothing':'Dress appropriately for the current temperature.',
+    'desc_cold':'Weather conditions can affect your risk of catching a cold.',
+    'desc_drive':'Weather can significantly impact driving safety.',
+    'w0':'Clear sky','w1':'Mainly clear','w2':'Partly cloudy','w3':'Overcast','w45':'Fog','w48':'Rime fog',
+    'w51':'Light drizzle','w53':'Moderate drizzle','w55':'Dense drizzle',
+    'w61':'Slight rain','w63':'Moderate rain','w65':'Heavy rain',
+    'w71':'Slight snow','w73':'Moderate snow','w75':'Heavy snow',
+    'w95':'Thunderstorm','w96':'Thunderstorm with hail','w99':'Thunderstorm with heavy hail',
   },
   'ur': {
     'search':'شہر تلاش کریں...','go':'جائیں','wind':'ہوا','humidity':'نمی','feels':'محسوس',
-    'hourly':'گھنٹہ وار پیش گوئی','daily':'7 دن کی پیش گوئی','details':'مزید تفصیلات','life':'لائف انڈیکس',
+    'hourly':'گھنٹہ وار پیش گوئی','daily':'ہفتہ وار پیش گوئی','details':'مزید تفصیلات','life':'لائف انڈیکس',
     'settings':'ترتیبات','theme':'تھیم','temp_unit':'درجہ حرارت','wind_unit':'ہوا کی رفتار',
     'time_format':'وقت کی ترتیب','language':'زبان','text_size':'متن کا سائز','done':'مکمل',
-    'text_small':'چھوٹا','text_medium':'درمیانہ','text_large':'بڑا','text_xlarge':'بہت بڑا',
     'auto':'خودکار','dark':'ڈارک','light':'لائٹ','now':'ابھی','today':'آج',
+    'text_small':'چھوٹا','text_medium':'درمیانہ','text_large':'بڑا','text_xlarge':'بہت بڑا',
     'precip':'بارش','aqi':'فضائی معیار','uv':'یووی انڈیکس','sun':'سورج',
-    'sunrise':'طلوع','sunset':'غروب','chance':'امکان',
+    'sunrise':'طلوع','sunset':'غروب','chance':'امکان','direction':'سمت','category':'قسم',
     'outdoor':'بیرونی سرگرمی','clothing':'لباس کا مشورہ','cold':'زکام اور فلو','drive':'ڈرائیونگ',
     'great_out':'اچھا موسم! باہر جائیں۔','bad_out':'شدید موسم۔ گھر میں رہیں۔',
     'light_cloth':'ہلکے کپڑے پہنیں۔','ok_cloth':'آرام دہ کپڑے بہترین ہیں۔',
@@ -70,26 +77,31 @@ const Map<String, Map<String, String>> TR = {
     'light_breeze':'ہلکی ہوا','strong_winds':'تیز ہوا','muggy':'مرطوب','comfortable':'آرام دہ',
     'low':'کم','moderate':'معتدل','high':'زیادہ','very_high':'بہت زیادہ',
     'good':'اچھا','fair':'منصفانہ','poor':'خراب','dry':'فی الحال خشک','raining':'بارش ہو رہی ہے',
-      'desc_precip':'بارش میں بارش، برف اور اولے شامل ہیں۔',
-      'desc_wind':'ہوا کی سمت بتاتی ہے کہ ہوا کہاں سے آ رہی ہے۔',
-      'desc_aqi':'فضائی معیار آپ کی سانس کی صحت کو متاثر کرتا ہے۔',
-      'desc_uv':'سورج سے نکلنے والی UV شعاعیں جلد کو نقصان پہنچا سکتی ہیں۔',
-      'desc_humidity':'نمی ہوا میں پانی کے بخارات کی مقدار ہے۔',
-      'desc_sun':'سورج ضروری وٹامن ڈی فراہم کرتا ہے۔',
-      'desc_outdoor':'بیرونی سرگرمیوں سے پہلے موسم پر غور کریں۔',
-      'desc_clothing':'موجودہ درجہ حرارت کے مطابق مناسب لباس پہنیں۔',
-      'desc_cold':'موسمی حالات زکام کے خطرے کو متاثر کر سکتے ہیں۔',
-      'desc_drive':'موسم ڈرائیونگ کی حفاظت کو متاثر کر سکتا ہے۔',
+    'desc_precip':'بارش میں بارش، برف اور اولے شامل ہیں۔',
+    'desc_wind':'ہوا کی سمت بتاتی ہے کہ ہوا کہاں سے آ رہی ہے۔',
+    'desc_aqi':'فضائی معیار آپ کی سانس کی صحت کو متاثر کرتا ہے۔',
+    'desc_uv':'سورج سے نکلنے والی UV شعاعیں جلد کو نقصان پہنچا سکتی ہیں۔',
+    'desc_humidity':'نمی ہوا میں پانی کے بخارات کی مقدار ہے۔',
+    'desc_sun':'سورج ضروری وٹامن ڈی فراہم کرتا ہے۔',
+    'desc_outdoor':'بیرونی سرگرمیوں سے پہلے موسم پر غور کریں۔',
+    'desc_clothing':'موجودہ درجہ حرارت کے مطابق مناسب لباس پہنیں۔',
+    'desc_cold':'موسمی حالات زکام کے خطرے کو متاثر کر سکتے ہیں۔',
+    'desc_drive':'موسم ڈرائیونگ کی حفاظت کو متاثر کر سکتا ہے۔',
+    'w0':'صاف آسمان','w1':'بنیادی طور پر صاف','w2':'جزوی ابر آلود','w3':'ابر آلود','w45':'دھند','w48':'دھند',
+    'w51':'ہلکی بوندا باندی','w53':'درمیانی بوندا باندی','w55':'تیز بوندا باندی',
+    'w61':'ہلکی بارش','w63':'درمیانی بارش','w65':'تیز بارش',
+    'w71':'ہلکی برف باری','w73':'درمیانی برف باری','w75':'تیز برف باری',
+    'w95':'گرج چمک','w96':'گرج چمک کے ساتھ اولے','w99':'گرج چمک کے ساتھ تیز اولے',
   },
   'sd': {
     'search':'شهر ڳوليو...','go':'وڃو','wind':'هوا','humidity':'نمي','feels':'محسوس',
-    'hourly':'ڪلاڪوار اڳڪٿي','daily':'7 ڏينهن جي اڳڪٿي','details':'وڌيڪ تفصيل','life':'لائف انڊيڪس',
+    'hourly':'ڪلاڪوار اڳڪٿي','daily':'هفتيوار اڳڪٿي','details':'وڌيڪ تفصيل','life':'لائف انڊيڪس',
     'settings':'سيٽنگون','theme':'ٿيم','temp_unit':'درجه حرارت','wind_unit':'هوا جي رفتار',
     'time_format':'وقت جي ترتيب','language':'ٻولي','text_size':'متن جي ماپ','done':'مڪمل',
-    'text_small':'ننڍو','text_medium':'وچولو','text_large':'وڏو','text_xlarge':'تمام وڏو',
     'auto':'خودڪار','dark':'ڊارڪ','light':'لائيٽ','now':'هاڻي','today':'اڄ',
+    'text_small':'ننڍو','text_medium':'وچولو','text_large':'وڏو','text_xlarge':'تمام وڏو',
     'precip':'برسات','aqi':'فضائي معيار','uv':'يووي انڊيڪس','sun':'سج',
-    'sunrise':'سج اڀرڻ','sunset':'سج لهڻ','chance':'امڪان',
+    'sunrise':'سج اڀرڻ','sunset':'سج لهڻ','chance':'امڪان','direction':'هدايت','category':'قسم',
     'outdoor':'ٻاهرين سرگرمي','clothing':'ڪپڙن جو مشورو','cold':'زڪام ۽ فلو','drive':'ڊرائيونگ',
     'great_out':'سٺو موسم! ٻاهر وڃو.','bad_out':'شديد موسم. گهر ۾ رهو.',
     'light_cloth':'هلڪا ڪپڙا پائو.','ok_cloth':'آرامده ڪپڙا بهترين آهن.',
@@ -100,26 +112,31 @@ const Map<String, Map<String, String>> TR = {
     'light_breeze':'هلڪي هوا','strong_winds':'تيز هوا','muggy':'مرطوب','comfortable':'آرامده',
     'low':'گهٽ','moderate':'وچولو','high':'وڌيڪ','very_high':'تمام وڌيڪ',
     'good':'سٺو','fair':'منصفانه','poor':'خراب','dry':'في الحال خشڪ','raining':'مينهن پيو پوي',
-      'desc_precip':'برسات ۾ مينهن، برف ۽ اولا شامل آهن.',
-      'desc_wind':'هوا جي هدايت ظاهر ڪري ٿي ته هوا ڪٿان اچي رهي آهي.',
-      'desc_aqi':'فضائي معيار توهان جي ساهه جي صحت کي متاثر ڪري ٿو.',
-      'desc_uv':'سج مان نڪرندڙ UV شعاعون چمڙي کي نقصان پهچائي سگهن ٿيون.',
-      'desc_humidity':'نمي هوا ۾ پاڻي جي بخارن جي مقدار آهي.',
-      'desc_sun':'سج ضروري وٽامن ڊي فراهم ڪري ٿو.',
-      'desc_outdoor':'ٻاهرين سرگرمين کان اڳ موسم تي غور ڪريو.',
-      'desc_clothing':'موجوده درجه حرارت مطابق مناسب ڪپڙا پائو.',
-      'desc_cold':'موسمي حالتون زڪام جي خطري کي متاثر ڪري سگهن ٿيون.',
-      'desc_drive':'موسم ڊرائيونگ جي حفاظت کي متاثر ڪري سگهي ٿو.',
+    'desc_precip':'برسات ۾ مينهن، برف ۽ اولا شامل آهن.',
+    'desc_wind':'هوا جي هدايت ظاهر ڪري ٿي ته هوا ڪٿان اچي رهي آهي.',
+    'desc_aqi':'فضائي معيار توهان جي ساهه جي صحت کي متاثر ڪري ٿو.',
+    'desc_uv':'سج مان نڪرندڙ UV شعاعون چمڙي کي نقصان پهچائي سگهن ٿيون.',
+    'desc_humidity':'نمي هوا ۾ پاڻي جي بخارن جي مقدار آهي.',
+    'desc_sun':'سج ضروري وٽامن ڊي فراهم ڪري ٿو.',
+    'desc_outdoor':'ٻاهرين سرگرمين کان اڳ موسم تي غور ڪريو.',
+    'desc_clothing':'موجوده درجه حرارت مطابق مناسب ڪپڙا پائو.',
+    'desc_cold':'موسمي حالتون زڪام جي خطري کي متاثر ڪري سگهن ٿيون.',
+    'desc_drive':'موسم ڊرائيونگ جي حفاظت کي متاثر ڪري سگهي ٿو.',
+    'w0':'صاف آسمان','w1':'مکيه صاف','w2':'جزوي ڪڪر','w3':'ڪڪر','w45':'ڌنڌ','w48':'ڌنڌ',
+    'w51':'هلڪي برسات','w53':'وچولي برسات','w55':'تيز برسات',
+    'w61':'هلڪو مينهن','w63':'وچولو مينهن','w65':'تيز مينهن',
+    'w71':'هلڪي برفباري','w73':'وچولي برفباري','w75':'تيز برفباري',
+    'w95':'گرج چمڪ','w96':'گرج چمڪ ۽ اولا','w99':'گرج چمڪ ۽ تيز اولا',
   },
   'es': {
     'search':'Buscar ciudad...','go':'Ir','wind':'Viento','humidity':'Humedad','feels':'Sensación',
-    'hourly':'Por Hora','daily':'7 Días','details':'Más Detalles','life':'Índice de Vida',
+    'hourly':'Por Hora','daily':'Semanal','details':'Más Detalles','life':'Índice de Vida',
     'settings':'Ajustes','theme':'Tema','temp_unit':'Temperatura','wind_unit':'Viento',
     'time_format':'Hora','language':'Idioma','text_size':'Tamaño de Texto','done':'Listo',
-    'text_small':'Pequeño','text_medium':'Mediano','text_large':'Grande','text_xlarge':'Muy Grande',
     'auto':'Auto','dark':'Oscuro','light':'Claro','now':'Ahora','today':'Hoy',
+    'text_small':'Pequeño','text_medium':'Mediano','text_large':'Grande','text_xlarge':'Muy Grande',
     'precip':'Precipitación','aqi':'Calidad Aire','uv':'Índice UV','sun':'Sol',
-    'sunrise':'Amanecer','sunset':'Atardecer','chance':'probabilidad',
+    'sunrise':'Amanecer','sunset':'Atardecer','chance':'probabilidad','direction':'Dirección','category':'Categoría',
     'outdoor':'Actividad Exterior','clothing':'Consejo de Ropa','cold':'Riesgo Resfriado','drive':'Conducción',
     'great_out':'¡Buen clima! Día perfecto.','bad_out':'Clima severo. Quédese en casa.',
     'light_cloth':'Use ropa ligera.','ok_cloth':'Ropa cómoda recomendada.',
@@ -130,16 +147,21 @@ const Map<String, Map<String, String>> TR = {
     'light_breeze':'Brisa ligera','strong_winds':'Vientos fuertes','muggy':'Húmedo','comfortable':'Cómodo',
     'low':'Bajo','moderate':'Moderado','high':'Alto','very_high':'Muy Alto',
     'good':'Buena','fair':'Aceptable','poor':'Mala','dry':'Seco actualmente','raining':'Está lloviendo',
-      'desc_precip':'La precipitación incluye lluvia, nieve y granizo.',
-      'desc_wind':'La dirección del viento indica de dónde viene.',
-      'desc_aqi':'La calidad del aire afecta su salud respiratoria.',
-      'desc_uv':'La radiación UV puede dañar su piel.',
-      'desc_humidity':'La humedad es el vapor de agua en el aire.',
-      'desc_sun':'El sol proporciona vitamina D esencial.',
-      'desc_outdoor':'Considere el clima antes de planificar actividades.',
-      'desc_clothing':'Vístase apropiadamente para la temperatura.',
-      'desc_cold':'Las condiciones pueden afectar su riesgo de resfriarse.',
-      'desc_drive':'El clima puede afectar la seguridad al conducir.',
+    'desc_precip':'La precipitación incluye lluvia, nieve y granizo.',
+    'desc_wind':'La dirección del viento indica de dónde viene.',
+    'desc_aqi':'La calidad del aire afecta su salud respiratoria.',
+    'desc_uv':'La radiación UV puede dañar su piel.',
+    'desc_humidity':'La humedad es el vapor de agua en el aire.',
+    'desc_sun':'El sol proporciona vitamina D esencial.',
+    'desc_outdoor':'Considere el clima antes de planificar actividades.',
+    'desc_clothing':'Vístase apropiadamente para la temperatura.',
+    'desc_cold':'Las condiciones pueden afectar su riesgo de resfriarse.',
+    'desc_drive':'El clima puede afectar la seguridad al conducir.',
+    'w0':'Cielo despejado','w1':'Mayormente despejado','w2':'Parcialmente nublado','w3':'Nublado','w45':'Niebla','w48':'Niebla helada',
+    'w51':'Llovizna ligera','w53':'Llovizna','w55':'Llovizna densa',
+    'w61':'Lluvia ligera','w63':'Lluvia','w65':'Lluvia fuerte',
+    'w71':'Nieve ligera','w73':'Nieve','w75':'Nieve fuerte',
+    'w95':'Tormenta','w96':'Tormenta con granizo','w99':'Tormenta fuerte',
   },
 };
 
@@ -148,6 +170,9 @@ const List<String> DAYS_UR = ['اتوار','پیر','منگل','بدھ','جمع�
 const List<String> DAYS_SD = ['آچر','سومر','اڱارو','اربع','خميس','جمع','ڇنڇر'];
 const List<String> DAYS_ES = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
 
+// ============================================================
+// SPLASH SCREEN — extended duration to cover native splash gap
+// ============================================================
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
   @override
@@ -163,44 +188,29 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
   @override
   void initState() {
     super.initState();
+    _fadeCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 700));
+    _spinCtrl = AnimationController(vsync: this, duration: const Duration(seconds: 4))..repeat();
+    _scaleCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 1200));
+    _textFadeCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 600));
 
-    _fadeCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 700),
-    );
-    _spinCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 4),
-    )..repeat();
-    _scaleCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1200),
-    );
-    _textFadeCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 600),
-    );
-
-    // Sequence:
-    // 1. Sun fades in and scales up (0-700ms)
-    // 2. Text fades in (500-1100ms)
-    // 3. Wait until 2200ms then navigate
     _fadeCtrl.forward();
     _scaleCtrl.forward();
     Future.delayed(const Duration(milliseconds: 500), () {
       if (mounted) _textFadeCtrl.forward();
     });
 
-    Future.delayed(const Duration(milliseconds: 2200), () {
+    // Extended to 3000ms so main app has time to init during fade
+    Future.delayed(const Duration(milliseconds: 3000), () {
       if (!mounted) return;
-      // Instant switch — no fade, no blank
       Navigator.pushReplacement(
         context,
         PageRouteBuilder(
           opaque: true,
           pageBuilder: (_, __, ___) => const WeatherHome(),
-          transitionDuration: Duration.zero,
-          reverseTransitionDuration: Duration.zero,
+          transitionDuration: const Duration(milliseconds: 400),
+          transitionsBuilder: (_, anim, __, child) {
+            return FadeTransition(opacity: anim, child: child);
+          },
         ),
       );
     });
@@ -223,58 +233,37 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Animated sun icon
             FadeTransition(
               opacity: _fadeCtrl,
               child: ScaleTransition(
                 scale: Tween<double>(begin: 0.5, end: 1.0).animate(
-                  CurvedAnimation(parent: _scaleCtrl, curve: Curves.easeOutBack),
-                ),
+                  CurvedAnimation(parent: _scaleCtrl, curve: Curves.easeOutBack)),
                 child: AnimatedBuilder(
                   animation: _spinCtrl,
                   builder: (c, ch) => Transform.rotate(
-                    angle: _spinCtrl.value * 2 * 3.14159,
-                    child: ch,
-                  ),
+                    angle: _spinCtrl.value * 2 * 3.14159, child: ch),
                   child: const Text('☀️', style: TextStyle(fontSize: 100)),
                 ),
               ),
             ),
             const SizedBox(height: 24),
-            // App name
             FadeTransition(
               opacity: _textFadeCtrl,
-              child: Column(
-                children: [
-                  const Text(
-                    'SkyCast',
-                    style: TextStyle(
-                      fontSize: 34,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF000000),
-                      letterSpacing: -0.5,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Weather',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w500,
-                      color: const Color(0xFF000000).withOpacity(0.5),
-                      letterSpacing: 4,
-                    ),
-                  ),
-                ],
-              ),
+              child: Column(children: [
+                const Text('SkyCast',
+                  style: TextStyle(fontSize: 34, fontWeight: FontWeight.w700,
+                    color: Color(0xFF000000), letterSpacing: -0.5)),
+                const SizedBox(height: 6),
+                Text('Weather',
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500,
+                    color: const Color(0xFF000000).withOpacity(0.5), letterSpacing: 4)),
+              ]),
             ),
             const SizedBox(height: 60),
-            // Loading dots
             FadeTransition(
               opacity: _textFadeCtrl,
               child: SizedBox(
-                width: 40,
-                height: 8,
+                width: 40, height: 8,
                 child: AnimatedBuilder(
                   animation: _spinCtrl,
                   builder: (c, ch) => Row(
@@ -302,6 +291,9 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
   }
 }
 
+// ============================================================
+// MAIN APP
+// ============================================================
 class WeatherHome extends StatefulWidget {
   const WeatherHome({super.key});
   @override
@@ -318,9 +310,6 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
   bool _loading = true, _allDays = false;
   List<dynamic> _hourly = [], _daily = [];
 
-  late AnimationController _animCtrl;
-  late Animation<double> _anim;
-
   String T(String k) => TR[_lang]?[k] ?? TR['en']?[k] ?? k;
 
   double get _textScaleValue {
@@ -332,23 +321,33 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
     }
   }
 
+  bool get _isLight {
+    if (_theme == 'light') return true;
+    if (_theme == 'dark') return false;
+    final h = DateTime.now().hour;
+    return h >= 6 && h < 18;
+  }
+
+  Color _bg1() => _isLight ? const Color(0xFFFFFFFF) : const Color(0xFF000000);
+  Color _bg2() => _isLight ? const Color(0xFFFFFFFF) : const Color(0xFF000000);
+  Color _txt() => _isLight ? const Color(0xFF000000) : const Color(0xFFFFFFFF);
+  Color _muted() => _isLight ? const Color(0xFF444444) : const Color(0xFFBBBBBB);
+  Color _faint() => _isLight ? const Color(0xFF666666) : const Color(0xFF999999);
+  Color _cardBg() => _isLight ? const Color(0xFFFFFFFF) : const Color(0xFF1A1A1A);
+  Color _cardBorder() => _isLight ? const Color(0xFFDDDDDD) : const Color(0xFF333333);
+  Color _divider() => _isLight ? const Color(0xFFDDDDDD) : const Color(0xFF333333);
+  Color _itemBg() => _isLight ? const Color(0xFFF5F5F5) : const Color(0xFF252525);
+
   @override
   void initState() {
     super.initState();
-    _animCtrl = AnimationController(vsync: this, duration: const Duration(seconds: 3))..repeat();
-    _anim = Tween<double>(begin: 0, end: 1).animate(_animCtrl);
     _loadSettings();
     _fetch('Karachi');
   }
 
-  @override
-  void dispose() {
-    _animCtrl.dispose();
-    super.dispose();
-  }
-
   Future<void> _loadSettings() async {
     final p = await SharedPreferences.getInstance();
+    if (!mounted) return;
     setState(() {
       _lang = p.getString('lang') ?? 'en';
       _theme = p.getString('theme') ?? 'auto';
@@ -360,7 +359,6 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
   }
 
   Future<void> _saveSettings() async {
-    if (mounted) setState(() {});  // Rebuild outer IMMEDIATELY
     final p = await SharedPreferences.getInstance();
     await p.setString('lang', _lang);
     await p.setString('theme', _theme);
@@ -373,26 +371,17 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
   Future<void> _fetch(String input) async {
     setState(() => _loading = true);
     try {
-      // Normalize input
       final city = input.trim();
-      
-      // Build variations to try
       final variations = <String>[
         city,
         city.replaceAll(' ', ''),
         city.replaceAll('hass', 'has'),
         city.replaceAll('hass', ' khas'),
-        city.replaceAll('pur', 'pur '),
         city.split(' ').first,
       ];
-      
-      // Remove duplicates and short entries
       final unique = <String>{};
-      for (final v in variations) {
-        if (v.trim().length >= 3) unique.add(v.trim());
-      }
-      
-      // Try each variation
+      for (final v in variations) { if (v.trim().length >= 3) unique.add(v.trim()); }
+
       List<dynamic> allResults = [];
       for (final v in unique) {
         try {
@@ -400,89 +389,75 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
             'https://geocoding-api.open-meteo.com/v1/search?name=${Uri.encodeComponent(v)}&count=10&language=en&format=json'
           )).timeout(const Duration(seconds: 8));
           final data = json.decode(res.body);
-          if (data['results'] != null) {
-            allResults.addAll(data['results'] as List);
-          }
+          if (data['results'] != null) allResults.addAll(data['results'] as List);
         } catch (_) {}
       }
-      
       if (allResults.isEmpty) {
         setState(() { _city = 'Not found'; _loading = false; });
         return;
       }
-      
-      // Remove duplicates by id
       final seen = <int>{};
       allResults = allResults.where((r) {
         final id = r['id'] as int;
         if (seen.contains(id)) return false;
-        seen.add(id);
-        return true;
+        seen.add(id); return true;
       }).toList();
-      
-      // Only Pakistan results
       var pk = allResults.where((r) => r['country_code'] == 'PK').toList();
       if (pk.isEmpty) pk = allResults;
-      
-      // Score by name similarity to input
+
       final target = city.toLowerCase().replaceAll(' ', '');
       pk.sort((a, b) {
         final aName = (a['name'] as String).toLowerCase().replaceAll(' ', '');
         final bName = (b['name'] as String).toLowerCase().replaceAll(' ', '');
-        
-        // Exact match gets highest score
         int aScore = 0, bScore = 0;
         if (aName == target) aScore = 100;
         else if (aName.startsWith(target) || target.startsWith(aName)) aScore = 80;
         else if (aName.contains(target) || target.contains(aName)) aScore = 60;
         else {
-          // Check how many characters match at the start
-          int match = 0;
+          int m = 0;
           for (int i = 0; i < aName.length && i < target.length; i++) {
-            if (aName[i] == target[i]) match++;
-            else break;
+            if (aName[i] == target[i]) m++; else break;
           }
-          aScore = match * 5;
+          aScore = m * 5;
         }
-        
         if (bName == target) bScore = 100;
         else if (bName.startsWith(target) || target.startsWith(bName)) bScore = 80;
         else if (bName.contains(target) || target.contains(bName)) bScore = 60;
         else {
-          int match = 0;
+          int m = 0;
           for (int i = 0; i < bName.length && i < target.length; i++) {
-            if (bName[i] == target[i]) match++;
-            else break;
+            if (bName[i] == target[i]) m++; else break;
           }
-          bScore = match * 5;
+          bScore = m * 5;
         }
-        
         if (aScore != bScore) return bScore - aScore;
-        // Tiebreaker: population
         return ((b['population'] ?? 0) as int).compareTo((a['population'] ?? 0) as int);
       });
-      
-      final pk2 = pk.first;
-      final lat = pk2['latitude'], lon = pk2['longitude'];
+
+      final loc = pk.first;
+      final lat = loc['latitude'], lon = loc['longitude'];
 
       final wr = await http.get(Uri.parse(
-        'https://api.open-meteo.com/v1/forecast?latitude=$lat&longitude=$lon&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,precipitation&hourly=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_probability_max&timezone=auto')).timeout(const Duration(seconds: 10));
+        'https://api.open-meteo.com/v1/forecast?latitude=$lat&longitude=$lon&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,precipitation&hourly=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_probability_max&timezone=auto'
+      )).timeout(const Duration(seconds: 10));
       final wd = json.decode(wr.body);
-      final cc = wd['current'];
+      final c = wd['current'];
 
       final ar = await http.get(Uri.parse(
-        'https://air-quality-api.open-meteo.com/v1/air-quality?latitude=$lat&longitude=$lon&current=european_aqi&timezone=auto')).timeout(const Duration(seconds: 10));
+        'https://air-quality-api.open-meteo.com/v1/air-quality?latitude=$lat&longitude=$lon&current=european_aqi&timezone=auto'
+      )).timeout(const Duration(seconds: 10));
       final ad = json.decode(ar.body);
 
+      if (!mounted) return;
       setState(() {
-        _city = pk2['name'] ?? city;
-        _country = pk2['country'] ?? '';
-        _temp = (cc['temperature_2m'] as num).toDouble();
-        _feels = (cc['apparent_temperature'] as num).toDouble();
-        _humidity = (cc['relative_humidity_2m'] as num).toInt();
-        _wind = (cc['wind_speed_10m'] as num).toDouble();
-        _precip = (cc['precipitation'] as num).toDouble();
-        _wcode = (cc['weather_code'] as num).toInt();
+        _city = loc['name'] ?? city;
+        _country = loc['country'] ?? '';
+        _temp = (c['temperature_2m'] as num).toDouble();
+        _feels = (c['apparent_temperature'] as num).toDouble();
+        _humidity = (c['relative_humidity_2m'] as num).toInt();
+        _wind = (c['wind_speed_10m'] as num).toDouble();
+        _precip = (c['precipitation'] as num).toDouble();
+        _wcode = (c['weather_code'] as num).toInt();
         _aqi = ((ad['current']?['european_aqi'] ?? 0) as num).toInt();
         _uv = (wd['daily']['uv_index_max'][0] as num).toDouble();
         _precipChance = (wd['daily']['precipitation_probability_max'][0] as num).toInt();
@@ -502,10 +477,10 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
         _loading = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() { _city = 'Connection error'; _country = ''; _loading = false; });
     }
   }
-
 
   String _icon(int c) {
     if (c <= 1) return '☀️';
@@ -517,54 +492,25 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
   }
 
   String _desc(int c) {
-    // Use translated weather code if available
-    final key = 'w$c';
-    final translated = TR[_lang]?[key];
-    if (translated != null) return translated;
-    // Fallback to English
+    final t = TR[_lang]?['w$c'];
+    if (t != null) return t;
     const m = {0:'Clear sky',1:'Mainly clear',2:'Partly cloudy',3:'Overcast',45:'Fog',48:'Rime fog',
       51:'Light drizzle',53:'Drizzle',55:'Dense drizzle',61:'Slight rain',63:'Rain',65:'Heavy rain',
       71:'Slight snow',73:'Snow',75:'Heavy snow',95:'Thunderstorm',96:'Storm with hail',99:'Heavy storm'};
     return m[c] ?? 'Unknown';
   }
 
-  // Weather-specific animation widget
-  Widget _animatedIcon(int code, double size) {
-    // Sunny = spin, Cloud = jiggle, Rain = bob, Storm = flash
-    if (code <= 1) {
-      return AnimatedBuilder(
-        animation: _anim,
-        builder: (c, ch) => Transform.rotate(angle: _anim.value * 2 * math.pi, child: ch),
-        child: Text(_icon(code), style: TextStyle(fontSize: size)),
-      );
-    } else if (code >= 51 && code <= 65) {
-      // Rain - bob up and down
-      return AnimatedBuilder(
-        animation: _anim,
-        builder: (c, ch) => Transform.translate(
-          offset: Offset(0, math.sin(_anim.value * 2 * math.pi) * 8),
-          child: ch),
-        child: Text(_icon(code), style: TextStyle(fontSize: size)),
-      );
-    } else if (code >= 95) {
-      // Storm - flash
-      return AnimatedBuilder(
-        animation: _anim,
-        builder: (c, ch) => Opacity(
-          opacity: 0.6 + (_anim.value > 0.5 ? 0.4 : 0),
-          child: ch),
-        child: Text(_icon(code), style: TextStyle(fontSize: size)),
-      );
-    } else {
-      // Cloud - gentle scale pulse
-      return AnimatedBuilder(
-        animation: _anim,
-        builder: (c, ch) => Transform.scale(
-          scale: 1 + math.sin(_anim.value * 2 * math.pi) * 0.05,
-          child: ch),
-        child: Text(_icon(code), style: TextStyle(fontSize: size)),
-      );
-    }
+  String _dayPrediction(int code) {
+    if (code == 0) return 'Clear sunny day. Perfect for outdoor activities.';
+    if (code == 1) return 'Mostly clear. Great weather to be outside.';
+    if (code == 2) return 'Partly cloudy with some sunshine.';
+    if (code == 3) return 'Overcast skies. Might feel a bit gloomy.';
+    if (code == 45 || code == 48) return 'Foggy conditions. Drive carefully.';
+    if (code >= 51 && code <= 55) return 'Light drizzle expected. Carry an umbrella.';
+    if (code >= 61 && code <= 65) return 'Rain expected. Bring an umbrella and wear waterproof shoes.';
+    if (code >= 71 && code <= 75) return 'Snow expected. Dress warmly and drive carefully.';
+    if (code >= 95) return 'Thunderstorms expected. Stay indoors if possible.';
+    return 'Mixed conditions throughout the day.';
   }
 
   String _fmtT(double t) => _unit == 'C' ? '${t.round()}°' : '${(t*9/5+32).round()}°';
@@ -578,24 +524,6 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
   String _fmtHour(String iso) => '${DateTime.parse(iso).hour.toString().padLeft(2,'0')}:00';
   List<String> _days() => _lang == 'ur' ? DAYS_UR : _lang == 'sd' ? DAYS_SD : _lang == 'es' ? DAYS_ES : DAYS_EN;
   String _day(String iso) => _days()[DateTime.parse(iso).weekday % 7];
-
-  bool get _isLight {
-    if (_theme == "light") return true;
-    if (_theme == "dark") return false;
-    final h = DateTime.now().hour;
-    return h >= 6 && h < 18;
-  }
-
-  // ==== BLACK & WHITE THEME ====
-  Color _bg1() => _isLight ? const Color(0xFFFFFFFF) : const Color(0xFF000000);
-  Color _bg2() => _isLight ? const Color(0xFFFFFFFF) : const Color(0xFF000000);
-  Color _txt() => _isLight ? const Color(0xFF000000) : const Color(0xFFFFFFFF);
-  Color _muted() => _isLight ? const Color(0xFF555555) : const Color(0xFFAAAAAA);
-  Color _faint() => _isLight ? const Color(0xFF888888) : const Color(0xFF777777);
-  Color _cardBg() => _isLight ? const Color(0xFFFFFFFF) : const Color(0xFF1A1A1A);
-  Color _cardBorder() => _isLight ? const Color(0xFFDDDDDD) : const Color(0xFF333333);
-  Color _divider() => _isLight ? const Color(0xFFDDDDDD) : const Color(0xFF333333);
-  Color _itemBg() => _isLight ? const Color(0xFFF5F5F5) : const Color(0xFF252525);
 
   String _aqiCategory() {
     if (_aqi <= 20) return T('good');
@@ -616,49 +544,38 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
     return MediaQuery(
       data: mq.copyWith(textScaler: TextScaler.linear(_textScaleValue)),
       child: Scaffold(
-      backgroundColor: _bg1(),
-      body: Container(
-        decoration: BoxDecoration(gradient: LinearGradient(
-          begin: Alignment.topLeft, end: Alignment.bottomRight,
-          colors: [_bg1(), _bg2()])),
-        child: SafeArea(
-          child: RefreshIndicator(
-            onRefresh: () => _fetch(_city),
-            color: _txt(),
-            backgroundColor: _cardBg(),
-            displacement: 100,
-            child: SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.all(16),
-              child: Column(children: [
-                _searchBar(),
-                const SizedBox(height: 12),
-                _mainCard(),
-                const SizedBox(height: 12),
-                _hourlyCard(),
-                const SizedBox(height: 12),
-                _dailyCard(),
-                const SizedBox(height: 12),
-                _extrasCard(),
-                const SizedBox(height: 12),
-                _lifeCard(),
-                const SizedBox(height: 16),
-              ]),
-            ),
+        backgroundColor: _bg1(),
+        body: SafeArea(
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(16),
+            child: Column(children: [
+              _searchBar(),
+              const SizedBox(height: 10),
+              _mainCard(),
+              const SizedBox(height: 10),
+              _hourlyCard(),
+              const SizedBox(height: 10),
+              _dailyCard(),
+              const SizedBox(height: 10),
+              _extrasCard(),
+              const SizedBox(height: 10),
+              _lifeCard(),
+              const SizedBox(height: 16),
+            ]),
           ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: _isLight ? const Color(0xFF000000) : const Color(0xFF333333),
-        onPressed: _openSettings,
-        child: Icon(Icons.settings, color: Colors.white),
-      ),
+        floatingActionButton: FloatingActionButton(
+          backgroundColor: _isLight ? const Color(0xFF000000) : const Color(0xFF333333),
+          onPressed: _openSettings,
+          child: const Icon(Icons.settings, color: Colors.white),
+        ),
       ),
     );
   }
 
   Widget _card({required Widget child}) => Container(
-    padding: const EdgeInsets.all(20),
+    padding: const EdgeInsets.all(16),
     decoration: BoxDecoration(
       color: _cardBg(),
       borderRadius: BorderRadius.circular(28),
@@ -669,11 +586,12 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
 
   Widget _searchBar() => Row(children: [
     Expanded(child: TextField(
-      controller: _ctrl, style: TextStyle(color: _isLight ? const Color(0xFF1A1A1A) : _txt()),
+      controller: _ctrl, style: TextStyle(color: _txt()),
       decoration: InputDecoration(
         hintText: T('search'), hintStyle: TextStyle(color: _faint()),
-        filled: true, fillColor: Colors.white.withOpacity(0.13),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide(color: _cardBorder())),
+        filled: true, fillColor: _itemBg(),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(20),
+          borderSide: BorderSide(color: _cardBorder())),
         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
       ),
       onSubmitted: (v) { if (v.trim().isNotEmpty) _fetch(v.trim()); },
@@ -696,21 +614,39 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
   Widget _mainCard() => _card(child: _loading
     ? Center(child: Padding(padding: const EdgeInsets.all(40),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          const SizedBox(width: 50, height: 50,
-            child: CircularProgressIndicator(color: Colors.white, strokeWidth: 4)),
+          SizedBox(width: 50, height: 50,
+            child: CircularProgressIndicator(color: _txt(), strokeWidth: 4)),
           const SizedBox(height: 16),
           Text('Loading...', style: TextStyle(color: _txt(), fontSize: 14)),
         ])))
     : Column(children: [
-        Text('$_city, $_country'.toUpperCase(),
-          style: TextStyle(color: _muted(), fontSize: 13,
-            letterSpacing: 1.5, fontWeight: FontWeight.w500)),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('$_city, $_country'.toUpperCase(),
+              style: TextStyle(color: _muted(), fontSize: 14,
+                letterSpacing: 1.5, fontWeight: FontWeight.w600)),
+            const SizedBox(width: 8),
+            GestureDetector(
+              onTap: () => _fetch(_city),
+              child: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: _itemBg(),
+                  borderRadius: BorderRadius.circular(50),
+                  border: Border.all(color: _cardBorder()),
+                ),
+                child: Icon(Icons.refresh, size: 16, color: _txt()),
+              ),
+            ),
+          ],
+        ),
         const SizedBox(height: 16),
-        _animatedIcon(_wcode, 80),
+        AnimatedWeatherIcon(code: _wcode, size: 80),
         const SizedBox(height: 10),
         Text(_fmtT(_temp), style: TextStyle(color: _txt(), fontSize: 90,
           fontWeight: FontWeight.w200, height: 1)),
-        Text(_desc(_wcode), style: TextStyle(color: _txt(), fontSize: 18)),
+        Text(_desc(_wcode), style: TextStyle(color: _txt(), fontSize: 20, fontWeight: FontWeight.w500)),
         const SizedBox(height: 20),
         Divider(color: _divider()),
         const SizedBox(height: 12),
@@ -722,7 +658,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
       ]));
 
   Widget _det(String l, String v) => Column(children: [
-    Text(l.toUpperCase(), style: TextStyle(color: _faint(), fontSize: 10, letterSpacing: 1.2)),
+    Text(l.toUpperCase(), style: TextStyle(color: _muted(), fontSize: 11, letterSpacing: 1.0, fontWeight: FontWeight.w600)),
     const SizedBox(height: 4),
     Text(v, style: TextStyle(color: _txt(), fontSize: 15, fontWeight: FontWeight.w500)),
   ]);
@@ -742,8 +678,8 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
             onTap: () => _showHourDetail(h),
             child: Container(
               width: 72, margin: const EdgeInsets.only(right: 12), padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(color: _isLight ? const Color(0xFFF0F4F8) : Colors.white.withOpacity(0.08),
-                borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.white.withOpacity(0.15))),
+              decoration: BoxDecoration(color: _itemBg(),
+                borderRadius: BorderRadius.circular(16), border: Border.all(color: _cardBorder())),
               child: Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
                 Text(i == 0 ? T('now') : _fmtHour(h['time']),
                   style: TextStyle(color: _muted(), fontSize: 12)),
@@ -758,6 +694,11 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
     ]));
   }
 
+  // ========================================================
+  // WEEKLY CARD — smooth expand/collapse with no gap
+  // Uses AnimatedSize on the list Column only, so the card
+  // shrinks/grows naturally and the More/Less button moves with it.
+  // ========================================================
   Widget _dailyCard() {
     final days = _allDays ? _daily : _daily.take(3).toList();
     return _card(child: Column(
@@ -767,39 +708,41 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
         Text(T('daily').toUpperCase(), style: TextStyle(color: _muted(),
           fontSize: 13, letterSpacing: 1.2, fontWeight: FontWeight.w500)),
         const SizedBox(height: 12),
-        ClipRect(
-          child: AnimatedSize(
-            duration: const Duration(milliseconds: 700),
-            curve: Curves.easeInOutCubic,
-            alignment: Alignment.topCenter,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ...days.asMap().entries.map((e) => GestureDetector(
-                  onTap: () => _showDayDetail(e.value, e.key == 0),
-                  child: Container(
-                    margin: const EdgeInsets.only(bottom: 8),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    decoration: BoxDecoration(color: _itemBg(),
-                      borderRadius: BorderRadius.circular(16), border: Border.all(color: _cardBorder())),
-                    child: Row(children: [
-                      SizedBox(width: 60, child: Text(
-                        e.key == 0 ? T('today') : _day(e.value['date']),
-                        style: TextStyle(color: _txt(), fontSize: 14, fontWeight: FontWeight.w500))),
-                      Text(_icon(e.value['code']), style: const TextStyle(fontSize: 20)),
-                      const Spacer(),
-                      Text('${_fmtT((e.value['max'] as num).toDouble())} / ${_fmtT((e.value['min'] as num).toDouble())}',
-                        style: TextStyle(color: _muted(), fontSize: 14)),
-                      const SizedBox(width: 6),
-                      Icon(Icons.chevron_right, size: 16, color: _faint()),
-                    ]),
+        AnimatedSize(
+          duration: const Duration(milliseconds: 650),
+          curve: Curves.easeInOutCubic,
+          alignment: Alignment.topCenter,
+          clipBehavior: Clip.hardEdge,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (var i = 0; i < days.length; i++)
+                Padding(
+                  padding: EdgeInsets.only(bottom: i == days.length - 1 ? 0 : 8),
+                  child: GestureDetector(
+                    onTap: () => _showDayDetail(days[i], i == 0),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      decoration: BoxDecoration(color: _itemBg(),
+                        borderRadius: BorderRadius.circular(16), border: Border.all(color: _cardBorder())),
+                      child: Row(children: [
+                        SizedBox(width: 60, child: Text(
+                          i == 0 ? T('today') : _day(days[i]['date']),
+                          style: TextStyle(color: _txt(), fontSize: 14, fontWeight: FontWeight.w500))),
+                        Text(_icon(days[i]['code']), style: const TextStyle(fontSize: 20)),
+                        const Spacer(),
+                        Text('${_fmtT((days[i]['max'] as num).toDouble())} / ${_fmtT((days[i]['min'] as num).toDouble())}',
+                          style: TextStyle(color: _muted(), fontSize: 14)),
+                        const SizedBox(width: 6),
+                        Icon(Icons.chevron_right, size: 16, color: _faint()),
+                      ]),
+                    ),
                   ),
-                )),
-              ],
-            ),
+                ),
+            ],
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 12),
         SizedBox(
           width: double.infinity, height: 54,
           child: OutlinedButton(
@@ -841,16 +784,16 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
     ),
   ]));
 
-  Widget _ex(String emoji, String l, String v, String sub, VoidCallback onTap) => _TapCard(
+  Widget _ex(String emoji, String l, String v, String sub, VoidCallback onTap) => GestureDetector(
     onTap: onTap,
     child: Container(
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(color: _isLight ? const Color(0xFFF0F4F8) : Colors.white.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.white.withOpacity(0.15))),
+      decoration: BoxDecoration(color: _itemBg(),
+        borderRadius: BorderRadius.circular(16), border: Border.all(color: _cardBorder())),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
           Expanded(child: Text('$emoji ${l.toUpperCase()}',
-            style: TextStyle(color: _faint(), fontSize: 10,
+            style: TextStyle(color: _muted(), fontSize: 10,
               letterSpacing: 1, fontWeight: FontWeight.w500),
             overflow: TextOverflow.ellipsis)),
           Icon(Icons.chevron_right, size: 14, color: _faint()),
@@ -868,24 +811,31 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
     final isBadOut = _wcode >= 51 || _temp > 38 || _temp < 5;
     final isBadDrv = (_wcode >= 45 && _wcode <= 48) || _wcode >= 61;
     final isHighCold = _feels < 15 || _humidity > 80;
-    return _card(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text('🌿 ${T('life').toUpperCase()}', style: TextStyle(color: _muted(),
-        fontSize: 13, letterSpacing: 1.2, fontWeight: FontWeight.w500)),
-      const SizedBox(height: 12),
-      _life('🏃', isBadOut ? T('bad_out') : T('great_out'), () => _openDetail('outdoor')),
-      _life('👕', _temp > 30 ? T('light_cloth') : _temp > 20 ? T('ok_cloth') : T('warm_cloth'),
-        () => _openDetail('clothing')),
-      _life('💊', isHighCold ? T('high_cold') : T('low_cold'), () => _openDetail('cold')),
-      _life('🚗', isBadDrv ? T('bad_drive') : T('ok_drive'), () => _openDetail('drive'), isLast: true),
-    ]));
+    return _card(child: Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('🌿 ${T('life').toUpperCase()}', style: TextStyle(color: _muted(),
+          fontSize: 13, letterSpacing: 1.2, fontWeight: FontWeight.w500)),
+        const SizedBox(height: 12),
+        _life('🏃', isBadOut ? T('bad_out') : T('great_out'), () => _openDetail('outdoor')),
+        const SizedBox(height: 8),
+        _life('👕', _temp > 30 ? T('light_cloth') : _temp > 20 ? T('ok_cloth') : T('warm_cloth'),
+          () => _openDetail('clothing')),
+        const SizedBox(height: 8),
+        _life('💊', isHighCold ? T('high_cold') : T('low_cold'), () => _openDetail('cold')),
+        const SizedBox(height: 8),
+        _life('🚗', isBadDrv ? T('bad_drive') : T('ok_drive'), () => _openDetail('drive')),
+      ],
+    ));
   }
 
-  Widget _life(String emoji, String text, VoidCallback onTap, {bool isLast = false}) => _TapCard(
+  Widget _life(String emoji, String text, VoidCallback onTap) => GestureDetector(
     onTap: onTap,
     child: Container(
-      margin: EdgeInsets.only(bottom: isLast ? 0 : 8), padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(color: _isLight ? const Color(0xFFF0F4F8) : Colors.white.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.white.withOpacity(0.15))),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(color: _itemBg(),
+        borderRadius: BorderRadius.circular(16), border: Border.all(color: _cardBorder())),
       child: Row(children: [
         Text(emoji, style: const TextStyle(fontSize: 20)),
         const SizedBox(width: 12),
@@ -895,172 +845,46 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
     ),
   );
 
+  // Smooth page transition — fade + subtle slide, no overlap
+  PageRouteBuilder _smoothRoute({required WidgetBuilder builder}) {
+    return PageRouteBuilder(
+      opaque: true,
+      pageBuilder: (context, animation, secondaryAnimation) => builder(context),
+      transitionDuration: const Duration(milliseconds: 550),
+      reverseTransitionDuration: const Duration(milliseconds: 400),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        final curved = CurvedAnimation(parent: animation,
+          curve: Curves.easeOutCubic, reverseCurve: Curves.easeInCubic);
+        return FadeTransition(
+          opacity: curved,
+          child: SlideTransition(
+            position: Tween<Offset>(begin: const Offset(0.06, 0), end: Offset.zero).animate(curved),
+            child: child,
+          ),
+        );
+      },
+    );
+  }
+
   Future<T?> _smoothBottomSheet<T>({
     required BuildContext context,
     required WidgetBuilder builder,
-    Color? backgroundColor,
-    ShapeBorder? shape,
     bool isScrollControlled = true,
   }) {
     return showModalBottomSheet<T>(
       context: context,
       backgroundColor: Colors.transparent,
-      shape: shape ?? const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
       isScrollControlled: isScrollControlled,
       transitionAnimationController: AnimationController(
         vsync: this,
-        duration: const Duration(milliseconds: 800),
-        reverseDuration: const Duration(milliseconds: 500),
+        duration: const Duration(milliseconds: 700),
+        reverseDuration: const Duration(milliseconds: 450),
       ),
-      builder: (ctx) => Container(
-        decoration: BoxDecoration(
-          color: _cardBg(),
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-        ),
-        child: builder(ctx),
-      ),
+      builder: builder,
     );
   }
 
-  PageRouteBuilder _smoothRoute({required WidgetBuilder builder}) {
-    return PageRouteBuilder(
-      opaque: true,
-      pageBuilder: (context, animation, secondaryAnimation) => builder(context),
-      transitionDuration: const Duration(milliseconds: 700),
-      reverseTransitionDuration: const Duration(milliseconds: 500),
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        final curved = CurvedAnimation(
-          parent: animation,
-          curve: Curves.easeInOutCubic,
-          reverseCurve: Curves.easeInOutCubic,
-        );
-        return FadeTransition(opacity: curved, child: child);
-      },
-    );
-  }
-
-  String _dayPrediction(int code) {
-    if (code == 0) return 'Clear sunny day. Perfect for outdoor activities.';
-    if (code == 1) return 'Mostly clear. Great weather to be outside.';
-    if (code == 2) return 'Partly cloudy with some sunshine.';
-    if (code == 3) return 'Overcast skies. Might feel a bit gloomy.';
-    if (code == 45 || code == 48) return 'Foggy conditions. Drive carefully.';
-    if (code >= 51 && code <= 55) return 'Light drizzle expected. Carry an umbrella.';
-    if (code >= 61 && code <= 65) return 'Rain expected. Bring an umbrella and wear waterproof shoes.';
-    if (code >= 71 && code <= 75) return 'Snow expected. Dress warmly and drive carefully.';
-    if (code >= 95) return 'Thunderstorms expected. Stay indoors if possible.';
-    return 'Mixed conditions throughout the day.';
-  }
-
-  void _showHourDetail(Map<String, dynamic> h) {
-    final code = h['code'] as int;
-    final temp = (h['temp'] as num).toDouble();
-    _smoothBottomSheet(
-      context: context,
-      backgroundColor: _cardBg(),
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
-      builder: (ctx) => Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(children: [
-            Text(_icon(code), style: const TextStyle(fontSize: 40)),
-            const SizedBox(width: 16),
-            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(_fmtHour(h['time']), style: TextStyle(color: _txt(), fontSize: 22, fontWeight: FontWeight.w600)),
-              Text(_desc(code), style: TextStyle(color: _muted(), fontSize: 14)),
-            ])),
-          ]),
-          const SizedBox(height: 24),
-          Text(_fmtT(temp), style: TextStyle(color: _txt(), fontSize: 48, fontWeight: FontWeight.w200, height: 1)),
-          const SizedBox(height: 24),
-          SizedBox(width: double.infinity, height: 52,
-            child: ElevatedButton(
-              onPressed: () => Navigator.pop(ctx),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: _isLight ? const Color(0xFF000000) : const Color(0xFFFFFFFF),
-                foregroundColor: _isLight ? const Color(0xFFFFFFFF) : const Color(0xFF000000),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
-              child: Text(T('done'), style: const TextStyle(fontWeight: FontWeight.w600)),
-            )),
-        ]),
-      ),
-    );
-  }
-
-  void _showDayDetail(Map<String, dynamic> d, bool isToday) {
-    final code = d['code'] as int;
-    final max = (d['max'] as num).toDouble();
-    final min = (d['min'] as num).toDouble();
-    final date = DateTime.parse(d['date']);
-    _smoothBottomSheet(
-      context: context,
-      backgroundColor: _cardBg(),
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
-      builder: (ctx) => Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(children: [
-            Text(_icon(code), style: const TextStyle(fontSize: 44)),
-            const SizedBox(width: 16),
-            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(isToday ? T('today') : _day(d['date']),
-                style: TextStyle(color: _txt(), fontSize: 22, fontWeight: FontWeight.w600)),
-              Text('${date.day}/${date.month}/${date.year}',
-                style: TextStyle(color: _muted(), fontSize: 13)),
-              Text(_desc(code), style: TextStyle(color: _muted(), fontSize: 14)),
-            ])),
-          ]),
-          const SizedBox(height: 20),
-          Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(color: _itemBg(),
-              borderRadius: BorderRadius.circular(14), border: Border.all(color: _cardBorder())),
-            child: Row(children: [
-              Icon(Icons.info_outline, color: _muted(), size: 20),
-              const SizedBox(width: 10),
-              Expanded(child: Text(_dayPrediction(code),
-                style: TextStyle(color: _txt(), fontSize: 13, height: 1.5))),
-            ]),
-          ),
-          const SizedBox(height: 20),
-          Row(children: [
-            Expanded(child: Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(color: _itemBg(),
-                borderRadius: BorderRadius.circular(14), border: Border.all(color: _cardBorder())),
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text('High', style: TextStyle(color: _muted(), fontSize: 12, fontWeight: FontWeight.w500)),
-                const SizedBox(height: 4),
-                Text(_fmtT(max), style: TextStyle(color: _txt(), fontSize: 32, fontWeight: FontWeight.w300, height: 1)),
-              ]),
-            )),
-            const SizedBox(width: 12),
-            Expanded(child: Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(color: _itemBg(),
-                borderRadius: BorderRadius.circular(14), border: Border.all(color: _cardBorder())),
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text('Low', style: TextStyle(color: _muted(), fontSize: 12, fontWeight: FontWeight.w500)),
-                const SizedBox(height: 4),
-                Text(_fmtT(min), style: TextStyle(color: _txt(), fontSize: 32, fontWeight: FontWeight.w300, height: 1)),
-              ]),
-            )),
-          ]),
-          const SizedBox(height: 24),
-          SizedBox(width: double.infinity, height: 52,
-            child: ElevatedButton(
-              onPressed: () => Navigator.pop(ctx),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: _isLight ? const Color(0xFF000000) : const Color(0xFFFFFFFF),
-                foregroundColor: _isLight ? const Color(0xFFFFFFFF) : const Color(0xFF000000),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
-              child: Text(T('done'), style: const TextStyle(fontWeight: FontWeight.w600)),
-            )),
-        ]),
-      ),
-    );
-  }
   String _getDetailContent(String type) {
     String title = '', value = '', label = '', desc = '', ctx = '';
     if (type == 'precip') {
@@ -1070,7 +894,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
       ctx = _precip > 0 ? T('raining') : T('dry');
     } else if (type == 'wind') {
       title = '💨 ${T('wind')}'; value = _fmtW(_wind);
-      label = '${T('direction')}: ' + ['N','NE','E','SE','S','SW','W','NW'][((_wind / 45).round()) % 8];
+      label = '${T('direction')}: ${['N','NE','E','SE','S','SW','W','NW'][((_wind / 45).round()) % 8]}';
       desc = T('desc_wind');
       ctx = _wind > 20 ? T('strong_winds') : T('light_breeze');
     } else if (type == 'aqi') {
@@ -1149,8 +973,123 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
     )));
   }
 
+  void _showHourDetail(Map<String, dynamic> h) {
+    final code = h['code'] as int;
+    final temp = (h['temp'] as num).toDouble();
+    _smoothBottomSheet(
+      context: context,
+      builder: (ctx) => Container(
+        decoration: BoxDecoration(color: _cardBg(),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(28))),
+        child: SafeArea(child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Row(children: [
+              Text(_icon(code), style: const TextStyle(fontSize: 40)),
+              const SizedBox(width: 16),
+              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(_fmtHour(h['time']), style: TextStyle(color: _txt(), fontSize: 22, fontWeight: FontWeight.w600)),
+                Text(_desc(code), style: TextStyle(color: _muted(), fontSize: 14)),
+              ])),
+            ]),
+            const SizedBox(height: 24),
+            Text(_fmtT(temp), style: TextStyle(color: _txt(), fontSize: 48, fontWeight: FontWeight.w200, height: 1)),
+            const SizedBox(height: 24),
+            SizedBox(width: double.infinity, height: 52,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(ctx),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _isLight ? const Color(0xFF000000) : const Color(0xFFFFFFFF),
+                  foregroundColor: _isLight ? const Color(0xFFFFFFFF) : const Color(0xFF000000),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
+                child: Text(T('done'), style: const TextStyle(fontWeight: FontWeight.w600)),
+              )),
+          ]),
+        )),
+      ),
+    );
+  }
+
+  void _showDayDetail(Map<String, dynamic> d, bool isToday) {
+    final code = d['code'] as int;
+    final max = (d['max'] as num).toDouble();
+    final min = (d['min'] as num).toDouble();
+    final date = DateTime.parse(d['date']);
+    _smoothBottomSheet(
+      context: context,
+      builder: (ctx) => Container(
+        decoration: BoxDecoration(color: _cardBg(),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(28))),
+        child: SafeArea(child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Row(children: [
+              Text(_icon(code), style: const TextStyle(fontSize: 44)),
+              const SizedBox(width: 16),
+              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(isToday ? T('today') : _day(d['date']),
+                  style: TextStyle(color: _txt(), fontSize: 22, fontWeight: FontWeight.w600)),
+                Text('${date.day}/${date.month}/${date.year}',
+                  style: TextStyle(color: _muted(), fontSize: 13)),
+                Text(_desc(code), style: TextStyle(color: _muted(), fontSize: 14)),
+              ])),
+            ]),
+            const SizedBox(height: 20),
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(color: _itemBg(),
+                borderRadius: BorderRadius.circular(14), border: Border.all(color: _cardBorder())),
+              child: Row(children: [
+                Icon(Icons.info_outline, color: _muted(), size: 20),
+                const SizedBox(width: 10),
+                Expanded(child: Text(_dayPrediction(code),
+                  style: TextStyle(color: _txt(), fontSize: 13, height: 1.5))),
+              ]),
+            ),
+            const SizedBox(height: 20),
+            Row(children: [
+              Expanded(child: Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(color: _itemBg(),
+                  borderRadius: BorderRadius.circular(14), border: Border.all(color: _cardBorder())),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text('High', style: TextStyle(color: _muted(), fontSize: 12, fontWeight: FontWeight.w500)),
+                  const SizedBox(height: 4),
+                  Text(_fmtT(max), style: TextStyle(color: _txt(), fontSize: 32, fontWeight: FontWeight.w300, height: 1)),
+                ]),
+              )),
+              const SizedBox(width: 12),
+              Expanded(child: Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(color: _itemBg(),
+                  borderRadius: BorderRadius.circular(14), border: Border.all(color: _cardBorder())),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text('Low', style: TextStyle(color: _muted(), fontSize: 12, fontWeight: FontWeight.w500)),
+                  const SizedBox(height: 4),
+                  Text(_fmtT(min), style: TextStyle(color: _txt(), fontSize: 32, fontWeight: FontWeight.w300, height: 1)),
+                ]),
+              )),
+            ]),
+            const SizedBox(height: 24),
+            SizedBox(width: double.infinity, height: 52,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(ctx),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _isLight ? const Color(0xFF000000) : const Color(0xFFFFFFFF),
+                  foregroundColor: _isLight ? const Color(0xFFFFFFFF) : const Color(0xFF000000),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
+                child: Text(T('done'), style: const TextStyle(fontWeight: FontWeight.w600)),
+              )),
+          ]),
+        )),
+      ),
+    );
+  }
+
+  // ========================================================
+  // SETTINGS — uses local vars, only applies on Done press
+  // ========================================================
   void _openSettings() {
-    // Local copies — only applied on Done
     String localTheme = _theme;
     String localUnit = _unit;
     String localWindUnit = _windUnit;
@@ -1168,20 +1107,20 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
           child: Column(mainAxisSize: MainAxisSize.min, children: [
             Text(T('settings'), style: TextStyle(color: _txt(), fontSize: 20, fontWeight: FontWeight.w600)),
             const SizedBox(height: 20),
-            _settingRow(T('theme'), localTheme, ['auto','dark','light'],
+            _settingRow(ctx, T('theme'), localTheme, ['auto','dark','light'],
               [T('auto'), T('dark'), T('light')],
               (v) => setSheet(() => localTheme = v)),
-            _settingRow(T('temp_unit'), localUnit, ['C','F'],
+            _settingRow(ctx, T('temp_unit'), localUnit, ['C','F'],
               ['Celsius (°C)','Fahrenheit (°F)'],
               (v) => setSheet(() => localUnit = v)),
-            _settingRow(T('wind_unit'), localWindUnit, ['kmh','mph'], ['km/h','mph'],
+            _settingRow(ctx, T('wind_unit'), localWindUnit, ['kmh','mph'], ['km/h','mph'],
               (v) => setSheet(() => localWindUnit = v)),
-            _settingRow(T('time_format'), localTimeFmt, ['12h','24h'], ['12-hour','24-hour'],
+            _settingRow(ctx, T('time_format'), localTimeFmt, ['12h','24h'], ['12-hour','24-hour'],
               (v) => setSheet(() => localTimeFmt = v)),
-            _settingRow(T('language'), localLang, ['en','ur','sd','es'],
+            _settingRow(ctx, T('language'), localLang, ['en','ur','sd','es'],
               ['English','اردو','سنڌي','Español'],
               (v) => setSheet(() => localLang = v)),
-            _settingRow(T('text_size'), localTextSize, ['small','medium','large','xlarge'],
+            _settingRow(ctx, T('text_size'), localTextSize, ['small','medium','large','xlarge'],
               [T('text_small'), T('text_medium'), T('text_large'), T('text_xlarge')],
               (v) => setSheet(() => localTextSize = v)),
             const SizedBox(height: 10),
@@ -1212,8 +1151,8 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
     );
   }
 
-  Widget _settingRow(String label, String val, List<String> vals, List<String> disp,
-      Function(String) onChange) {
+  Widget _settingRow(BuildContext parentCtx, String label, String val,
+      List<String> vals, List<String> disp, Function(String) onChange) {
     final idx = vals.indexOf(val);
     final displayVal = idx >= 0 && idx < disp.length ? disp[idx] : val;
     return Padding(
@@ -1292,9 +1231,74 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
       ]),
     );
   }
-
 }
 
+// ============================================================
+// ANIMATED WEATHER ICON
+// ============================================================
+class AnimatedWeatherIcon extends StatefulWidget {
+  final int code;
+  final double size;
+  const AnimatedWeatherIcon({super.key, required this.code, this.size = 80});
+  @override
+  State<AnimatedWeatherIcon> createState() => _AnimatedWeatherIconState();
+}
+
+class _AnimatedWeatherIconState extends State<AnimatedWeatherIcon> with SingleTickerProviderStateMixin {
+  late AnimationController _ctrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(vsync: this, duration: const Duration(seconds: 4))..repeat();
+  }
+
+  @override
+  void dispose() { _ctrl.dispose(); super.dispose(); }
+
+  String _ic(int c) {
+    if (c <= 1) return '☀️';
+    if (c <= 3 || c == 45 || c == 48) return '☁️';
+    if (c >= 51 && c <= 65) return '🌧️';
+    if (c >= 71 && c <= 75) return '❄️';
+    if (c >= 95) return '⛈️';
+    return '☀️';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final icon = Text(_ic(widget.code), style: TextStyle(fontSize: widget.size));
+    if (widget.code <= 1) {
+      return AnimatedBuilder(
+        animation: _ctrl,
+        builder: (c, ch) => Transform.rotate(angle: _ctrl.value * 2 * math.pi, child: ch),
+        child: icon);
+    }
+    if (widget.code >= 51 && widget.code <= 65) {
+      return AnimatedBuilder(
+        animation: _ctrl,
+        builder: (c, ch) => Transform.translate(
+          offset: Offset(0, math.sin(_ctrl.value * 2 * math.pi) * 6), child: ch),
+        child: icon);
+    }
+    if (widget.code >= 95) {
+      return AnimatedBuilder(
+        animation: _ctrl,
+        builder: (c, ch) => Opacity(
+          opacity: _ctrl.value > 0.85 || _ctrl.value < 0.15 ? 1.0 : 0.7, child: ch),
+        child: icon);
+    }
+    return AnimatedBuilder(
+      animation: _ctrl,
+      builder: (c, ch) => Transform.scale(
+        scale: 1 + math.sin(_ctrl.value * 2 * math.pi) * 0.05, child: ch),
+      child: icon);
+  }
+}
+
+// ============================================================
+// DETAIL PAGE — premium layout
+// ============================================================
 class DetailPage extends StatefulWidget {
   final Color bg1, bg2, txt, muted, faint, cardBorder, itemBg;
   final Function(String) getContent;
@@ -1323,9 +1327,6 @@ class _DetailPageState extends State<DetailPage> {
   final ScrollController _scrollCtrl = ScrollController();
   bool _isTransitioning = false;
 
-  bool get _isLight => widget.bg1 == const Color(0xFFFFFFFF);
-  Color _cardBorder() => _isLight ? const Color(0xFFDDDDDD) : const Color(0xFF333333);
-
   @override
   void initState() {
     super.initState();
@@ -1334,14 +1335,9 @@ class _DetailPageState extends State<DetailPage> {
   }
 
   @override
-  void dispose() {
-    _scrollCtrl.dispose();
-    super.dispose();
-  }
+  void dispose() { _scrollCtrl.dispose(); super.dispose(); }
 
   Map<String, String> _parseContent(String raw) {
-    // The content is a concatenated string like:
-    // "title|value|label|desc|ctx"
     final parts = raw.split('|');
     return {
       'title': parts.isNotEmpty ? parts[0] : '',
@@ -1352,37 +1348,34 @@ class _DetailPageState extends State<DetailPage> {
     };
   }
 
+  // Smooth transition between detail items — scroll to top, then swap content.
+  // No fade / no AnimatedOpacity so old and new never overlap.
   void _onExploreTap(String key) async {
     if (key == _currentType) return;
-    if (_isTransitioning) return;  // Prevent fast taps
-    
+    if (_isTransitioning) return;
     _isTransitioning = true;
 
-    // Step 1: Scroll to top first (if scrolled down)
+    // Scroll to top smoothly (if needed)
     if (_scrollCtrl.hasClients && _scrollCtrl.offset > 0) {
       await _scrollCtrl.animateTo(
         0,
-        duration: const Duration(milliseconds: 500),
+        duration: const Duration(milliseconds: 450),
         curve: Curves.easeInOutCubic,
       );
     }
 
-    // Step 2: Fade out old content
-    await Future.delayed(const Duration(milliseconds: 400));
+    // Small pause so the scroll settles
+    await Future.delayed(const Duration(milliseconds: 150));
 
-    // Step 3: Swap content
+    // Instant content swap — no overlap
     if (mounted) {
       setState(() {
         _currentType = key;
         _content = _parseContent(widget.getContent(key));
       });
     }
-    
-    // Step 4: Fade in new content
-    await Future.delayed(const Duration(milliseconds: 50));
-    
-    // Step 5: Release lock after full animation
-    await Future.delayed(const Duration(milliseconds: 400));
+
+    await Future.delayed(const Duration(milliseconds: 200));
     _isTransitioning = false;
   }
 
@@ -1390,162 +1383,162 @@ class _DetailPageState extends State<DetailPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: widget.bg1,
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [widget.bg1, widget.bg2],
-          ),
-        ),
-        child: SafeArea(
-          child: SingleChildScrollView(
-            controller: _scrollCtrl,
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Header
-                Row(
-                  children: [
-                    GestureDetector(
-                      onTap: () => Navigator.pop(context),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8),
-                        child: Icon(Icons.arrow_back,
-                          color: widget.txt, size: 26),
-                      ),
-                    ),
-                    const SizedBox(width: 14),
-                    Expanded(child: Text(
-                      _content['title'] ?? '',
-                      style: TextStyle(color: widget.txt, fontSize: 21, fontWeight: FontWeight.w600),
-                    )),
-                  ],
+      body: SafeArea(
+        child: SingleChildScrollView(
+          controller: _scrollCtrl,
+          padding: const EdgeInsets.all(24),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            // Back button row
+            Row(children: [
+              GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: Padding(
+                  padding: const EdgeInsets.all(6),
+                  child: Icon(Icons.arrow_back, color: widget.txt, size: 24),
                 ),
-                const SizedBox(height: 28),
+              ),
+              const SizedBox(width: 12),
+              Expanded(child: Text(_content['title'] ?? '',
+                style: TextStyle(color: widget.txt, fontSize: 22,
+                  fontWeight: FontWeight.w700, letterSpacing: -0.3))),
+            ]),
+            const SizedBox(height: 32),
 
-                Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                // Main value
-                Text(_content['value'] ?? '',
-                  style: TextStyle(color: widget.txt, fontSize: 60,
-                    fontWeight: FontWeight.w200, height: 1)),
-                const SizedBox(height: 6),
-                Text(_content['label'] ?? '',
-                  style: TextStyle(color: widget.txt.withOpacity(0.7), fontSize: 14)),
-                const SizedBox(height: 32),
+            // Big value
+            Text(_content['value'] ?? '',
+              style: TextStyle(color: widget.txt, fontSize: 64,
+                fontWeight: FontWeight.w200, height: 1, letterSpacing: -1.5)),
+            const SizedBox(height: 8),
+            Text(_content['label'] ?? '',
+              style: TextStyle(color: widget.muted, fontSize: 15, fontWeight: FontWeight.w500)),
 
-                // About
-                Text(widget.aboutLabel, style: TextStyle(color: widget.txt.withOpacity(0.9),
-                  fontSize: 16, fontWeight: FontWeight.w600)),
-                const SizedBox(height: 10),
-                Text(_content['desc'] ?? '', style: TextStyle(color: widget.txt.withOpacity(0.8),
-                  fontSize: 14, height: 1.6)),
-                const SizedBox(height: 28),
+            const SizedBox(height: 36),
 
-                // Context
-                Text(widget.contextLabel, style: TextStyle(color: widget.txt.withOpacity(0.9),
-                  fontSize: 16, fontWeight: FontWeight.w600)),
-                const SizedBox(height: 10),
-                Text(_content['ctx'] ?? '', style: TextStyle(color: widget.txt.withOpacity(0.8),
-                  fontSize: 14, height: 1.6)),
-                const SizedBox(height: 32),
-                    ],
-                  ),
-
-                Divider(color: widget.txt.withOpacity(0.15)),
-                const SizedBox(height: 20),
-
-                Text(widget.exploreLabel, style: TextStyle(color: widget.txt.withOpacity(0.9),
-                  fontSize: 16, fontWeight: FontWeight.w600)),
-                const SizedBox(height: 16),
-
-                if (widget.metricsList.any((m) => m['key'] != _currentType)) ...[
-                  Text(widget.metricsLabel.toUpperCase(), style: TextStyle(
-                    color: widget.txt.withOpacity(0.6), fontSize: 13,
-                    fontWeight: FontWeight.w600, letterSpacing: 1.2)),
-                  const SizedBox(height: 12),
-                  ...widget.metricsList
-                    .where((m) => m['key'] != _currentType)
-                    .map((m) => _listItem(m['name']!, m['val'] ?? '', () => _onExploreTap(m['key']!))),
-                  const SizedBox(height: 20),
-                ],
-                if (widget.lifestyleList.any((m) => m['key'] != _currentType)) ...[
-                  Text(widget.lifestyleLabel.toUpperCase(), style: TextStyle(
-                    color: widget.txt.withOpacity(0.6), fontSize: 13,
-                    fontWeight: FontWeight.w600, letterSpacing: 1.2)),
-                  const SizedBox(height: 12),
-                  ...widget.lifestyleList
-                    .where((m) => m['key'] != _currentType)
-                    .map((m) => _listItem(m['name']!, '', () => _onExploreTap(m['key']!))),
-                ],
-                const SizedBox(height: 40),
-              ],
+            // ABOUT section — premium card
+            _sectionHeader(widget.aboutLabel),
+            const SizedBox(height: 12),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                color: widget.itemBg,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: widget.cardBorder),
+              ),
+              child: Text(_content['desc'] ?? '',
+                style: TextStyle(color: widget.txt, fontSize: 14.5, height: 1.6, letterSpacing: 0.1)),
             ),
-          ),
+
+            const SizedBox(height: 24),
+
+            // CONTEXT section
+            _sectionHeader(widget.contextLabel),
+            const SizedBox(height: 12),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                color: widget.itemBg,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: widget.cardBorder),
+              ),
+              child: Text(_content['ctx'] ?? '',
+                style: TextStyle(color: widget.txt, fontSize: 14.5, height: 1.6, letterSpacing: 0.1)),
+            ),
+
+            const SizedBox(height: 36),
+            Divider(color: widget.cardBorder, height: 1),
+            const SizedBox(height: 32),
+
+            // EXPLORE header
+            Row(children: [
+              Container(
+                width: 4, height: 20,
+                decoration: BoxDecoration(
+                  color: widget.txt,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Text(widget.exploreLabel,
+                style: TextStyle(color: widget.txt, fontSize: 18, fontWeight: FontWeight.w700)),
+            ]),
+            const SizedBox(height: 24),
+
+            // Weather metrics
+            if (widget.metricsList.any((m) => m['key'] != _currentType)) ...[
+              _subHeader(widget.metricsLabel),
+              const SizedBox(height: 12),
+              ...widget.metricsList
+                .where((m) => m['key'] != _currentType)
+                .map((m) => _listItem(m['name']!, m['val'] ?? '', () => _onExploreTap(m['key']!))),
+              const SizedBox(height: 28),
+            ],
+
+            // Lifestyle
+            if (widget.lifestyleList.any((m) => m['key'] != _currentType)) ...[
+              _subHeader(widget.lifestyleLabel),
+              const SizedBox(height: 12),
+              ...widget.lifestyleList
+                .where((m) => m['key'] != _currentType)
+                .map((m) => _listItem(m['name']!, '', () => _onExploreTap(m['key']!))),
+            ],
+            const SizedBox(height: 40),
+          ]),
         ),
       ),
     );
   }
+
+  Widget _sectionHeader(String text) => Row(children: [
+    Container(
+      width: 3, height: 18,
+      decoration: BoxDecoration(
+        color: widget.txt,
+        borderRadius: BorderRadius.circular(2),
+      ),
+    ),
+    const SizedBox(width: 10),
+    Text(text, style: TextStyle(
+      color: widget.txt, fontSize: 16, fontWeight: FontWeight.w700, letterSpacing: -0.2)),
+  ]);
+
+  Widget _subHeader(String text) => Padding(
+    padding: const EdgeInsets.only(left: 4, bottom: 4),
+    child: Text(text.toUpperCase(), style: TextStyle(
+      color: widget.faint, fontSize: 12,
+      fontWeight: FontWeight.w700, letterSpacing: 1.4)),
+  );
 
   Widget _listItem(String name, String val, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.only(bottom: 10),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
         decoration: BoxDecoration(
-          color: _isLight ? const Color(0xFFFFFFFF) : const Color(0xFF1A1A1A),
+          color: widget.itemBg,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: _cardBorder()),
+          border: Border.all(color: widget.cardBorder),
         ),
-        child: Row(
-          children: [
-            Expanded(child: Text(name, style: TextStyle(color: widget.txt,
-              fontSize: 14, fontWeight: FontWeight.w500))),
-            if (val.isNotEmpty) ...[
-              Text(val, style: TextStyle(color: widget.txt.withOpacity(0.7), fontSize: 14)),
-              const SizedBox(width: 8),
-            ],
-            Text('\u203A', style: TextStyle(color: widget.txt.withOpacity(0.5), fontSize: 22)),
+        child: Row(children: [
+          Expanded(child: Text(name, style: TextStyle(color: widget.txt,
+            fontSize: 15, fontWeight: FontWeight.w500))),
+          if (val.isNotEmpty) ...[
+            Text(val, style: TextStyle(color: widget.muted, fontSize: 14,
+              fontWeight: FontWeight.w500)),
+            const SizedBox(width: 10),
           ],
-        ),
+          Icon(Icons.chevron_right, color: widget.faint, size: 20),
+        ]),
       ),
     );
   }
 }
 
-class _TapCard extends StatefulWidget {
-  final Widget child;
-  final VoidCallback onTap;
-  const _TapCard({required this.child, required this.onTap});
-  @override
-  State<_TapCard> createState() => _TapCardState();
-}
-
-class _TapCardState extends State<_TapCard> {
-  bool _pressed = false;
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (_) => setState(() => _pressed = true),
-      onTapUp: (_) {
-        setState(() => _pressed = false);
-        widget.onTap();
-      },
-      onTapCancel: () => setState(() => _pressed = false),
-      child: AnimatedScale(
-        scale: _pressed ? 0.97 : 1.0,
-        duration: const Duration(milliseconds: 1000),
-        curve: Curves.easeInOutCubic,
-        child: widget.child,
-      ),
-    );
-  }
-}
-
+// ============================================================
+// TAP ANIMATION WIDGETS
+// ============================================================
 class _TapButton extends StatefulWidget {
   final Widget child;
   final VoidCallback onTap;
@@ -1574,4 +1567,3 @@ class _TapButtonState extends State<_TapButton> {
     );
   }
 }
-
