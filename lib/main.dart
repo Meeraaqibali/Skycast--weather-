@@ -165,7 +165,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
     setState(() => _loading = true);
     try {
       final geo = await http.get(Uri.parse(
-        'https://geocoding-api.open-meteo.com/v1/search?name=${Uri.encodeComponent(city)}&count=10&language=en&format=json'));
+        'https://geocoding-api.open-meteo.com/v1/search?name=${Uri.encodeComponent(city)}&count=10&language=en&format=json')).timeout(const Duration(seconds: 10));
       final gd = json.decode(geo.body);
       if (gd['results'] == null) {
         setState(() { _city = 'Not found'; _loading = false; });
@@ -176,12 +176,12 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
       final lat = pk['latitude'], lon = pk['longitude'];
 
       final wr = await http.get(Uri.parse(
-        'https://api.open-meteo.com/v1/forecast?latitude=$lat&longitude=$lon&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,precipitation&hourly=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_probability_max&timezone=auto'));
+        'https://api.open-meteo.com/v1/forecast?latitude=$lat&longitude=$lon&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,precipitation&hourly=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_probability_max&timezone=auto')).timeout(const Duration(seconds: 10));
       final wd = json.decode(wr.body);
       final c = wd['current'];
 
       final ar = await http.get(Uri.parse(
-        'https://air-quality-api.open-meteo.com/v1/air-quality?latitude=$lat&longitude=$lon&current=european_aqi&timezone=auto'));
+        'https://air-quality-api.open-meteo.com/v1/air-quality?latitude=$lat&longitude=$lon&current=european_aqi&timezone=auto')).timeout(const Duration(seconds: 10));
       final ad = json.decode(ar.body);
 
       setState(() {
@@ -212,7 +212,11 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
         _loading = false;
       });
     } catch (e) {
-      setState(() { _city = 'No connection'; _loading = false; });
+      setState(() {
+        _city = e.toString().contains('TimeoutException') ? 'Request timed out' : 'Connection error';
+        _country = '';
+        _loading = false;
+      });
     }
   }
 
@@ -293,10 +297,10 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
   Color _bg2() => _theme == 'light' ? const Color(0xFFCFDEF3) : const Color(0xFF3A6B8A);
   Color _txt() => _theme == 'light' ? const Color(0xFF1A1A1A) : Colors.white;
   Color _cardBg() => _theme == 'light' ? Colors.white.withOpacity(0.65) : Colors.white.withOpacity(0.13);
-  Color _cardBorder() => _isLight ? const Color(0xFFD0D8E0) : Colors.white.withOpacity(0.2);
-  Color _muted() => _isLight ? const Color(0xFF333333) : Colors.white.withOpacity(0.75);
-  Color _faint() => _isLight ? const Color(0xFF555555) : Colors.white.withOpacity(0.55);
-  Color _divider() => _isLight ? const Color(0xFFD0D8E0) : Colors.white.withOpacity(0.15);
+  Color _cardBorder() => _isLight ? const Color(0xFFB0C0D0) : Colors.white.withOpacity(0.2);
+  Color _muted() => _isLight ? const Color(0xFF2A2A2A) : Colors.white.withOpacity(0.75);
+  Color _faint() => _isLight ? const Color(0xFF444444) : Colors.white.withOpacity(0.55);
+  Color _divider() => _isLight ? const Color(0xFFB0C0D0) : Colors.white.withOpacity(0.15);
 
   String _aqiCategory() {
     if (_aqi <= 20) return T('good');
@@ -345,9 +349,9 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: _isLight ? const Color(0xFF1E3C4F) : _cardBg(),
+        backgroundColor: _isLight ? const Color(0xFF1E3C4F) : const Color(0xFF1A2A34),
         onPressed: _openSettings,
-        child: Icon(Icons.settings, color: _isLight ? Colors.white : _txt()),
+        child: Icon(Icons.settings, color: Colors.white),
       ),
     );
   }
@@ -386,8 +390,13 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
   ]);
 
   Widget _mainCard() => _card(child: _loading
-    ? const Center(child: Padding(padding: EdgeInsets.all(40),
-        child: CircularProgressIndicator(color: Colors.white)))
+    ? Center(child: Padding(padding: const EdgeInsets.all(40),
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          const SizedBox(width: 50, height: 50,
+            child: CircularProgressIndicator(color: Colors.white, strokeWidth: 4)),
+          const SizedBox(height: 16),
+          Text('Loading...', style: TextStyle(color: _txt(), fontSize: 14)),
+        ])))
     : Column(children: [
         Text('$_city, $_country'.toUpperCase(),
           style: TextStyle(color: _muted(), fontSize: 13,
@@ -425,17 +434,20 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
         scrollDirection: Axis.horizontal, itemCount: up.length,
         itemBuilder: (c, i) {
           final h = up[i];
-          return Container(
-            width: 72, margin: const EdgeInsets.only(right: 12), padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(color: _isLight ? Colors.white : Colors.white.withOpacity(0.08),
-              borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.white.withOpacity(0.15))),
-            child: Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-              Text(i == 0 ? T('now') : _fmtHour(h['time']),
-                style: TextStyle(color: _muted(), fontSize: 12)),
-              Text(_icon(h['code']), style: const TextStyle(fontSize: 24)),
-              Text(_fmtT((h['temp'] as num).toDouble()),
-                style: TextStyle(color: _txt(), fontSize: 14, fontWeight: FontWeight.w500)),
-            ]),
+          return GestureDetector(
+            onTap: () => _showHourDetail(h),
+            child: Container(
+              width: 72, margin: const EdgeInsets.only(right: 12), padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(color: _isLight ? const Color(0xFFF0F4F8) : Colors.white.withOpacity(0.08),
+                borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.white.withOpacity(0.15))),
+              child: Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+                Text(i == 0 ? T('now') : _fmtHour(h['time']),
+                  style: TextStyle(color: _muted(), fontSize: 12)),
+                Text(_icon(h['code']), style: const TextStyle(fontSize: 24)),
+                Text(_fmtT((h['temp'] as num).toDouble()),
+                  style: TextStyle(color: _txt(), fontSize: 14, fontWeight: FontWeight.w500)),
+              ]),
+            ),
           );
         },
       )),
@@ -450,7 +462,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
       const SizedBox(height: 12),
       ...days.asMap().entries.map((e) => Container(
         margin: const EdgeInsets.only(bottom: 8), padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(color: _isLight ? Colors.white : Colors.white.withOpacity(0.08),
+        decoration: BoxDecoration(color: _isLight ? const Color(0xFFF0F4F8) : Colors.white.withOpacity(0.08),
           borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.white.withOpacity(0.15))),
         child: Row(children: [
           SizedBox(width: 60, child: Text(e.key == 0 ? T('today') : _day(e.value['date']),
@@ -505,7 +517,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
     onTap: onTap,
     child: Container(
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(color: _isLight ? Colors.white : Colors.white.withOpacity(0.08),
+      decoration: BoxDecoration(color: _isLight ? const Color(0xFFF0F4F8) : Colors.white.withOpacity(0.08),
         borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.white.withOpacity(0.15))),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
@@ -544,7 +556,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
     onTap: onTap,
     child: Container(
       margin: const EdgeInsets.only(bottom: 8), padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(color: _isLight ? Colors.white : Colors.white.withOpacity(0.08),
+      decoration: BoxDecoration(color: _isLight ? const Color(0xFFF0F4F8) : Colors.white.withOpacity(0.08),
         borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.white.withOpacity(0.15))),
       child: Row(children: [
         Text(emoji, style: const TextStyle(fontSize: 20)),
@@ -554,6 +566,88 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
       ]),
     ),
   );
+
+  void _showHourDetail(Map<String, dynamic> h) {
+    final code = h['code'] as int;
+    final temp = (h['temp'] as num).toDouble();
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: _isLight ? Colors.white : const Color(0xFF1E3C4F),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Row(children: [
+            Text(_icon(code), style: const TextStyle(fontSize: 40)),
+            const SizedBox(width: 16),
+            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(_fmtHour(h['time']), style: TextStyle(color: _txt(), fontSize: 22, fontWeight: FontWeight.w600)),
+              Text(_desc(code), style: TextStyle(color: _muted(), fontSize: 14)),
+            ])),
+          ]),
+          const SizedBox(height: 24),
+          Text(_fmtT(temp), style: TextStyle(color: _txt(), fontSize: 48, fontWeight: FontWeight.w200, height: 1)),
+          const SizedBox(height: 24),
+          SizedBox(width: double.infinity, height: 48,
+            child: ElevatedButton(
+              onPressed: () => Navigator.pop(ctx),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _isLight ? const Color(0xFF1E3C4F) : const Color(0xFF2C5364),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
+              child: Text(T('done'), style: const TextStyle(fontWeight: FontWeight.w600)),
+            )),
+        ]),
+      ),
+    );
+  }
+
+  void _showDayDetail(Map<String, dynamic> d, bool isToday) {
+    final code = d['code'] as int;
+    final max = (d['max'] as num).toDouble();
+    final min = (d['min'] as num).toDouble();
+    final date = DateTime.parse(d['date']);
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: _isLight ? Colors.white : const Color(0xFF1E3C4F),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Row(children: [
+            Text(_icon(code), style: const TextStyle(fontSize: 40)),
+            const SizedBox(width: 16),
+            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(isToday ? T('today') : _day(d['date']), style: TextStyle(color: _txt(), fontSize: 22, fontWeight: FontWeight.w600)),
+              Text('${date.day}/${date.month}/${date.year}', style: TextStyle(color: _muted(), fontSize: 13)),
+              Text(_desc(code), style: TextStyle(color: _muted(), fontSize: 14)),
+            ])),
+          ]),
+          const SizedBox(height: 24),
+          Row(children: [
+            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text('High', style: TextStyle(color: _muted(), fontSize: 12)),
+              Text(_fmtT(max), style: TextStyle(color: _txt(), fontSize: 40, fontWeight: FontWeight.w200, height: 1.2)),
+            ])),
+            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text('Low', style: TextStyle(color: _muted(), fontSize: 12)),
+              Text(_fmtT(min), style: TextStyle(color: _txt(), fontSize: 40, fontWeight: FontWeight.w200, height: 1.2)),
+            ])),
+          ]),
+          const SizedBox(height: 24),
+          SizedBox(width: double.infinity, height: 48,
+            child: ElevatedButton(
+              onPressed: () => Navigator.pop(ctx),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _isLight ? const Color(0xFF1E3C4F) : const Color(0xFF2C5364),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
+              child: Text(T('done'), style: const TextStyle(fontWeight: FontWeight.w600)),
+            )),
+        ]),
+      ),
+    );
+  }
 
   // ============ SMOOTH PAGE ROUTE ============
 
@@ -567,8 +661,8 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
     return PageRouteBuilder(
       opaque: true,
       pageBuilder: (context, animation, secondaryAnimation) => builder(context),
-      transitionDuration: const Duration(milliseconds: 500),
-      reverseTransitionDuration: const Duration(milliseconds: 500),
+      transitionDuration: const Duration(milliseconds: 700),
+      reverseTransitionDuration: const Duration(milliseconds: 600),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         final curved = CurvedAnimation(
           parent: animation,
@@ -780,8 +874,8 @@ class _DetailPage extends StatelessWidget {
     required this.onTapItem,
   });
 
-  bool get _isLight => bg1 == const Color(0xFFDCE8F5);
-  Color _cardBorder() => _isLight ? const Color(0xFFD0D8E0) : Colors.white.withOpacity(0.2);
+  bool get _isLight => bg1 == const Color(0xFFB8D4F0) || bg1 == const Color(0xFFDCE8F5);
+  Color _cardBorder() => _isLight ? const Color(0xFFB0C0D0) : Colors.white.withOpacity(0.2);
 
   @override
   Widget build(BuildContext context) {
@@ -888,7 +982,7 @@ class _DetailPage extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         decoration: BoxDecoration(
-          color: _isLight ? Colors.white : Colors.white.withOpacity(0.08),
+          color: _isLight ? const Color(0xFFF0F4F8) : Colors.white.withOpacity(0.08),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: _cardBorder()),
         ),
@@ -928,8 +1022,8 @@ class _TapCardState extends State<_TapCard> {
       },
       onTapCancel: () => setState(() => _pressed = false),
       child: AnimatedScale(
-        scale: _pressed ? 0.96 : 1.0,
-        duration: const Duration(milliseconds: 500),
+        scale: _pressed ? 0.94 : 1.0,
+        duration: const Duration(milliseconds: 700),
         curve: Curves.easeOutCubic,
         child: widget.child,
       ),
