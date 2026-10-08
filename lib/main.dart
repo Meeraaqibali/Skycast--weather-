@@ -504,34 +504,45 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
       Text(T('daily').toUpperCase(), style: TextStyle(color: _muted(),
         fontSize: 13, letterSpacing: 1.2, fontWeight: FontWeight.w500)),
       const SizedBox(height: 12),
-      ...days.asMap().entries.map((e) => Container(
-        margin: const EdgeInsets.only(bottom: 8), padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(color: _isLight ? const Color(0xFFF0F4F8) : Colors.white.withOpacity(0.08),
-          borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.white.withOpacity(0.15))),
-        child: Row(children: [
-          SizedBox(width: 60, child: Text(e.key == 0 ? T('today') : _day(e.value['date']),
-            style: TextStyle(color: _txt(), fontSize: 14, fontWeight: FontWeight.w500))),
-          Text(_icon(e.value['code']), style: const TextStyle(fontSize: 20)),
-          const Spacer(),
-          Text('${_fmtT((e.value['max'] as num).toDouble())} / ${_fmtT((e.value['min'] as num).toDouble())}',
-            style: TextStyle(color: _txt().withOpacity(0.85), fontSize: 14)),
-        ]),
+      ...days.asMap().entries.map((e) => GestureDetector(
+        onTap: () => _showDayDetail(e.value, e.key == 0),
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: _itemBg(),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: _cardBorder()),
+          ),
+          child: Row(children: [
+            SizedBox(width: 60, child: Text(
+              e.key == 0 ? T('today') : _day(e.value['date']),
+              style: TextStyle(color: _txt(), fontSize: 14, fontWeight: FontWeight.w500),
+            )),
+            Text(_icon(e.value['code']), style: const TextStyle(fontSize: 20)),
+            const Spacer(),
+            Text('${_fmtT((e.value['max'] as num).toDouble())} / ${_fmtT((e.value['min'] as num).toDouble())}',
+              style: TextStyle(color: _muted(), fontSize: 14)),
+            const SizedBox(width: 6),
+            Icon(Icons.chevron_right, size: 16, color: _faint()),
+          ]),
+        ),
       )),
-      const SizedBox(height: 4),
-      // BIG More/Less button
+      const SizedBox(height: 8),
       SizedBox(
         width: double.infinity, height: 52,
         child: ElevatedButton(
           onPressed: () => setState(() => _allDays = !_allDays),
           style: ElevatedButton.styleFrom(
-            backgroundColor: _isLight ? const Color(0xFF000000) : const Color(0xFF333333),
-        foregroundColor: Colors.white,
-            elevation: 0, shape: RoundedRectangleBorder(
+            backgroundColor: _isLight ? const Color(0xFF000000) : const Color(0xFFFFFFFF),
+            foregroundColor: _isLight ? const Color(0xFFFFFFFF) : const Color(0xFF000000),
+            elevation: 0,
+            shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
-              side: BorderSide(color: Colors.white.withOpacity(0.2))),
+            ),
           ),
           child: Text(_allDays ? 'Less' : 'More',
-            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
         ),
       ),
     ]));
@@ -668,6 +679,19 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
     );
   }
 
+  String _dayPrediction(int code) {
+    if (code == 0) return 'Clear sunny day. Perfect for outdoor activities.';
+    if (code == 1) return 'Mostly clear. Great weather to be outside.';
+    if (code == 2) return 'Partly cloudy with some sunshine.';
+    if (code == 3) return 'Overcast skies. Might feel a bit gloomy.';
+    if (code == 45 || code == 48) return 'Foggy conditions. Drive carefully.';
+    if (code >= 51 && code <= 55) return 'Light drizzle expected. Carry an umbrella.';
+    if (code >= 61 && code <= 65) return 'Rain expected. Bring an umbrella and wear waterproof shoes.';
+    if (code >= 71 && code <= 75) return 'Snow expected. Dress warmly and drive carefully.';
+    if (code >= 95) return 'Thunderstorms expected. Stay indoors if possible.';
+    return 'Mixed conditions throughout the day.';
+  }
+
   void _showDayDetail(Map<String, dynamic> d, bool isToday) {
     final code = d['code'] as int;
     final max = (d['max'] as num).toDouble();
@@ -680,122 +704,85 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
       builder: (ctx) => Padding(
         padding: const EdgeInsets.all(24),
         child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+          // Header: icon + name + date
           Row(children: [
-            Text(_icon(code), style: const TextStyle(fontSize: 40)),
+            Text(_icon(code), style: const TextStyle(fontSize: 44)),
             const SizedBox(width: 16),
             Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(isToday ? T('today') : _day(d['date']), style: TextStyle(color: _txt(), fontSize: 22, fontWeight: FontWeight.w600)),
-              Text('${date.day}/${date.month}/${date.year}', style: TextStyle(color: _muted(), fontSize: 13)),
+              Text(isToday ? T('today') : _day(d['date']),
+                style: TextStyle(color: _txt(), fontSize: 22, fontWeight: FontWeight.w600)),
+              Text('${date.day}/${date.month}/${date.year}',
+                style: TextStyle(color: _muted(), fontSize: 13)),
               Text(_desc(code), style: TextStyle(color: _muted(), fontSize: 14)),
             ])),
           ]),
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
+          // Weather prediction box
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: _itemBg(),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: _cardBorder()),
+            ),
+            child: Row(children: [
+              Icon(Icons.info_outline, color: _muted(), size: 20),
+              const SizedBox(width: 10),
+              Expanded(child: Text(
+                _dayPrediction(code),
+                style: TextStyle(color: _txt(), fontSize: 13, height: 1.5),
+              )),
+            ]),
+          ),
+          const SizedBox(height: 20),
+          // High / Low boxes
           Row(children: [
-            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text('High', style: TextStyle(color: _muted(), fontSize: 12)),
-              Text(_fmtT(max), style: TextStyle(color: _txt(), fontSize: 40, fontWeight: FontWeight.w200, height: 1.2)),
-            ])),
-            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text('Low', style: TextStyle(color: _muted(), fontSize: 12)),
-              Text(_fmtT(min), style: TextStyle(color: _txt(), fontSize: 40, fontWeight: FontWeight.w200, height: 1.2)),
-            ])),
+            Expanded(child: Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: _itemBg(),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: _cardBorder()),
+              ),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text('High', style: TextStyle(color: _muted(), fontSize: 12, fontWeight: FontWeight.w500)),
+                const SizedBox(height: 4),
+                Text(_fmtT(max), style: TextStyle(color: _txt(), fontSize: 32, fontWeight: FontWeight.w300, height: 1)),
+              ]),
+            )),
+            const SizedBox(width: 12),
+            Expanded(child: Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: _itemBg(),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: _cardBorder()),
+              ),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text('Low', style: TextStyle(color: _muted(), fontSize: 12, fontWeight: FontWeight.w500)),
+                const SizedBox(height: 4),
+                Text(_fmtT(min), style: TextStyle(color: _txt(), fontSize: 32, fontWeight: FontWeight.w300, height: 1)),
+              ]),
+            )),
           ]),
           const SizedBox(height: 24),
-          SizedBox(width: double.infinity, height: 48,
+          // Done button
+          SizedBox(width: double.infinity, height: 52,
             child: ElevatedButton(
               onPressed: () => Navigator.pop(ctx),
               style: ElevatedButton.styleFrom(
-                backgroundColor: _isLight ? const Color(0xFF000000) : const Color(0xFF333333),
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
-              child: Text(T('done'), style: const TextStyle(fontWeight: FontWeight.w600)),
+                backgroundColor: _isLight ? const Color(0xFF000000) : const Color(0xFFFFFFFF),
+                foregroundColor: _isLight ? const Color(0xFFFFFFFF) : const Color(0xFF000000),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                elevation: 0,
+              ),
+              child: Text(T('done'), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
             )),
         ]),
       ),
     );
   }
 
-  // ============ SMOOTH PAGE ROUTE ============
-
-
-
-
-
-
-
-  PageRouteBuilder _smoothRoute({required WidgetBuilder builder}) {
-    return PageRouteBuilder(
-      opaque: true,
-      pageBuilder: (context, animation, secondaryAnimation) => builder(context),
-      transitionDuration: const Duration(milliseconds: 700),
-      reverseTransitionDuration: const Duration(milliseconds: 600),
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        final curved = CurvedAnimation(
-          parent: animation,
-          curve: Curves.easeInOutCubic,
-          reverseCurve: Curves.easeInOutCubic,
-        );
-        return FadeTransition(opacity: curved, child: child);
-      },
-    );
-  }
-
-  // ============ FULL-SCREEN DETAIL PAGE ============
-  String _getDetailContent(String type) {
-    String title = '', value = '', label = '', desc = '', ctx = '';
-    if (type == 'precip') {
-      title = '🌧️ ${T('precip')}'; value = '${_precip.round()} mm';
-      label = '$_precipChance% ${T('chance')}';
-      desc = T('desc_precip');
-      ctx = _precip > 0 ? T('raining') : T('dry');
-    } else if (type == 'wind') {
-      title = '💨 ${T('wind')}'; value = _fmtW(_wind);
-      label = '${T('direction')}: ' + ['N','NE','E','SE','S','SW','W','NW'][((_wind / 45).round()) % 8];
-      desc = T('desc_wind');
-      ctx = _wind > 20 ? T('strong_winds') : T('light_breeze');
-    } else if (type == 'aqi') {
-      title = '🌍 ${T('aqi')}'; value = '$_aqi';
-      label = '${T('category')}: ${_aqiCategory()}';
-      desc = T('desc_aqi'); ctx = '${T('context')}: ${_aqiCategory()}';
-    } else if (type == 'uv') {
-      title = '☀️ ${T('uv')}'; value = '${_uv.round()}';
-      label = '${T('category')}: ${_uvCategory()}';
-      desc = T('desc_uv'); ctx = '${T('uv')}: ${_uvCategory()}';
-    } else if (type == 'humidity') {
-      title = '💧 ${T('humidity')}'; value = '$_humidity%';
-      label = _humidity > 60 ? T('muggy') : T('comfortable');
-      desc = T('desc_humidity'); ctx = '$_humidity%';
-    } else if (type == 'sun') {
-      title = '🌅 ${T('sun')}'; value = '${_fmtTime(_sunrise)} / ${_fmtTime(_sunset)}';
-      label = '${T('sunrise')} / ${T('sunset')}';
-      desc = T('desc_sun');
-      ctx = '${T('sunrise')}: ${_fmtTime(_sunrise)} · ${T('sunset')}: ${_fmtTime(_sunset)}';
-    } else if (type == 'outdoor') {
-      final isBad = _wcode >= 51 || _temp > 38 || _temp < 5;
-      title = '🏃 ${T('outdoor')}';
-      value = isBad ? T('bad_out').split('.').first : T('great_out').split('.').first;
-      label = T('about'); desc = T('desc_outdoor');
-      ctx = isBad ? T('bad_out') : T('great_out');
-    } else if (type == 'clothing') {
-      title = '👕 ${T('clothing')}';
-      value = _temp > 30 ? 'Light' : _temp > 20 ? 'Comfortable' : 'Warm';
-      label = T('about'); desc = T('desc_clothing');
-      ctx = _temp > 30 ? T('light_cloth') : _temp > 20 ? T('ok_cloth') : T('warm_cloth');
-    } else if (type == 'cold') {
-      final isHigh = _feels < 15 || _humidity > 80;
-      title = '💊 ${T('cold')}';
-      value = isHigh ? 'Higher Risk' : 'Low Risk';
-      label = T('about'); desc = T('desc_cold');
-      ctx = isHigh ? T('high_cold') : T('low_cold');
-    } else if (type == 'drive') {
-      final isBad = (_wcode >= 45 && _wcode <= 48) || _wcode >= 61;
-      title = '🚗 ${T('drive')}';
-      value = isBad ? 'Caution' : 'Excellent';
-      label = T('about'); desc = T('desc_drive');
-      ctx = isBad ? T('bad_drive') : T('ok_drive');
-    }
-    return '$title|$value|$label|$desc|$ctx';
-  }
 
   void _openDetail(String type) {
     final metrics = [
