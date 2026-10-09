@@ -12,3 +12,9 @@ lib/*.tmp
 # Flutter-generated Android files
 android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java
 android/local.properties
+
+# Signing — NEVER commit
+android/key.properties
+*.jks
+*.keystore
+upload-keystore.jks

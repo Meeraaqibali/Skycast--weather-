@@ -1,38 +1,77 @@
-import re, os
+import os
+import re
+import sys
 
-path = "android/build.gradle"
-if not os.path.exists(path):
-    print("android/build.gradle not found")
-    exit(1)
+KOTLIN_VERSION = "1.9.0"
 
-with open(path, "r") as f:
-    c = f.read()
+def pick(*candidates):
+    """Return the first existing path, else None."""
+    for p in candidates:
+        if os.path.exists(p):
+            return p
+    return None
 
-# Update Kotlin version from old to 1.9.0
-old_versions = ["1.7.1", "1.7.0", "1.6.21", "1.5.31", "1.4.32", "1.3.72"]
-for v in old_versions:
-    c = c.replace(f"ext.kotlin_version = '{v}'", "ext.kotlin_version = '1.9.0'")
+def bump_groovy_root(path):
+    with open(path) as f:
+        c = f.read()
+    # replace any old ext.kotlin_version
+    c = re.sub(r"ext\.kotlin_version\s*=\s*'[\d.]+'",
+               f"ext.kotlin_version = '{KOTLIN_VERSION}'", c)
+    if "ext.kotlin_version" not in c and "buildscript" in c:
+        c = c.replace("buildscript {",
+                      f"buildscript {{\n    ext.kotlin_version = '{KOTLIN_VERSION}'")
+    with open(path, "w") as f:
+        f.write(c)
+    print(f"Bumped (groovy): {path}")
 
-# If not present at all, add it
-if "ext.kotlin_version" not in c:
-    if "buildscript" in c:
-        c = c.replace(
-            "buildscript {",
-            "buildscript {\n    ext.kotlin_version = '1.9.0'"
-        )
+def bump_kts_root(path):
+    with open(path) as f:
+        c = f.read()
+    # Kotlin DSL: `id("org.jetbrains.kotlin.android") version "X"` or similar
+    c = re.sub(r'(id\("org\.jetbrains\.kotlin\.android"\)\s*version\s*")[\d.]+(")',
+               rf'\g<1>{KOTLIN_VERSION}\g<2>', c)
+    # Alternative: `kotlinVersion = "X"` variable
+    c = re.sub(r'(kotlinVersion\s*=\s*")[\d.]+(")',
+               rf'\g<1>{KOTLIN_VERSION}\g<2>', c)
+    with open(path, "w") as f:
+        f.write(c)
+    print(f"Bumped (kts): {path}")
 
-with open(path, "w") as f:
-    f.write(c)
-
-print("Kotlin version updated to 1.9.0")
-
-# Also update app/build.gradle Kotlin plugin if present
-app_path = "android/app/build.gradle"
-if os.path.exists(app_path):
-    with open(app_path, "r") as f:
+def bump_app_groovy(path):
+    with open(path) as f:
         a = f.read()
     a = re.sub(r"id 'org\.jetbrains\.kotlin\.android' version '[\d.]+'",
-               "id 'org.jetbrains.kotlin.android' version '1.9.0'", a)
-    with open(app_path, "w") as f:
+               f"id 'org.jetbrains.kotlin.android' version '{KOTLIN_VERSION}'", a)
+    with open(path, "w") as f:
         f.write(a)
-    print("App Kotlin plugin updated")
+    print(f"App (groovy) updated: {path}")
+
+def bump_app_kts(path):
+    with open(path) as f:
+        a = f.read()
+    a = re.sub(r'(id\("org\.jetbrains\.kotlin\.android"\)\s*version\s*")[\d.]+(")',
+               rf'\g<1>{KOTLIN_VERSION}\g<2>', a)
+    with open(path, "w") as f:
+        f.write(a)
+    print(f"App (kts) updated: {path}")
+
+# ---- root build file -------------------------------------------------------
+root = pick("android/build.gradle.kts", "android/build.gradle")
+if not root:
+    print("neither android/build.gradle.kts nor android/build.gradle found")
+    sys.exit(1)
+
+if root.endswith(".kts"):
+    bump_kts_root(root)
+else:
+    bump_groovy_root(root)
+
+# ---- app build file --------------------------------------------------------
+app = pick("android/app/build.gradle.kts", "android/app/build.gradle")
+if app:
+    if app.endswith(".kts"):
+        bump_app_kts(app)
+    else:
+        bump_app_groovy(app)
+
+print(f"Kotlin version updated to {KOTLIN_VERSION}")
