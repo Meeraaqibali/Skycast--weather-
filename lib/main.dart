@@ -751,42 +751,13 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
         Text(T('daily').toUpperCase(), style: TextStyle(color: _muted(),
           fontSize: 13, letterSpacing: 1.2, fontWeight: FontWeight.w500)),
         const SizedBox(height: 12),
-        AnimatedSize(
-          duration: const Duration(milliseconds: 500),
-          curve: Curves.easeInOutCubic,
-          alignment: Alignment.topCenter,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              for (var i = 0; i < (_allDays ? _daily.length : 3); i++)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: GestureDetector(
-                    onTap: () => _showDayDetail(_daily[i], i == 0),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      decoration: BoxDecoration(
-                        color: _itemBg(),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: _cardBorder()),
-                      ),
-                      child: Row(children: [
-                        SizedBox(width: 60, child: Text(
-                          i == 0 ? T('today') : _day(_daily[i]['date']),
-                          style: TextStyle(color: _txt(), fontSize: 14, fontWeight: FontWeight.w500))),
-                        Text(_icon(_daily[i]['code']), style: const TextStyle(fontSize: 20)),
-                        const Spacer(),
-                        Text('${_fmtT((_daily[i]['max'] as num).toDouble())} / ${_fmtT((_daily[i]['min'] as num).toDouble())}',
-                          style: TextStyle(color: _muted(), fontSize: 14)),
-                        const SizedBox(width: 6),
-                        Icon(Icons.chevron_right, size: 16, color: _faint()),
-                      ]),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ),
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (var i = 0; i < (_allDays ? _daily.length : 3); i++)
+              _dayRow(i),
+          ],
+        ),,,
         const SizedBox(height: 12),
         SizedBox(
           width: double.infinity, height: 54,
@@ -806,6 +777,34 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
         ),
       ],
     ));
+  }
+
+  Widget _dayRow(int i) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: GestureDetector(
+        onTap: () => _showDayDetail(_daily[i], i == 0),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: _itemBg(),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: _cardBorder()),
+          ),
+          child: Row(children: [
+            SizedBox(width: 60, child: Text(
+              i == 0 ? T('today') : _day(_daily[i]['date']),
+              style: TextStyle(color: _txt(), fontSize: 14, fontWeight: FontWeight.w500))),
+            Text(_icon(_daily[i]['code']), style: const TextStyle(fontSize: 20)),
+            const Spacer(),
+            Text('${_fmtT((_daily[i]['max'] as num).toDouble())} / ${_fmtT((_daily[i]['min'] as num).toDouble())}',
+              style: TextStyle(color: _muted(), fontSize: 14)),
+            const SizedBox(width: 6),
+            Icon(Icons.chevron_right, size: 16, color: _faint()),
+          ]),
+        ),
+      ),
+    );
   }
 
   Widget _extrasCard() => _card(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
