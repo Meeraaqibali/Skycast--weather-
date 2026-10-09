@@ -711,7 +711,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
         AnimatedContainer(
           duration: const Duration(milliseconds: 500),
           curve: Curves.easeInOutCubic,
-          height: (_allDays ? _daily.length : 3) * 56.0,
+          height: (_allDays ? _daily.length : 3) * 60.0,
           clipBehavior: Clip.hardEdge,
           decoration: const BoxDecoration(),
           child: ListView.builder(
