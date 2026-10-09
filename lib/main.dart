@@ -1331,6 +1331,7 @@ class _DetailPageState extends State<DetailPage> {
   late Map<String, String> _content;
   final ScrollController _scrollCtrl = ScrollController();
   bool _isTransitioning = false;
+  bool _loadingContent = false;
 
   @override
   void initState() {
@@ -1360,55 +1361,28 @@ class _DetailPageState extends State<DetailPage> {
     if (_isTransitioning) return;
     _isTransitioning = true;
 
-    // Scroll to top smoothly first
+    // 1. Scroll to top
     if (_scrollCtrl.hasClients && _scrollCtrl.offset > 0) {
       await _scrollCtrl.animateTo(
         0,
-        duration: const Duration(milliseconds: 400),
+        duration: const Duration(milliseconds: 350),
         curve: Curves.easeInOutCubic,
       );
     }
 
-    // Smooth full-page transition to new detail type
+    // 2. Show loading state (old content hidden)
+    if (mounted) setState(() => _loadingContent = true);
+
+    // 3. Wait a moment — this is the "load" the user sees
+    await Future.delayed(const Duration(milliseconds: 550));
+
+    // 4. Swap to new content and hide loading
     if (mounted) {
-      Navigator.of(context).pushReplacement(
-        PageRouteBuilder(
-          opaque: true,
-          pageBuilder: (_, __, ___) => DetailPage(
-            bg1: widget.bg1, bg2: widget.bg2, txt: widget.txt,
-            muted: widget.muted, faint: widget.faint,
-            cardBorder: widget.cardBorder, itemBg: widget.itemBg,
-            initialType: key,
-            getContent: widget.getContent,
-            aboutLabel: widget.aboutLabel,
-            contextLabel: widget.contextLabel,
-            exploreLabel: widget.exploreLabel,
-            metricsLabel: widget.metricsLabel,
-            lifestyleLabel: widget.lifestyleLabel,
-            metricsList: widget.metricsList,
-            lifestyleList: widget.lifestyleList,
-          ),
-          transitionDuration: const Duration(milliseconds: 850),
-          reverseTransitionDuration: const Duration(milliseconds: 650),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            final curved = CurvedAnimation(
-              parent: animation,
-              curve: Curves.easeOutCubic,
-              reverseCurve: Curves.easeInCubic,
-            );
-            return FadeTransition(
-              opacity: curved,
-              child: SlideTransition(
-                position: Tween<Offset>(
-                  begin: const Offset(0.08, 0),
-                  end: Offset.zero,
-                ).animate(curved),
-                child: child,
-              ),
-            );
-          },
-        ),
-      );
+      setState(() {
+        _currentType = key;
+        _content = _parseContent(widget.getContent(key));
+        _loadingContent = false;
+      });
     }
 
     _isTransitioning = false;
@@ -1439,6 +1413,19 @@ class _DetailPageState extends State<DetailPage> {
             ]),
             const SizedBox(height: 32),
 
+            // === LOADING OR CONTENT ===
+            if (_loadingContent)
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 80),
+                alignment: Alignment.center,
+                child: SizedBox(
+                  width: 40, height: 40,
+                  child: CircularProgressIndicator(
+                    color: widget.txt, strokeWidth: 3,
+                  ),
+                ),
+              )
+            else ...[
             // Big value — dynamic size based on text length
             Text(_content['value'] ?? '',
               maxLines: 2,
@@ -1491,6 +1478,7 @@ class _DetailPageState extends State<DetailPage> {
             ),
 
             const SizedBox(height: 36),
+            ],
             Divider(color: widget.cardBorder, height: 1),
             const SizedBox(height: 32),
 
