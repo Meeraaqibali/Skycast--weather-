@@ -8,3 +8,7 @@ build/
 .vscode/
 lib/*.bak*
 lib/*.tmp
+
+# Flutter-generated Android files
+android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java
+android/local.properties
