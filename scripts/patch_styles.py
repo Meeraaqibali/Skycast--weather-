@@ -18,18 +18,39 @@ light_styles = """<?xml version="1.0" encoding="utf-8"?>
 </resources>
 """
 
-v31_styles = """<?xml version="1.0" encoding="utf-8"?>
+night_styles = """<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="LaunchTheme" parent="@android:style/Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">#FFFFFF</item>
+    <style name="LaunchTheme" parent="@android:style/Theme.Black.NoTitleBar">
+        <item name="android:windowBackground">@drawable/launch_background</item>
         <item name="android:statusBarColor">#FFFFFF</item>
         <item name="android:navigationBarColor">#FFFFFF</item>
-        <item name="postSplashScreenTheme">@style/NormalTheme</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+    </style>
+    <style name="NormalTheme" parent="@android:style/Theme.Black.NoTitleBar">
+        <item name="android:windowBackground">?android:attr/colorBackground</item>
     </style>
 </resources>
 """
 
-# Pure white background with no default icon overlay
+# Android 12+ (API 31) - ONLY android:-prefixed native attributes
+# No androidx core-splashscreen library needed
+v31_styles = """<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="LaunchTheme" parent="@android:style/Theme.Light.NoTitleBar">
+        <item name="android:windowSplashScreenBackground">#FFFFFF</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@mipmap/launcher_icon</item>
+        <item name="android:windowSplashScreenIconBackgroundColor">#FFFFFF</item>
+        <item name="android:statusBarColor">#FFFFFF</item>
+        <item name="android:navigationBarColor">#FFFFFF</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+    <style name="NormalTheme" parent="@android:style/Theme.Light.NoTitleBar">
+        <item name="android:windowBackground">?android:attr/colorBackground</item>
+    </style>
+</resources>
+"""
+
 launch_bg = """<?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:drawable="@android:color/white" />
@@ -45,7 +66,7 @@ os.makedirs("android/app/src/main/res/drawable-v21", exist_ok=True)
 with open("android/app/src/main/res/values/styles.xml", "w") as f:
     f.write(light_styles)
 with open("android/app/src/main/res/values-night/styles.xml", "w") as f:
-    f.write(light_styles)
+    f.write(night_styles)
 with open("android/app/src/main/res/values-v31/styles.xml", "w") as f:
     f.write(v31_styles)
 with open("android/app/src/main/res/drawable/launch_background.xml", "w") as f:
@@ -53,4 +74,4 @@ with open("android/app/src/main/res/drawable/launch_background.xml", "w") as f:
 with open("android/app/src/main/res/drawable-v21/launch_background.xml", "w") as f:
     f.write(launch_bg)
 
-print("Patched launch theme to white!")
+print("patch_styles.py updated - android: prefix on v31 attributes")
