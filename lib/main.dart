@@ -751,12 +751,17 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
         Text(T('daily').toUpperCase(), style: TextStyle(color: _muted(),
           fontSize: 13, letterSpacing: 1.2, fontWeight: FontWeight.w500)),
         const SizedBox(height: 12),
-        Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            for (var i = 0; i < (_allDays ? _daily.length : 3); i++)
-              _dayRow(i),
-          ],
+        AnimatedSize(
+          duration: const Duration(milliseconds: 450),
+          curve: Curves.easeInOutCubic,
+          alignment: Alignment.topCenter,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (var i = 0; i < (_allDays ? _daily.length : 3); i++)
+                _dayRow(i),
+            ],
+          ),
         ),
         const SizedBox(height: 12),
         SizedBox(
