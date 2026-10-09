@@ -41,8 +41,6 @@ jobs:
       - name: Patch native splash styles
         run: python3 scripts/patch_styles.py
 
-      - name: Patch Kotlin version
-        run: python3 scripts/patch_kotlin.py
 
       - name: Delete auto-generated test
         run: |
