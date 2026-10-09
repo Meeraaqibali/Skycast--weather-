@@ -779,6 +779,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
         SizedBox(
           width: double.infinity, height: 54,
           child: OutlinedButton(
+            onPressed: () => setState(() => _allDays = !_allDays),
             style: OutlinedButton.styleFrom(
               backgroundColor: Colors.transparent,
               foregroundColor: _txt(),
