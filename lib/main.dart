@@ -757,7 +757,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
             for (var i = 0; i < (_allDays ? _daily.length : 3); i++)
               _dayRow(i),
           ],
-        ),,,
+        ),
         const SizedBox(height: 12),
         SizedBox(
           width: double.infinity, height: 54,
