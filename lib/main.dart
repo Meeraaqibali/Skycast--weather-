@@ -57,6 +57,17 @@ const Map<String, Map<String, String>> TR = {
     'w61':'Slight rain','w63':'Moderate rain','w65':'Heavy rain',
     'w71':'Slight snow','w73':'Moderate snow','w75':'Heavy snow',
     'w95':'Thunderstorm','w96':'Thunderstorm with hail','w99':'Thunderstorm with heavy hail',
+      'pred_clear':'Clear sunny day. Perfect for outdoor activities.',
+      'pred_mostly_clear':'Mostly clear. Great weather to be outside.',
+      'pred_partly_cloudy':'Partly cloudy with some sunshine.',
+      'pred_overcast':'Overcast skies. Might feel a bit gloomy.',
+      'pred_fog':'Foggy conditions. Drive carefully.',
+      'pred_drizzle':'Light drizzle expected. Carry an umbrella.',
+      'pred_rain':'Rain expected. Bring an umbrella and wear waterproof shoes.',
+      'pred_snow':'Snow expected. Dress warmly and drive carefully.',
+      'pred_storm':'Thunderstorms expected. Stay indoors if possible.',
+      'pred_mixed':'Mixed conditions throughout the day.',
+      'high':'High','low':'Low',
   },
   'ur': {
     'search':'شہر تلاش کریں...','go':'جائیں','wind':'ہوا','humidity':'نمی','feels':'محسوس',
@@ -92,6 +103,17 @@ const Map<String, Map<String, String>> TR = {
     'w61':'ہلکی بارش','w63':'درمیانی بارش','w65':'تیز بارش',
     'w71':'ہلکی برف باری','w73':'درمیانی برف باری','w75':'تیز برف باری',
     'w95':'گرج چمک','w96':'گرج چمک کے ساتھ اولے','w99':'گرج چمک کے ساتھ تیز اولے',
+      'pred_clear':'صاف دھوپ والا دن۔ بیرونی سرگرمیوں کے لیے بہترین۔',
+      'pred_mostly_clear':'زیادہ تر صاف۔ باہر جانے کے لیے بہترین موسم۔',
+      'pred_partly_cloudy':'جزوی طور پر ابر آلود، کچھ دھوپ کے ساتھ۔',
+      'pred_overcast':'ابر آلود آسمان۔ تھوڑا اداس محسوس ہو سکتا ہے۔',
+      'pred_fog':'دھند کے حالات۔ احتیاط سے گاڑی چلائیں۔',
+      'pred_drizzle':'ہلکی بوندا باندی متوقع۔ چھتری ساتھ رکھیں۔',
+      'pred_rain':'بارش متوقع۔ چھتری لائیں اور واٹر پروف جوتے پہنیں۔',
+      'pred_snow':'برف باری متوقع۔ گرم کپڑے پہنیں اور احتیاط سے گاڑی چلائیں۔',
+      'pred_storm':'گرج چمک متوقع۔ اگر ممکن ہو تو گھر میں رہیں۔',
+      'pred_mixed':'دن بھر مخلوط حالات۔',
+      'high':'زیادہ','low':'کم',
   },
   'sd': {
     'search':'شهر ڳوليو...','go':'وڃو','wind':'هوا','humidity':'نمي','feels':'محسوس',
@@ -127,6 +149,17 @@ const Map<String, Map<String, String>> TR = {
     'w61':'هلڪو مينهن','w63':'وچولو مينهن','w65':'تيز مينهن',
     'w71':'هلڪي برفباري','w73':'وچولي برفباري','w75':'تيز برفباري',
     'w95':'گرج چمڪ','w96':'گرج چمڪ ۽ اولا','w99':'گرج چمڪ ۽ تيز اولا',
+      'pred_clear':'صاف سج وارو ڏينهن. ٻاهرين سرگرمين لاءِ بهترين.',
+      'pred_mostly_clear':'وڌيڪ صاف. ٻاهر وڃڻ لاءِ بهترين موسم.',
+      'pred_partly_cloudy':'جزوي طور تي ڪڪر، ٿوري سج سان.',
+      'pred_overcast':'ڪڪر وارو آسمان. ٿورو اداس محسوس ٿي سگهي ٿو.',
+      'pred_fog':'ڌنڌ جا حالتون. احتياط سان گاڏي هلايو.',
+      'pred_drizzle':'هلڪي برسات متوقع. ڇٽي ساڻ رکو.',
+      'pred_rain':'مينهن متوقع. ڇٽي آڻيو ۽ واٽر پروف جوتا پائو.',
+      'pred_snow':'برفباري متوقع. گرم ڪپڙا پائو ۽ احتياط سان گاڏي هلايو.',
+      'pred_storm':'گرج چمڪ متوقع. جيڪڏهن ممڪن هجي ته گهر ۾ رهو.',
+      'pred_mixed':'ڏينهن تي مخلوط حالتون.',
+      'high':'وڌيڪ','low':'گهٽ',
   },
   'es': {
     'search':'Buscar ciudad...','go':'Ir','wind':'Viento','humidity':'Humedad','feels':'Sensación',
@@ -162,6 +195,17 @@ const Map<String, Map<String, String>> TR = {
     'w61':'Lluvia ligera','w63':'Lluvia','w65':'Lluvia fuerte',
     'w71':'Nieve ligera','w73':'Nieve','w75':'Nieve fuerte',
     'w95':'Tormenta','w96':'Tormenta con granizo','w99':'Tormenta fuerte',
+      'pred_clear':'Día soleado y despejado. Perfecto para actividades al aire libre.',
+      'pred_mostly_clear':'Mayormente despejado. Excelente clima para estar afuera.',
+      'pred_partly_cloudy':'Parcialmente nublado con algo de sol.',
+      'pred_overcast':'Cielo nublado. Puede sentirse un poco gris.',
+      'pred_fog':'Niebla. Conduzca con cuidado.',
+      'pred_drizzle':'Llovizna ligera esperada. Lleva paraguas.',
+      'pred_rain':'Lluvia esperada. Lleva paraguas y zapatos impermeables.',
+      'pred_snow':'Nieve esperada. Abríguese y conduzca con cuidado.',
+      'pred_storm':'Tormentas esperadas. Quédese en casa si es posible.',
+      'pred_mixed':'Condiciones mixtas durante el día.',
+      'high':'Alta','low':'Baja',
   },
 };
 
@@ -501,16 +545,16 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
   }
 
   String _dayPrediction(int code) {
-    if (code == 0) return 'Clear sunny day. Perfect for outdoor activities.';
-    if (code == 1) return 'Mostly clear. Great weather to be outside.';
-    if (code == 2) return 'Partly cloudy with some sunshine.';
-    if (code == 3) return 'Overcast skies. Might feel a bit gloomy.';
-    if (code == 45 || code == 48) return 'Foggy conditions. Drive carefully.';
-    if (code >= 51 && code <= 55) return 'Light drizzle expected. Carry an umbrella.';
-    if (code >= 61 && code <= 65) return 'Rain expected. Bring an umbrella and wear waterproof shoes.';
-    if (code >= 71 && code <= 75) return 'Snow expected. Dress warmly and drive carefully.';
-    if (code >= 95) return 'Thunderstorms expected. Stay indoors if possible.';
-    return 'Mixed conditions throughout the day.';
+    if (code == 0) return T('pred_clear');
+    if (code == 1) return T('pred_mostly_clear');
+    if (code == 2) return T('pred_partly_cloudy');
+    if (code == 3) return T('pred_overcast');
+    if (code == 45 || code == 48) return T('pred_fog');
+    if (code >= 51 && code <= 55) return T('pred_drizzle');
+    if (code >= 61 && code <= 65) return T('pred_rain');
+    if (code >= 71 && code <= 75) return T('pred_snow');
+    if (code >= 95) return T('pred_storm');
+    return T('pred_mixed');
   }
 
   String _fmtT(double t) => _unit == 'C' ? '${t.round()}°' : '${(t*9/5+32).round()}°';
@@ -1058,7 +1102,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
                 decoration: BoxDecoration(color: _itemBg(),
                   borderRadius: BorderRadius.circular(14), border: Border.all(color: _cardBorder())),
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text('High', style: TextStyle(color: _muted(), fontSize: 12, fontWeight: FontWeight.w500)),
+                  Text(T('high'), style: TextStyle(color: _muted(), fontSize: 12, fontWeight: FontWeight.w500)),
                   const SizedBox(height: 4),
                   Text(_fmtT(max), style: TextStyle(color: _txt(), fontSize: 32, fontWeight: FontWeight.w300, height: 1)),
                 ]),
@@ -1069,7 +1113,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
                 decoration: BoxDecoration(color: _itemBg(),
                   borderRadius: BorderRadius.circular(14), border: Border.all(color: _cardBorder())),
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text('Low', style: TextStyle(color: _muted(), fontSize: 12, fontWeight: FontWeight.w500)),
+                  Text(T('low'), style: TextStyle(color: _muted(), fontSize: 12, fontWeight: FontWeight.w500)),
                   const SizedBox(height: 4),
                   Text(_fmtT(min), style: TextStyle(color: _txt(), fontSize: 32, fontWeight: FontWeight.w300, height: 1)),
                 ]),
