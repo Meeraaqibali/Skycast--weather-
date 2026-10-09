@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:math' as math;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:geolocator/geolocator.dart';
 
 void main() => runApp(const WeatherApp());
 
@@ -252,6 +253,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
           opaque: true,
           pageBuilder: (_, __, ___) => const WeatherHome(),
           transitionDuration: const Duration(milliseconds: 400),
+          transitionsBuilder: (_, animation, __, child) => FadeTransition(opacity: animation, child: child),
           transitionsBuilder: (_, anim, __, child) {
             return FadeTransition(opacity: anim, child: child);
           },
@@ -372,7 +374,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
     return h >= 6 && h < 18;
   }
 
-  Color _bg1() => _isLight ? const Color(0xFFFFFFFF) : const Color(0xFF000000);
+  Color _bg1() => _loading ? const Color(0xFFFFFFFF) : (_isLight ? const Color(0xFFFFFFFF) : const Color(0xFF000000));
   Color _bg2() => _isLight ? const Color(0xFFFFFFFF) : const Color(0xFF000000);
   Color _txt() => _isLight ? const Color(0xFF000000) : const Color(0xFFFFFFFF);
   Color _muted() => _isLight ? const Color(0xFF444444) : const Color(0xFFBBBBBB);
@@ -386,7 +388,6 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
   void initState() {
     super.initState();
     _loadSettings();
-    _fetch('Karachi');
   }
 
   Future<void> _loadSettings() async {
@@ -681,6 +682,22 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
                   border: Border.all(color: _cardBorder()),
                 ),
                 child: Icon(Icons.refresh, size: 16, color: _txt()),
+              ),
+            ),
+            const SizedBox(width: 6),
+            GestureDetector(
+              onTap: () async {
+                final p = await SharedPreferences.getInstance();
+                _tryCurrentLocation(p);
+              },
+              child: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: _itemBg(),
+                  borderRadius: BorderRadius.circular(50),
+                  border: Border.all(color: _cardBorder()),
+                ),
+                child: Icon(Icons.my_location, size: 16, color: _txt()),
               ),
             ),
           ],
