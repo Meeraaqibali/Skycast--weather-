@@ -3,7 +3,6 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:math' as math;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:geolocator/geolocator.dart';
 
 void main() => runApp(const WeatherApp());
 
@@ -406,25 +405,21 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
 
   Future<void> _tryCurrentLocation(SharedPreferences p) async {
     try {
-      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) {
-        _fallbackToSavedCity(p);
+      // Use IP-based geolocation (no permissions needed)
+      final res = await http.get(
+        Uri.parse('http://ip-api.com/json/?fields=status,country,city,lat,lon'),
+      ).timeout(const Duration(seconds: 6));
+      final data = json.decode(res.body);
+      if (data['status'] == 'success') {
+        final city = data['city'] ?? 'Current Location';
+        final country = data['country'] ?? '';
+        final lat = (data['lat'] as num).toDouble();
+        final lon = (data['lon'] as num).toDouble();
+        final name = country.isNotEmpty ? '$city, $country' : city;
+        await _fetchByCoords(lat, lon, name);
         return;
       }
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-      }
-      if (permission == LocationPermission.denied ||
-          permission == LocationPermission.deniedForever) {
-        _fallbackToSavedCity(p);
-        return;
-      }
-      final pos = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.low,
-      ).timeout(const Duration(seconds: 8));
-      final name = await _reverseGeocode(pos.latitude, pos.longitude);
-      await _fetchByCoords(pos.latitude, pos.longitude, name);
+      _fallbackToSavedCity(p);
     } catch (e) {
       _fallbackToSavedCity(p);
     }
