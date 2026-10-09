@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -15,7 +16,7 @@ class WeatherApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(useMaterial3: true),
       home: const SplashScreen(),
-    );
+    ));
   }
 }
 
@@ -257,7 +258,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
           },
         ),
       );
-    });
+    }));
   }
 
   @override
@@ -266,14 +267,37 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
     _spinCtrl.dispose();
     _scaleCtrl.dispose();
     _textFadeCtrl.dispose();
-    super.dispose();
+    super.dispose());
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+        bool isDark = _theme == 'dark' || (_theme == 'auto' && MediaQuery.of(context).platformBrightness == Brightness.dark);
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      systemNavigationBarColor: isDark ? const Color(0xFF121212) : Colors.white,
+      systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+    ));
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        final now = DateTime.now();
+        if (_lastBackPress == null || now.difference(_lastBackPress!) > const Duration(seconds: 2)) {
+          _lastBackPress = now;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(T('Press back again to exit')),
+              duration: const Duration(seconds: 2),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        } else {
+          SystemNavigator.pop();
+        }
+      },
+      child: Scaffold(
       backgroundColor: const Color(0xFFFFFFFF),
-      body: Center(
+      body: SafeArea(Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -331,7 +355,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
           ],
         ),
       ),
-    );
+    ));
   }
 }
 
@@ -351,6 +375,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
   double _temp = 0, _feels = 0, _wind = 0, _precip = 0, _uv = 0;
   int _humidity = 0, _wcode = 0, _precipChance = 0, _aqi = 0;
   String _sunrise = '', _sunset = '';
+  DateTime? _lastBackPress;
   bool _loading = true, _allDays = false, _isDay = true;
   List<dynamic> _hourly = [], _daily = [];
 
@@ -385,7 +410,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
   @override
   void initState() {
     super.initState();
-    _loadSettings();
+    _loadSettings());
   }
 
   Future<void> _loadSettings() async {
@@ -400,7 +425,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
       _textSize = p.getString('textSize') ?? 'medium';
     });
     // Try GPS first; fall back to saved city
-    await _tryCurrentLocation(p);
+    await _tryCurrentLocation(p));
   }
 
   Future<void> _tryCurrentLocation(SharedPreferences p) async {
@@ -430,7 +455,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
 
   void _fallbackToSavedCity(SharedPreferences p) {
     final saved = p.getString('lastCity') ?? 'Karachi';
-    _fetch(saved);
+    _fetch(saved));
   }
 
   Future<String> _reverseGeocode(double lat, double lon) async {
@@ -507,7 +532,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
     await p.setString('unit', _unit);
     await p.setString('windUnit', _windUnit);
     await p.setString('timeFmt', _timeFmt);
-    await p.setString('textSize', _textSize);
+    await p.setString('textSize', _textSize));
   }
 
   Future<void> _fetch(String input) async {
@@ -654,7 +679,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
     if (code >= 61 && code <= 65) return T('pred_rain');
     if (code >= 71 && code <= 75) return T('pred_snow');
     if (code >= 95) return T('pred_storm');
-    return T('pred_mixed');
+    return T('pred_mixed'));
   }
 
   String _fmtT(double t) => _unit == 'C' ? '${t.round()}°' : '${(t*9/5+32).round()}°';
@@ -673,13 +698,13 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
     if (_aqi <= 20) return T('good');
     if (_aqi <= 40) return T('fair');
     if (_aqi <= 60) return T('moderate');
-    return T('poor');
+    return T('poor'));
   }
   String _uvCategory() {
     if (_uv <= 2) return T('low');
     if (_uv <= 5) return T('moderate');
     if (_uv <= 7) return T('high');
-    return T('very_high');
+    return T('very_high'));
   }
 
   @override
@@ -689,7 +714,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
       data: mq.copyWith(textScaler: TextScaler.linear(_textScaleValue)),
       child: Scaffold(
         backgroundColor: _bg1(),
-        body: SafeArea(
+        body: SafeArea(SafeArea(
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.all(16),
@@ -715,7 +740,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
           child: const Icon(Icons.settings, color: Colors.white),
         ),
       ),
-    );
+    ));
   }
 
   Widget _card({required Widget child}) => Container(
@@ -851,7 +876,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
           );
         },
       )),
-    ]));
+    ])));
   }
 
   // ========================================================
@@ -909,7 +934,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
           ),
         ),
       ],
-    ));
+    )));
   }
 
   Widget _dayRow(int i) {
@@ -937,7 +962,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
           ]),
         ),
       ),
-    );
+    ));
   }
 
   Widget _extrasCard() => _card(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -1004,7 +1029,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
         const SizedBox(height: 8),
         _life('🚗', isBadDrv ? T('bad_drive') : T('ok_drive'), () => _openDetail('drive')),
       ],
-    ));
+    )));
   }
 
   Widget _life(String emoji, String text, VoidCallback onTap) => GestureDetector(
@@ -1040,7 +1065,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
           ),
         );
       },
-    );
+    ));
   }
 
   Future<T?> _smoothBottomSheet<T>({
@@ -1059,7 +1084,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
         reverseDuration: const Duration(milliseconds: 450),
       ),
       builder: builder,
-    );
+    ));
   }
 
   String _getDetailContent(String type) {
@@ -1147,7 +1172,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
       lifestyleLabel: T('lifestyle'),
       metricsList: metrics,
       lifestyleList: lifestyle,
-    )));
+    ))));
   }
 
   void _showHourDetail(Map<String, dynamic> h) {
@@ -1184,7 +1209,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
           ]),
         )),
       ),
-    );
+    ));
   }
 
   void _showDayDetail(Map<String, dynamic> d, bool isToday) {
@@ -1260,7 +1285,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
           ]),
         )),
       ),
-    );
+    ));
   }
 
   // ========================================================
@@ -1325,7 +1350,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
           ]),
         )),
       )),
-    );
+    ));
   }
 
   Widget _settingRow(BuildContext parentCtx, String label, String val,
@@ -1406,7 +1431,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
           ),
         ),
       ]),
-    );
+    ));
   }
 }
 
@@ -1428,7 +1453,7 @@ class _AnimatedWeatherIconState extends State<AnimatedWeatherIcon> with SingleTi
   @override
   void initState() {
     super.initState();
-    _ctrl = AnimationController(vsync: this, duration: const Duration(seconds: 4))..repeat();
+    _ctrl = AnimationController(vsync: this, duration: const Duration(seconds: 4))..repeat());
   }
 
   @override
@@ -1471,7 +1496,7 @@ class _AnimatedWeatherIconState extends State<AnimatedWeatherIcon> with SingleTi
       animation: _ctrl,
       builder: (c, ch) => Transform.scale(
         scale: 1 + math.sin(_ctrl.value * 2 * math.pi) * 0.05, child: ch),
-      child: icon);
+      child: icon));
   }
 }
 
@@ -1511,7 +1536,7 @@ class _DetailPageState extends State<DetailPage> {
   void initState() {
     super.initState();
     _currentType = widget.initialType;
-    _content = _parseContent(widget.getContent(_currentType));
+    _content = _parseContent(widget.getContent(_currentType)));
   }
 
   @override
@@ -1566,7 +1591,7 @@ class _DetailPageState extends State<DetailPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: widget.bg1,
-      body: SafeArea(
+      body: SafeArea(SafeArea(
         child: SingleChildScrollView(
           controller: _scrollCtrl,
           padding: const EdgeInsets.all(24),
@@ -1693,7 +1718,7 @@ class _DetailPageState extends State<DetailPage> {
           ]),
         ),
       ),
-    );
+    ));
   }
 
   Widget _sectionHeader(String text) => Row(children: [
@@ -1738,7 +1763,7 @@ class _DetailPageState extends State<DetailPage> {
           Icon(Icons.chevron_right, color: widget.faint, size: 20),
         ]),
       ),
-    );
+    ));
   }
 }
 
@@ -1770,6 +1795,6 @@ class _TapButtonState extends State<_TapButton> {
         curve: Curves.easeOutCubic,
         child: widget.child,
       ),
-    );
+    ));
   }
 }
