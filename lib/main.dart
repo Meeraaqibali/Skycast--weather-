@@ -253,9 +253,8 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
           opaque: true,
           pageBuilder: (_, __, ___) => const WeatherHome(),
           transitionDuration: const Duration(milliseconds: 400),
-          transitionsBuilder: (_, animation, __, child) => FadeTransition(opacity: animation, child: child),
-          transitionsBuilder: (_, anim, __, child) {
-            return FadeTransition(opacity: anim, child: child);
+          transitionsBuilder: (_, animation, __, child) {
+            return FadeTransition(opacity: animation, child: child);
           },
         ),
       );
@@ -401,6 +400,104 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
       _timeFmt = p.getString('timeFmt') ?? '12h';
       _textSize = p.getString('textSize') ?? 'medium';
     });
+    // Try GPS first; fall back to saved city
+    await _tryCurrentLocation(p);
+  }
+
+  Future<void> _tryCurrentLocation(SharedPreferences p) async {
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        _fallbackToSavedCity(p);
+        return;
+      }
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
+        _fallbackToSavedCity(p);
+        return;
+      }
+      final pos = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.low,
+      ).timeout(const Duration(seconds: 8));
+      final name = await _reverseGeocode(pos.latitude, pos.longitude);
+      await _fetchByCoords(pos.latitude, pos.longitude, name);
+    } catch (e) {
+      _fallbackToSavedCity(p);
+    }
+  }
+
+  void _fallbackToSavedCity(SharedPreferences p) {
+    final saved = p.getString('lastCity') ?? 'Karachi';
+    _fetch(saved);
+  }
+
+  Future<String> _reverseGeocode(double lat, double lon) async {
+    try {
+      final res = await http.get(
+        Uri.parse('https://nominatim.openstreetmap.org/reverse?format=json&lat=$lat&lon=$lon&zoom=10'),
+        headers: {'User-Agent': 'SkyCastWeather/1.0'},
+      ).timeout(const Duration(seconds: 5));
+      final data = json.decode(res.body);
+      final addr = data['address'] ?? {};
+      final city = addr['city'] ?? addr['town'] ?? addr['village'] ??
+                    addr['suburb'] ?? addr['county'] ?? 'Current Location';
+      final country = addr['country'] ?? '';
+      return country.isNotEmpty ? '$city, $country' : city;
+    } catch (_) {
+      return 'Current Location';
+    }
+  }
+
+  Future<void> _fetchByCoords(double lat, double lon, String name) async {
+    setState(() => _loading = true);
+    try {
+      final wr = await http.get(Uri.parse(
+        'https://api.open-meteo.com/v1/forecast?latitude=$lat&longitude=$lon&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,precipitation&hourly=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_probability_max&timezone=auto'
+      )).timeout(const Duration(seconds: 10));
+      final wd = json.decode(wr.body);
+      final cc = wd['current'];
+
+      final ar = await http.get(Uri.parse(
+        'https://air-quality-api.open-meteo.com/v1/air-quality?latitude=$lat&longitude=$lon&current=european_aqi&timezone=auto'
+      )).timeout(const Duration(seconds: 10));
+      final ad = json.decode(ar.body);
+
+      if (!mounted) return;
+      setState(() {
+        _city = name;
+        _country = '';
+        _temp = (cc['temperature_2m'] as num).toDouble();
+        _feels = (cc['apparent_temperature'] as num).toDouble();
+        _humidity = (cc['relative_humidity_2m'] as num).toInt();
+        _wind = (cc['wind_speed_10m'] as num).toDouble();
+        _precip = (cc['precipitation'] as num).toDouble();
+        _wcode = (cc['weather_code'] as num).toInt();
+        _aqi = ((ad['current']?['european_aqi'] ?? 0) as num).toInt();
+        _uv = (wd['daily']['uv_index_max'][0] as num).toDouble();
+        _precipChance = (wd['daily']['precipitation_probability_max'][0] as num).toInt();
+        _sunrise = wd['daily']['sunrise'][0];
+        _sunset = wd['daily']['sunset'][0];
+        _hourly = List.generate(wd['hourly']['time'].length, (i) => {
+          'time': wd['hourly']['time'][i],
+          'temp': wd['hourly']['temperature_2m'][i],
+          'code': wd['hourly']['weather_code'][i],
+        });
+        _daily = List.generate(wd['daily']['time'].length, (i) => {
+          'date': wd['daily']['time'][i],
+          'max': wd['daily']['temperature_2m_max'][i],
+          'min': wd['daily']['temperature_2m_min'][i],
+          'code': wd['daily']['weather_code'][i],
+        });
+        _loading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() { _city = 'Connection error'; _country = ''; _loading = false; });
+    }
   }
 
   Future<void> _saveSettings() async {
