@@ -67,7 +67,7 @@ const Map<String, Map<String, String>> TR = {
       'pred_snow':'Snow expected. Dress warmly and drive carefully.',
       'pred_storm':'Thunderstorms expected. Stay indoors if possible.',
       'pred_mixed':'Mixed conditions throughout the day.',
-      'high':'High','low':'Low',
+      'label_high':'High','label_low':'Low',
   },
   'ur': {
     'search':'شہر تلاش کریں...','go':'جائیں','wind':'ہوا','humidity':'نمی','feels':'محسوس',
@@ -113,7 +113,7 @@ const Map<String, Map<String, String>> TR = {
       'pred_snow':'برف باری متوقع۔ گرم کپڑے پہنیں اور احتیاط سے گاڑی چلائیں۔',
       'pred_storm':'گرج چمک متوقع۔ اگر ممکن ہو تو گھر میں رہیں۔',
       'pred_mixed':'دن بھر مخلوط حالات۔',
-      'high':'زیادہ','low':'کم',
+      'label_high':'زیادہ','label_low':'کم',
   },
   'sd': {
     'search':'شهر ڳوليو...','go':'وڃو','wind':'هوا','humidity':'نمي','feels':'محسوس',
@@ -159,7 +159,7 @@ const Map<String, Map<String, String>> TR = {
       'pred_snow':'برفباري متوقع. گرم ڪپڙا پائو ۽ احتياط سان گاڏي هلايو.',
       'pred_storm':'گرج چمڪ متوقع. جيڪڏهن ممڪن هجي ته گهر ۾ رهو.',
       'pred_mixed':'ڏينهن تي مخلوط حالتون.',
-      'high':'وڌيڪ','low':'گهٽ',
+      'label_high':'وڌيڪ','label_low':'گهٽ',
   },
   'es': {
     'search':'Buscar ciudad...','go':'Ir','wind':'Viento','humidity':'Humedad','feels':'Sensación',
@@ -205,7 +205,7 @@ const Map<String, Map<String, String>> TR = {
       'pred_snow':'Nieve esperada. Abríguese y conduzca con cuidado.',
       'pred_storm':'Tormentas esperadas. Quédese en casa si es posible.',
       'pred_mixed':'Condiciones mixtas durante el día.',
-      'high':'Alta','low':'Baja',
+      'label_high':'Alta','label_low':'Baja',
   },
 };
 
@@ -744,7 +744,6 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
   // shrinks/grows naturally and the More/Less button moves with it.
   // ========================================================
   Widget _dailyCard() {
-    final days = _allDays ? _daily : _daily.take(3).toList();
     return _card(child: Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1099,7 +1098,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
                 decoration: BoxDecoration(color: _itemBg(),
                   borderRadius: BorderRadius.circular(14), border: Border.all(color: _cardBorder())),
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(T('high'), style: TextStyle(color: _muted(), fontSize: 12, fontWeight: FontWeight.w500)),
+                  Text(T('label_high'), style: TextStyle(color: _muted(), fontSize: 12, fontWeight: FontWeight.w500)),
                   const SizedBox(height: 4),
                   Text(_fmtT(max), style: TextStyle(color: _txt(), fontSize: 32, fontWeight: FontWeight.w300, height: 1)),
                 ]),
@@ -1110,7 +1109,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
                 decoration: BoxDecoration(color: _itemBg(),
                   borderRadius: BorderRadius.circular(14), border: Border.all(color: _cardBorder())),
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(T('low'), style: TextStyle(color: _muted(), fontSize: 12, fontWeight: FontWeight.w500)),
+                  Text(T('label_low'), style: TextStyle(color: _muted(), fontSize: 12, fontWeight: FontWeight.w500)),
                   const SizedBox(height: 4),
                   Text(_fmtT(min), style: TextStyle(color: _txt(), fontSize: 32, fontWeight: FontWeight.w300, height: 1)),
                 ]),
