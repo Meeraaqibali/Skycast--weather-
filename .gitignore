@@ -6,3 +6,5 @@ build/
 *.iml
 .idea/
 .vscode/
+lib/*.bak*
+lib/*.tmp

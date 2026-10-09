@@ -1,3 +1,4 @@
+// ignore_for_file: constant_identifier_names
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -16,7 +17,7 @@ class WeatherApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(useMaterial3: true),
       home: const SplashScreen(),
-    ));
+    );
   }
 }
 
@@ -224,7 +225,12 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
+String _lang = "en";
+String T(String k) => TR[_lang]?[k] ?? TR["en"]?[k] ?? k;
+
 class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMixin {
+  final String _theme = "auto";
+  DateTime? _lastBackPress;
   late AnimationController _fadeCtrl;
   late AnimationController _spinCtrl;
   late AnimationController _scaleCtrl;
@@ -258,7 +264,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
           },
         ),
       );
-    }));
+    });
   }
 
   @override
@@ -267,7 +273,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
     _spinCtrl.dispose();
     _scaleCtrl.dispose();
     _textFadeCtrl.dispose();
-    super.dispose());
+    super.dispose();
   }
 
   @override
@@ -297,7 +303,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
       },
       child: Scaffold(
       backgroundColor: const Color(0xFFFFFFFF),
-      body: SafeArea(Center(
+      body: SafeArea(child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -324,7 +330,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                 const SizedBox(height: 6),
                 Text('Weather',
                   style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500,
-                    color: const Color(0xFF000000).withOpacity(0.5), letterSpacing: 4)),
+                    color: const Color(0xFF000000).withValues(alpha: 0.5), letterSpacing: 4)),
               ]),
             ),
             const SizedBox(height: 60),
@@ -355,7 +361,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
           ],
         ),
       ),
-    ));
+    )));
   }
 }
 
@@ -370,16 +376,14 @@ class WeatherHome extends StatefulWidget {
 
 class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin {
   final _ctrl = TextEditingController();
-  String _lang = 'en', _theme = 'auto', _unit = 'C', _windUnit = 'kmh', _timeFmt = '12h', _textSize = 'medium';
+  String _theme = 'auto', _unit = 'C', _windUnit = 'kmh', _timeFmt = '12h', _textSize = 'medium';
   String _city = 'Karachi', _country = 'Pakistan';
   double _temp = 0, _feels = 0, _wind = 0, _precip = 0, _uv = 0;
   int _humidity = 0, _wcode = 0, _precipChance = 0, _aqi = 0;
   String _sunrise = '', _sunset = '';
-  DateTime? _lastBackPress;
   bool _loading = true, _allDays = false, _isDay = true;
   List<dynamic> _hourly = [], _daily = [];
 
-  String T(String k) => TR[_lang]?[k] ?? TR['en']?[k] ?? k;
 
   double get _textScaleValue {
     switch (_textSize) {
@@ -410,7 +414,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
   @override
   void initState() {
     super.initState();
-    _loadSettings());
+    _loadSettings();
   }
 
   Future<void> _loadSettings() async {
@@ -425,7 +429,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
       _textSize = p.getString('textSize') ?? 'medium';
     });
     // Try GPS first; fall back to saved city
-    await _tryCurrentLocation(p));
+    await _tryCurrentLocation(p);
   }
 
   Future<void> _tryCurrentLocation(SharedPreferences p) async {
@@ -455,7 +459,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
 
   void _fallbackToSavedCity(SharedPreferences p) {
     final saved = p.getString('lastCity') ?? 'Karachi';
-    _fetch(saved));
+    _fetch(saved);
   }
 
   Future<String> _reverseGeocode(double lat, double lon) async {
@@ -532,7 +536,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
     await p.setString('unit', _unit);
     await p.setString('windUnit', _windUnit);
     await p.setString('timeFmt', _timeFmt);
-    await p.setString('textSize', _textSize));
+    await p.setString('textSize', _textSize);
   }
 
   Future<void> _fetch(String input) async {
@@ -577,23 +581,33 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
         final aName = (a['name'] as String).toLowerCase().replaceAll(' ', '');
         final bName = (b['name'] as String).toLowerCase().replaceAll(' ', '');
         int aScore = 0, bScore = 0;
-        if (aName == target) aScore = 100;
-        else if (aName.startsWith(target) || target.startsWith(aName)) aScore = 80;
+        if (aName == target) {
+          aScore = 100;
+        } else if (aName.startsWith(target) || target.startsWith(aName)) aScore = 80;
         else if (aName.contains(target) || target.contains(aName)) aScore = 60;
         else {
           int m = 0;
           for (int i = 0; i < aName.length && i < target.length; i++) {
-            if (aName[i] == target[i]) m++; else break;
+            if (aName[i] == target[i]) {
+              m++;
+            } else {
+              break;
+            }
           }
           aScore = m * 5;
         }
-        if (bName == target) bScore = 100;
-        else if (bName.startsWith(target) || target.startsWith(bName)) bScore = 80;
+        if (bName == target) {
+          bScore = 100;
+        } else if (bName.startsWith(target) || target.startsWith(bName)) bScore = 80;
         else if (bName.contains(target) || target.contains(bName)) bScore = 60;
         else {
           int m = 0;
           for (int i = 0; i < bName.length && i < target.length; i++) {
-            if (bName[i] == target[i]) m++; else break;
+            if (bName[i] == target[i]) {
+              m++;
+            } else {
+              break;
+            }
           }
           bScore = m * 5;
         }
@@ -679,7 +693,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
     if (code >= 61 && code <= 65) return T('pred_rain');
     if (code >= 71 && code <= 75) return T('pred_snow');
     if (code >= 95) return T('pred_storm');
-    return T('pred_mixed'));
+    return T('pred_mixed');
   }
 
   String _fmtT(double t) => _unit == 'C' ? '${t.round()}°' : '${(t*9/5+32).round()}°';
@@ -698,13 +712,13 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
     if (_aqi <= 20) return T('good');
     if (_aqi <= 40) return T('fair');
     if (_aqi <= 60) return T('moderate');
-    return T('poor'));
+    return T('poor');
   }
   String _uvCategory() {
     if (_uv <= 2) return T('low');
     if (_uv <= 5) return T('moderate');
     if (_uv <= 7) return T('high');
-    return T('very_high'));
+    return T('very_high');
   }
 
   @override
@@ -714,7 +728,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
       data: mq.copyWith(textScaler: TextScaler.linear(_textScaleValue)),
       child: Scaffold(
         backgroundColor: _bg1(),
-        body: SafeArea(SafeArea(
+        body: SafeArea(
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.all(16),
@@ -740,7 +754,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
           child: const Icon(Icons.settings, color: Colors.white),
         ),
       ),
-    ));
+    );
   }
 
   Widget _card({required Widget child}) => Container(
@@ -876,7 +890,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
           );
         },
       )),
-    ])));
+    ]));
   }
 
   // ========================================================
@@ -934,7 +948,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
           ),
         ),
       ],
-    )));
+    ));
   }
 
   Widget _dayRow(int i) {
@@ -962,7 +976,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
           ]),
         ),
       ),
-    ));
+    );
   }
 
   Widget _extrasCard() => _card(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -1029,7 +1043,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
         const SizedBox(height: 8),
         _life('🚗', isBadDrv ? T('bad_drive') : T('ok_drive'), () => _openDetail('drive')),
       ],
-    )));
+    ));
   }
 
   Widget _life(String emoji, String text, VoidCallback onTap) => GestureDetector(
@@ -1065,7 +1079,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
           ),
         );
       },
-    ));
+    );
   }
 
   Future<T?> _smoothBottomSheet<T>({
@@ -1084,7 +1098,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
         reverseDuration: const Duration(milliseconds: 450),
       ),
       builder: builder,
-    ));
+    );
   }
 
   String _getDetailContent(String type) {
@@ -1172,7 +1186,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
       lifestyleLabel: T('lifestyle'),
       metricsList: metrics,
       lifestyleList: lifestyle,
-    ))));
+    )));
   }
 
   void _showHourDetail(Map<String, dynamic> h) {
@@ -1209,7 +1223,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
           ]),
         )),
       ),
-    ));
+    );
   }
 
   void _showDayDetail(Map<String, dynamic> d, bool isToday) {
@@ -1285,7 +1299,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
           ]),
         )),
       ),
-    ));
+    );
   }
 
   // ========================================================
@@ -1350,7 +1364,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
           ]),
         )),
       )),
-    ));
+    );
   }
 
   Widget _settingRow(BuildContext parentCtx, String label, String val,
@@ -1381,7 +1395,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
                     Container(
                       width: 40, height: 4,
                       decoration: BoxDecoration(
-                        color: _muted().withOpacity(0.3),
+                        color: _muted().withValues(alpha: 0.3),
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -1396,7 +1410,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
                           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                           decoration: BoxDecoration(
-                            color: isSelected ? _txt().withOpacity(0.08) : Colors.transparent,
+                            color: isSelected ? _txt().withValues(alpha: 0.08) : Colors.transparent,
                             borderRadius: BorderRadius.circular(14),
                             border: isSelected ? Border.all(color: _cardBorder(), width: 1.5) : null,
                           ),
@@ -1431,7 +1445,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
           ),
         ),
       ]),
-    ));
+    );
   }
 }
 
@@ -1453,7 +1467,7 @@ class _AnimatedWeatherIconState extends State<AnimatedWeatherIcon> with SingleTi
   @override
   void initState() {
     super.initState();
-    _ctrl = AnimationController(vsync: this, duration: const Duration(seconds: 4))..repeat());
+    _ctrl = AnimationController(vsync: this, duration: const Duration(seconds: 4))..repeat();
   }
 
   @override
@@ -1496,7 +1510,7 @@ class _AnimatedWeatherIconState extends State<AnimatedWeatherIcon> with SingleTi
       animation: _ctrl,
       builder: (c, ch) => Transform.scale(
         scale: 1 + math.sin(_ctrl.value * 2 * math.pi) * 0.05, child: ch),
-      child: icon));
+      child: icon);
   }
 }
 
@@ -1526,6 +1540,8 @@ class DetailPage extends StatefulWidget {
 }
 
 class _DetailPageState extends State<DetailPage> {
+  final String _theme = "auto";
+  DateTime? _lastBackPress;
   late String _currentType;
   late Map<String, String> _content;
   final ScrollController _scrollCtrl = ScrollController();
@@ -1536,7 +1552,7 @@ class _DetailPageState extends State<DetailPage> {
   void initState() {
     super.initState();
     _currentType = widget.initialType;
-    _content = _parseContent(widget.getContent(_currentType)));
+    _content = _parseContent(widget.getContent(_currentType));
   }
 
   @override
@@ -1589,9 +1605,32 @@ class _DetailPageState extends State<DetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    bool isDark = _theme == "dark" || (_theme == "auto" && MediaQuery.of(context).platformBrightness == Brightness.dark);
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      systemNavigationBarColor: isDark ? const Color(0xFF121212) : Colors.white,
+      systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+    ));
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        final now = DateTime.now();
+        if (_lastBackPress == null || now.difference(_lastBackPress!) > const Duration(seconds: 2)) {
+          _lastBackPress = now;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(T("Press back again to exit")),
+              duration: const Duration(seconds: 2),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        } else {
+          SystemNavigator.pop();
+        }
+      },
+      child: Scaffold(
       backgroundColor: widget.bg1,
-      body: SafeArea(SafeArea(
+      body: SafeArea(
         child: SingleChildScrollView(
           controller: _scrollCtrl,
           padding: const EdgeInsets.all(24),
@@ -1650,7 +1689,7 @@ class _DetailPageState extends State<DetailPage> {
               padding: const EdgeInsets.only(left: 16),
               decoration: BoxDecoration(
                 border: Border(
-                  left: BorderSide(color: widget.txt.withOpacity(0.3), width: 3),
+                  left: BorderSide(color: widget.txt.withValues(alpha: 0.3), width: 3),
                 ),
               ),
               child: Text(_content['desc'] ?? '',
@@ -1668,7 +1707,7 @@ class _DetailPageState extends State<DetailPage> {
               padding: const EdgeInsets.only(left: 16),
               decoration: BoxDecoration(
                 border: Border(
-                  left: BorderSide(color: widget.txt.withOpacity(0.3), width: 3),
+                  left: BorderSide(color: widget.txt.withValues(alpha: 0.3), width: 3),
                 ),
               ),
               child: Text(_content['ctx'] ?? '',
@@ -1739,7 +1778,7 @@ class _DetailPageState extends State<DetailPage> {
     child: Text(text.toUpperCase(), style: TextStyle(
       color: widget.faint, fontSize: 12,
       fontWeight: FontWeight.w700, letterSpacing: 1.4)),
-  );
+      );
 
   Widget _listItem(String name, String val, VoidCallback onTap) {
     return GestureDetector(
@@ -1763,7 +1802,7 @@ class _DetailPageState extends State<DetailPage> {
           Icon(Icons.chevron_right, color: widget.faint, size: 20),
         ]),
       ),
-    ));
+    );
   }
 }
 
@@ -1795,6 +1834,6 @@ class _TapButtonState extends State<_TapButton> {
         curve: Curves.easeOutCubic,
         child: widget.child,
       ),
-    ));
+    );
   }
 }
