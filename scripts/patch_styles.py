@@ -36,13 +36,20 @@ night_styles = """<?xml version="1.0" encoding="utf-8"?>
 </resources>
 """
 
+# Android 12+ (API 31+) uses native android:windowSplashScreenBackground
+# NOTE: We use android: prefix - no extra library needed
 v31_styles = """<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="LaunchTheme" parent="@android:style/Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">#FFFFFF</item>
+    <style name="LaunchTheme" parent="@android:style/Theme.Light.NoTitleBar">
+        <item name="android:windowSplashScreenBackground">#FFFFFF</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
+        <item name="android:windowSplashScreenIconBackgroundColor">#FFFFFF</item>
         <item name="android:statusBarColor">#FFFFFF</item>
         <item name="android:navigationBarColor">#FFFFFF</item>
-        <item name="postSplashScreenTheme">@style/NormalTheme</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+    <style name="NormalTheme" parent="@android:style/Theme.Light.NoTitleBar">
+        <item name="android:windowBackground">?android:attr/colorBackground</item>
     </style>
 </resources>
 """
@@ -70,4 +77,4 @@ with open("android/app/src/main/res/drawable/launch_background.xml", "w") as f:
 with open("android/app/src/main/res/drawable-v21/launch_background.xml", "w") as f:
     f.write(launch_bg)
 
-print("Native splash & Android 12+ v31 styles patched successfully!")
+print("Native splash styles updated (fixed android: prefix)")
