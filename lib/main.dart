@@ -351,7 +351,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
   double _temp = 0, _feels = 0, _wind = 0, _precip = 0, _uv = 0;
   int _humidity = 0, _wcode = 0, _precipChance = 0, _aqi = 0;
   String _sunrise = '', _sunset = '';
-  bool _loading = true, _allDays = false;
+  bool _loading = true, _allDays = false, _isDay = true;
   List<dynamic> _hourly = [], _daily = [];
 
   String T(String k) => TR[_lang]?[k] ?? TR['en']?[k] ?? k;
@@ -407,15 +407,18 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
     try {
       // Use IP-based geolocation (no permissions needed)
       final res = await http.get(
-        Uri.parse('http://ip-api.com/json/?fields=status,country,city,lat,lon'),
+        Uri.parse('https://ipapi.co/json/'),
       ).timeout(const Duration(seconds: 6));
       final data = json.decode(res.body);
-      if (data['status'] == 'success') {
-        final city = data['city'] ?? 'Current Location';
-        final country = data['country'] ?? '';
-        final lat = (data['lat'] as num).toDouble();
-        final lon = (data['lon'] as num).toDouble();
-        final name = country.isNotEmpty ? '$city, $country' : city;
+      if (data['status'] == 'success' || data['latitude'] != null) {
+        final lat = ((data['lat'] ?? data['latitude']) as num).toDouble();
+        final lon = ((data['lon'] ?? data['longitude']) as num).toDouble();
+        String name = await _reverseGeocode(lat, lon);
+        if (name.isEmpty) {
+          final city = data['city'] ?? 'Current Location';
+          final country = data['country_name'] ?? data['country'] ?? '';
+          name = country.isNotEmpty ? '$city, $country' : city;
+        }
         await _fetchByCoords(lat, lon, name);
         return;
       }
@@ -451,7 +454,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
     setState(() => _loading = true);
     try {
       final wr = await http.get(Uri.parse(
-        'https://api.open-meteo.com/v1/forecast?latitude=$lat&longitude=$lon&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,precipitation&hourly=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_probability_max&timezone=auto'
+        'https://api.open-meteo.com/v1/forecast?latitude=$lat&longitude=$lon&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,precipitation,is_day&hourly=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_probability_max&timezone=auto'
       )).timeout(const Duration(seconds: 10));
       final wd = json.decode(wr.body);
       final cc = wd['current'];
@@ -471,6 +474,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
         _wind = (cc['wind_speed_10m'] as num).toDouble();
         _precip = (cc['precipitation'] as num).toDouble();
         _wcode = (cc['weather_code'] as num).toInt();
+        _isDay = (cc['is_day'] ?? 1) == 1;
         _aqi = ((ad['current']?['european_aqi'] ?? 0) as num).toInt();
         _uv = (wd['daily']['uv_index_max'][0] as num).toDouble();
         _precipChance = (wd['daily']['precipitation_probability_max'][0] as num).toInt();
@@ -575,7 +579,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
       final lat = loc['latitude'], lon = loc['longitude'];
 
       final wr = await http.get(Uri.parse(
-        'https://api.open-meteo.com/v1/forecast?latitude=$lat&longitude=$lon&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,precipitation&hourly=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_probability_max&timezone=auto'
+        'https://api.open-meteo.com/v1/forecast?latitude=$lat&longitude=$lon&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,precipitation,is_day&hourly=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_probability_max&timezone=auto'
       )).timeout(const Duration(seconds: 10));
       final wd = json.decode(wr.body);
       final c = wd['current'];
@@ -619,8 +623,9 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
     }
   }
 
-  String _icon(int c) {
-    if (c <= 1) return '☀️';
+  String _icon(int c, {bool isDay = true}) {
+    if (c <= 1) return isDay ? '☀️' : '🌙';
+    if (c == 2) return isDay ? '⛅' : '☁️';
     if (c <= 3 || c == 45 || c == 48) return '☁️';
     if (c >= 51 && c <= 65) return '🌧️';
     if (c >= 71 && c <= 75) return '❄️';
@@ -795,7 +800,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
           ],
         ),
         const SizedBox(height: 16),
-        AnimatedWeatherIcon(code: _wcode, size: 80),
+        AnimatedWeatherIcon(code: _wcode, size: 80, isDay: _isDay),
         const SizedBox(height: 10),
         Text(_fmtT(_temp), style: TextStyle(color: _txt(), fontSize: 90,
           fontWeight: FontWeight.w200, height: 1)),
@@ -836,7 +841,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
               child: Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
                 Text(i == 0 ? T('now') : _fmtHour(h['time']),
                   style: TextStyle(color: _muted(), fontSize: 12)),
-                Text(_icon(h['code']), style: const TextStyle(fontSize: 24)),
+                Text(_icon(h['code'], isDay: (h['is_day'] ?? ((DateTime.tryParse(h['time'] ?? '')?.hour ?? 12) >= 6 && (DateTime.tryParse(h['time'] ?? '')?.hour ?? 12) < 18)) == 1 || (h['is_day'] == true)), style: const TextStyle(fontSize: 24)),
                 Text(_fmtT((h['temp'] as num).toDouble()),
                   style: TextStyle(color: _txt(), fontSize: 14, fontWeight: FontWeight.w500)),
               ]),
@@ -1155,7 +1160,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
           padding: const EdgeInsets.all(24),
           child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
             Row(children: [
-              Text(_icon(code), style: const TextStyle(fontSize: 40)),
+              Text(_icon(code, isDay: (h['is_day'] ?? ((DateTime.tryParse(h['time'] ?? '')?.hour ?? 12) >= 6 && (DateTime.tryParse(h['time'] ?? '')?.hour ?? 12) < 18)) == 1 || (h['is_day'] == true)), style: const TextStyle(fontSize: 40)),
               const SizedBox(width: 16),
               Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Text(_fmtHour(h['time']), style: TextStyle(color: _txt(), fontSize: 22, fontWeight: FontWeight.w600)),
@@ -1409,7 +1414,8 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
 class AnimatedWeatherIcon extends StatefulWidget {
   final int code;
   final double size;
-  const AnimatedWeatherIcon({super.key, required this.code, this.size = 80});
+  final bool isDay;
+  const AnimatedWeatherIcon({super.key, required this.code, this.size = 80, this.isDay = true});
   @override
   State<AnimatedWeatherIcon> createState() => _AnimatedWeatherIconState();
 }
@@ -1427,7 +1433,8 @@ class _AnimatedWeatherIconState extends State<AnimatedWeatherIcon> with SingleTi
   void dispose() { _ctrl.dispose(); super.dispose(); }
 
   String _ic(int c) {
-    if (c <= 1) return '☀️';
+    if (c <= 1) return widget.isDay ? '☀️' : '🌙';
+    if (c == 2) return widget.isDay ? '⛅' : '☁️';
     if (c <= 3 || c == 45 || c == 48) return '☁️';
     if (c >= 51 && c <= 65) return '🌧️';
     if (c >= 71 && c <= 75) return '❄️';
