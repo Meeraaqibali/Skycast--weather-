@@ -751,11 +751,23 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
         Text(T('daily').toUpperCase(), style: TextStyle(color: _muted(),
           fontSize: 13, letterSpacing: 1.2, fontWeight: FontWeight.w500)),
         const SizedBox(height: 12),
-        AnimatedSize(
-          duration: const Duration(milliseconds: 450),
-          curve: Curves.easeInOutCubic,
-          alignment: Alignment.topCenter,
+        AnimatedSwitcher(
+          duration: const Duration(milliseconds: 400),
+          reverseDuration: const Duration(milliseconds: 400),
+          switchInCurve: Curves.easeInOutCubic,
+          switchOutCurve: Curves.easeInOutCubic,
+          transitionBuilder: (Widget child, Animation<double> animation) {
+            return SizeTransition(
+              sizeFactor: animation,
+              axisAlignment: -1.0,
+              child: FadeTransition(
+                opacity: animation,
+                child: child,
+              ),
+            );
+          },
           child: Column(
+            key: ValueKey<bool>(_allDays),
             mainAxisSize: MainAxisSize.min,
             children: [
               for (var i = 0; i < (_allDays ? _daily.length : 3); i++)
@@ -767,7 +779,6 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
         SizedBox(
           width: double.infinity, height: 54,
           child: OutlinedButton(
-            onPressed: () => setState(() => _allDays = !_allDays),
             style: OutlinedButton.styleFrom(
               backgroundColor: Colors.transparent,
               foregroundColor: _txt(),
