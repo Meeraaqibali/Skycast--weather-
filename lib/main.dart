@@ -454,7 +454,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
     setState(() => _loading = true);
     try {
       final wr = await http.get(Uri.parse(
-        'https://api.open-meteo.com/v1/forecast?latitude=$lat&longitude=$lon&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,precipitation,is_day&hourly=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_probability_max&timezone=auto'
+        'https://api.open-meteo.com/v1/forecast?latitude=$lat&longitude=$lon&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,precipitation,is_day&hourly=temperature_2m,weather_code,is_day&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_probability_max&timezone=auto'
       )).timeout(const Duration(seconds: 10));
       final wd = json.decode(wr.body);
       final cc = wd['current'];
@@ -484,6 +484,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
           'time': wd['hourly']['time'][i],
           'temp': wd['hourly']['temperature_2m'][i],
           'code': wd['hourly']['weather_code'][i],
+          'is_day': wd['hourly']['is_day'] != null ? (wd['hourly']['is_day'][i] == 1) : true,
         });
         _daily = List.generate(wd['daily']['time'].length, (i) => {
           'date': wd['daily']['time'][i],
@@ -579,7 +580,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
       final lat = loc['latitude'], lon = loc['longitude'];
 
       final wr = await http.get(Uri.parse(
-        'https://api.open-meteo.com/v1/forecast?latitude=$lat&longitude=$lon&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,precipitation,is_day&hourly=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_probability_max&timezone=auto'
+        'https://api.open-meteo.com/v1/forecast?latitude=$lat&longitude=$lon&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,precipitation,is_day&hourly=temperature_2m,weather_code,is_day&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_probability_max&timezone=auto'
       )).timeout(const Duration(seconds: 10));
       final wd = json.decode(wr.body);
       final c = wd['current'];
@@ -608,6 +609,7 @@ class _WeatherHomeState extends State<WeatherHome> with TickerProviderStateMixin
           'time': wd['hourly']['time'][i],
           'temp': wd['hourly']['temperature_2m'][i],
           'code': wd['hourly']['weather_code'][i],
+          'is_day': wd['hourly']['is_day'] != null ? (wd['hourly']['is_day'][i] == 1) : true,
         });
         _daily = List.generate(wd['daily']['time'].length, (i) => {
           'date': wd['daily']['time'][i],
